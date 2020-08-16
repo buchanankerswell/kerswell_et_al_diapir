@@ -769,10 +769,10 @@ f.oned <-
       unnest(cols = d.scaled) %>%
       ungroup() ->
       df.scaled
-    f <- vector(mode = 'list', length = length(pg))
-    f.strip <- vector(mode = 'list', length = length(pg))
-    f.ridge <- vector(mode = 'list', length = length(pg))
     n.pg <- ceiling(length(unique(df.scaled$model)) / (ncol * nrow))
+    f <- vector(mode = 'list', length = length(n.pg))
+    f.strip <- vector(mode = 'list', length = length(n.pg))
+    f.ridge <- vector(mode = 'list', length = length(n.pg))
     if (plot == 'strip') {
       p <- ggplot(df.scaled) +
         stat_density(
@@ -808,7 +808,7 @@ f.oned <-
         scale_x_continuous(limits = xlim) +
         xlab('Scaled Value') +
         ylab('')
-      for (i in 1:pg) {
+      for (i in 1:n.pg) {
         f[i] <- p + facet_wrap_paginate(~ model,
                                         ncol = ncol,
                                         nrow = nrow,
@@ -843,7 +843,7 @@ f.oned <-
           xlab('Scaled Value') +
           ylab('')
       )
-      for (i in 1:pg) {
+      for (i in 1:n.pg) {
         f.strip <- p$p.strip + facet_wrap_paginate( ~ model,
                                                     ncol = ncol,
                                                     nrow = nrow,
@@ -855,7 +855,7 @@ f.oned <-
       }
       f <- list(f.strip = f.strip, f.ridge = f.ridge)
     }
-    return(facet = f)
+    return(f)
   }
 # f.summary ----
 # Combine gifs into one faceted summary gif

@@ -74,7 +74,7 @@ marx1 <- marx %>%
       scatter = FALSE
     ),
     # Dimension Reduction
-    dr.mod1 = l.gmm.dr(mod1),
+    dr.mod1 = l.gmm.dr(mod1)
   )
 # Open PDF for plotting
 cairo_pdf('ft.PDF',
@@ -82,14 +82,14 @@ cairo_pdf('ft.PDF',
           height = 8.5,
           onefile = TRUE)
 # Explore features for individual models
-marx1$vis.oned[[1]]
-marx1$vis.twod[[1]] %>% sample(3)
+marx1$vis.oned
+marx1$vis.twod
 # Summarise features by faceting
 marx1$mark.ft %>%
   f.oned(
     runs = 'all',
-    nrow = 3,
-    ncol = 4,
+    nrow = 2,
+    ncol = 2,
     features = c('dTSum', 'dPSum', 'dTUpSum', 'dPUpSum'),
     plot = 'all',
     xlim = c(-2, 2),

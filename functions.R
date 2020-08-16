@@ -796,7 +796,7 @@ f.oned <-
           end = 0.8,
           na.value = 'white'
         ) +
-        scale_x_continuous(limits = xlim) +
+        coord_cartesian(xlim = xlim) +
         xlab('Scaled Value') +
         ylab('') +
         theme(
@@ -813,7 +813,7 @@ f.oned <-
     } else if (plot == 'ridge') {
       p <- ggplot(df.scaled) +
         geom_density_ridges(aes(x = val, y = var)) +
-        scale_x_continuous(limits = xlim) +
+        coord_cartesian(xlim = xlim) +
         xlab('Scaled Value') +
         ylab('')
       for (i in 1:n.pg) {
@@ -837,7 +837,7 @@ f.oned <-
             end = 0.8,
             na.value = 'white'
           ) +
-          scale_x_continuous(limits = xlim) +
+          coord_cartesian(xlim = xlim) +
           xlab('Scaled Value') +
           ylab('') +
           theme(
@@ -847,7 +847,7 @@ f.oned <-
           ),
         p.ridge = ggplot(df.scaled) +
           geom_density_ridges(aes(x = val, y = var)) +
-          scale_x_continuous(limits = xlim) +
+          coord_cartesian(xlim = xlim) +
           xlab('Scaled Value') +
           ylab('')
       )
@@ -1004,7 +1004,7 @@ p.oned <- function(df,
         end = 1,
         na.value = 'lemonchiffon'
       ) +
-      scale_x_continuous(limits = xlim) +
+      coord_cartesian(xlim = xlim) +
       xlab('Scaled Value') +
       ylab('') +
       ggtitle(fname) +
@@ -1016,7 +1016,7 @@ p.oned <- function(df,
   } else if (plot == 'ridge') {
     p <- ggplot(df.scaled) +
       geom_density_ridges(aes(x = val, y = var)) +
-      scale_x_continuous(limits = xlim) +
+      coord_cartesian(xlim = xlim) +
       xlab('Scaled Value') +
       ylab('') +
       ggtitle(fname)
@@ -1035,7 +1035,7 @@ p.oned <- function(df,
           end = 0.8,
           na.value = 'lemonchiffon'
         ) +
-        scale_x_continuous(limits = xlim) +
+        coord_cartesian(xlim = xlim) +
         xlab('Scaled Value') +
         ylab('') +
         ggtitle(fname) +
@@ -1046,9 +1046,10 @@ p.oned <- function(df,
         ),
       p.ridge = ggplot(df.scaled) +
         geom_density_ridges(aes(x = val, y = var)) +
-        scale_x_continuous(limits = xlim) +
+        coord_cartesian(xlim = xlim) +
         xlab('Scaled Value') +
-        ylab('')
+        ylab('') +
+        ggtitle(fname)
     )
   }
   return(p)
@@ -1099,8 +1100,8 @@ p.twod <- function(df,
         end = 1,
         na.value = 'lemonchiffon'
       ) +
-      scale_x_continuous(limits = xlim) +
-      scale_y_continuous(limits = xlim) +
+      coord_cartesian(xlim = xlim,
+                      ylim = xlim) +
       xlab('Scaled Value') +
       theme(
         panel.background = element_rect(fill = rgb(0.00146, 0.000466, 0.0139)),
@@ -1256,7 +1257,7 @@ a.oned <- function(lst,
         end = 0.8,
         na.value = 'lemonchiffon'
       ) +
-      scale_x_continuous(limits = xlim) +
+      coord_cartesian(xlim = xlim) +
       xlab('Scaled Value') +
       ylab('') +
       labs(title = '{closest_state}') +
@@ -1272,7 +1273,7 @@ a.oned <- function(lst,
   } else if (plot == 'ridge') {
     a <- ggplot(df.scaled) +
       geom_density_ridges(aes(x = val, y = var)) +
-      scale_x_continuous(limits = xlim) +
+      coord_cartesian(xlim = xlim) +
       xlab('Scaled Value') +
       ylab('') +
       transition_states(df.scaled$model) +
@@ -1295,7 +1296,7 @@ a.oned <- function(lst,
           end = 0.8,
           na.value = 'white'
         ) +
-        scale_x_continuous(limits = xlim) +
+        coord_cartesian(xlim = xlim) +
         xlab('Scaled Value') +
         ylab('') +
         labs(title = '{closest_state}') +
@@ -1310,7 +1311,7 @@ a.oned <- function(lst,
         exit_fade(),
       a.ridge = ggplot(df.scaled) +
         geom_density_ridges(aes(x = val, y = var)) +
-        scale_x_continuous(limits = xlim) +
+        coord_cartesian(xlim = xlim) +
         xlab('Scaled Value') +
         ylab('') +
         labs(title = '{closest_state}') +
@@ -1452,8 +1453,8 @@ a.twod <- function(lst,
         end = 1,
         na.value = 'lemonchiffon'
       ) +
-      scale_x_continuous(limits = xlim) +
-      scale_y_continuous(limits = xlim) +
+      coord_cartesian(xlim = xlim,
+                      ylim = xlim) +
       xlab('Scaled Value') +
       labs(title = '{closest_state}') +
       transition_states(df.scaled$model) +
@@ -1473,24 +1474,22 @@ a.twod <- function(lst,
     wrap_plots(a, guides = 'collect')
   if (save == TRUE) {
     if (type == 'gif') {
-      anims %>%
-        purrr::map(~ anim_save(
+      anim_save(
           filename = paste0('facet.', .x$labels$y, '.gif'),
           animation = animate(
-            .x,
+            w,
             height = 8.5,
             width = 11,
             units = 'in',
             res = 300,
             fps = fps
           )
-        ))
+        )
     } else if (type == 'avi') {
-      anims %>%
-        purrr::map(~ anim_save(
+      anim_save(
           filename = paste0('facet.', .x$labels$y, '.avi'),
           animation = animate(
-            .x,
+            w,
             height = 8.5,
             width = 11,
             units = 'in',
@@ -1498,7 +1497,7 @@ a.twod <- function(lst,
             fps = fps,
             renderer = av_renderer()
           )
-        ))
+        )
     }
   }
   return(w)

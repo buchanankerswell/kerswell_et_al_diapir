@@ -106,25 +106,25 @@ marx1$dr.mod0 %>% p.dr.boundary()
 marx1$dr.mod1 %>% p.dr.boundary()
 # Turn off PDF
 dev.off()
-# Summarise features by animation
-marx1$mark.ft %>%
-  a.oned(
-    plot = 'all',
-    features = c('dTSum', 'dPSum', 'dTUpSum', 'dPUpSum'),
-    type = 'gif',
-    xlim = c(-2, 2),
-    dlim = 1,
-    save = TRUE,
-    fname = 'oned',
-    fps = 20
-  )
-marx1$mark.ft %>%
-  a.twod(
-    type = 'gif',
-    features = c('dTSum', 'dPSum', 'dTUpSum', 'dPUpSum'),
-    xlim = c(-2, 2),
-    dlim = 0.05,
-    save = TRUE,
-    fname = 'twod',
-    fps = 20
-  )
+# # Summarise features by animation
+# marx1$mark.ft %>%
+#   a.oned(
+#     plot = 'all',
+#     features = c('dTSum', 'dPSum', 'dTUpSum', 'dPUpSum'),
+#     type = 'gif',
+#     xlim = c(-2, 2),
+#     dlim = 1,
+#     save = TRUE,
+#     fname = 'oned',
+#     fps = 20
+#   )
+# marx1$mark.ft %>%
+#   a.twod(
+#     type = 'gif',
+#     features = c('dTSum', 'dPSum', 'dTUpSum', 'dPUpSum'),
+#     xlim = c(-2, 2),
+#     dlim = 0.05,
+#     save = TRUE,
+#     fname = 'twod',
+#     fps = 20
+#   )

@@ -1,14 +1,6 @@
-library(tidyverse)
-library(vroom)
-library(mclust)
-library(fs)
-library(ggforce)
-library(patchwork)
-library(gridExtra)
-library(gganimate)
-library(ggridges)
-library(transformr)
-library(gifski)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, vroom, mclust, fs, ggforce, patchwork,
+               gridExtra, gganimate, ggridges, transformr, gifski)
 # proportions ----
 # Calculate ratios of rocks among classes
 proportions <- function(df) {

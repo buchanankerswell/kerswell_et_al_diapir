@@ -31,7 +31,7 @@ marx <- marx %>%
            purrr::map(~ add.ft(.x)))
 # Clean up environment
 rm(list = couplingList)
-rm(couplingList, data.coupling, data.elevator, files)
+rm(couplingList, data.coupling, data.elevator, files, bic.col, c.pal)
 rm(list = lsf.str())
 # Save data ----
 save.image(file = 'marx.RData')

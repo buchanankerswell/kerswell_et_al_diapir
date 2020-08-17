@@ -773,7 +773,8 @@ p.oned <- function(df,
                    features,
                    plot,
                    xlim = c(-2, 2),
-                   dlim = 0.5) {
+                   dlim = 0.5,
+                   alpha.min = 0.05) {
   fname <- df$model[1]
   if (features == 'all') {
     df %>%
@@ -826,7 +827,7 @@ p.oned <- function(df,
       )
   } else if (plot == 'ridge') {
     p <- ggplot(df.scaled) +
-      geom_density_ridges(aes(x = val, fct_reorder(var, val, median)), rel_min_height = 0.05) +
+      geom_density_ridges(aes(x = val, fct_reorder(var, val, median)), rel_min_height = alpha.min) +
       coord_cartesian(xlim = xlim) +
       
       xlab('Scaled Value') +
@@ -857,7 +858,7 @@ p.oned <- function(df,
           panel.grid.minor = element_line(color = rgb(0.00146, 0.000466, 0.0139))
         ),
       p.ridge = ggplot(df.scaled) +
-        geom_density_ridges(aes(x = val, fct_reorder(var, val, median)), rel_min_height = 0.05) +
+        geom_density_ridges(aes(x = val, fct_reorder(var, val, median)), rel_min_height = alpha.min) +
         coord_cartesian(xlim = xlim) +
         xlab('Scaled Value') +
         ylab('') +
@@ -938,7 +939,9 @@ f.oned <-
            features = 'all',
            plot = 'all',
            xlim = c(-2, 2),
-           dlim = 0.5) {
+           dlim = 0.5,
+           alpha.min = 0.05
+           ) {
     if (runs == 'all') {
       df <- lst %>% bind_rows()
     } else {
@@ -1006,9 +1009,8 @@ f.oned <-
       }
     } else if (plot == 'ridge') {
       p <- ggplot(df.scaled) +
-        geom_density_ridges(aes(x = val, fct_reorder(var, val, median)), rel_min_height = 0.05) +
+        geom_density_ridges(aes(x = val, fct_reorder(var, val, median)), rel_min_height = alpha.min) +
         coord_cartesian(xlim = xlim) +
-        
         xlab('Scaled Value') +
         ylab('')
       for (i in 1:n.pg) {
@@ -1042,7 +1044,7 @@ f.oned <-
             panel.grid.minor = element_line(color = rgb(0.00146, 0.000466, 0.0139, 0.7))
           ),
         p.ridge = ggplot(df.scaled) +
-          geom_density_ridges(aes(x = val, fct_reorder(var, val, median)), rel_min_height = 0.05) +
+          geom_density_ridges(aes(x = val, fct_reorder(var, val, median)), rel_min_height = alpha.min) +
           coord_cartesian(xlim = xlim) +
           
           xlab('Scaled Value') +
@@ -1222,6 +1224,7 @@ a.oned <- function(lst,
                    plot = 'all',
                    xlim = c(-2, 2),
                    dlim = 1,
+                   alpha.min = 0.05,
                    save = TRUE,
                    fps = 20,
                    type = 'gif',
@@ -1280,7 +1283,7 @@ a.oned <- function(lst,
       exit_fade()
   } else if (plot == 'ridge') {
     a <- ggplot(df.scaled) +
-      geom_density_ridges(aes(x = val, fct_reorder(var, val, median)), rel_min_height = 0.05) +
+      geom_density_ridges(aes(x = val, fct_reorder(var, val, median)), rel_min_height = alpha.min) +
       coord_cartesian(xlim = xlim) +
       xlab('Scaled Value') +
       ylab('') +
@@ -1318,7 +1321,7 @@ a.oned <- function(lst,
         enter_fade() +
         exit_fade(),
       a.ridge = ggplot(df.scaled) +
-        geom_density_ridges(aes(x = val, fct_reorder(var, val, median)), rel_min_height = 0.05) +
+        geom_density_ridges(aes(x = val, fct_reorder(var, val, median)), rel_min_height = alpha.min) +
         coord_cartesian(xlim = xlim) +
         xlab('Scaled Value') +
         ylab('') +

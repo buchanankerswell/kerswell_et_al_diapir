@@ -31,7 +31,8 @@ vis9 <- marx %>%
         features = features,
         plot = 'all',
         xlim = c(-3, 3),
-        dlim = 0.5
+        dlim = 0.5,
+        alpha.min = 0.05
       ),
     # 2D vis plots
     vis.twod = mark.ft %>%
@@ -59,7 +60,8 @@ vis9$mark.ft %>%
     features = features,
     plot = 'all',
     xlim = c(-3, 3),
-    dlim = 0.5
+    dlim = 0.5,
+    alpha.min = 0.02
   ) %>%
   print()
 

@@ -7,7 +7,7 @@ marx
 glimpse(marx)
 
 # Visualize data distribution in 1- and 2D
-vis7 <- marx %>%
+vis8 <- marx %>%
   mutate(
     # 1D vis plots
     vis.oned = mark.ft %>%
@@ -27,15 +27,15 @@ vis7 <- marx %>%
   )
 
 # Open PDF for plotting
-cairo_pdf('vis7.PDF',
+cairo_pdf('vis8.PDF',
           width = 11,
           height = 8.5,
           onefile = TRUE)
 # # Explore features for individual models
-# print(vis7$vis.oned[[1]])
-# print(vis7$vis.twod[[1]][[1]])
+# print(vis8$vis.oned[[1]])
+# print(vis8$vis.twod[[1]][[1]])
 # Summarise features by faceting
-vis7$mark.ft %>%
+vis8$mark.ft %>%
   f.oned(
     runs = 'all',
     nrow = 4,

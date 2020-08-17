@@ -28,7 +28,9 @@ rid <- c(
   'maxConsecutiveTUp',
   'dXUpSum',
   'minTPGrad',
-  'maxTPGrad'
+  'maxTPGrad',
+  'maxConsecutivePDown',
+  'PDown'
 )
 features <- 
   colnames(marx$mark.ft[[1]])[!(colnames(marx$mark.ft[[1]]) %in% rid)]

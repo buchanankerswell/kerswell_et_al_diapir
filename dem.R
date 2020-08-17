@@ -14,14 +14,14 @@ vis8 <- marx %>%
       l.oned(
         features = 'all',
         plot = 'all',
-        xlim = c(-2, 2),
+        xlim = c(-3, 3),
         dlim = 0.5
       ),
     # 2D vis plots
     vis.twod = mark.ft %>%
       l.twod(
         features = 'all',
-        xlim = c(-2, 2),
+        xlim = c(-3, 3),
         dlim = 0.05
       )
   )
@@ -42,7 +42,7 @@ vis8$mark.ft %>%
     ncol = 1,
     features = 'all',
     plot = 'all',
-    xlim = c(-2, 2),
+    xlim = c(-3, 3),
     dlim = 0.5
   ) %>%
   print()

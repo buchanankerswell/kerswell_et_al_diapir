@@ -8,6 +8,8 @@ glimpse(marx)
 
 # Visualize data distribution in 1- and 2D
 rid <- c(
+  'markerID',
+  'model',
   'TIQR',
   'PMedian',
   'PIQR',
@@ -21,8 +23,8 @@ rid <- c(
   'dXSum',
   'TDown'
 )
-features <-
-  colnames(marx$mark.ft[[1]])[isFALSE(colnames(marx$mark.ft[[1]]) %in% rid)]
+features <- 
+  colnames(marx$mark.ft[[1]])[!(colnames(marx$mark.ft[[1]]) %in% rid)]
 vis9 <- marx %>%
   mutate(
     # 1D vis plots

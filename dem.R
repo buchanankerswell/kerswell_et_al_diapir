@@ -22,7 +22,7 @@ rid <- c(
   'TDown'
 )
 features <-
-  colnames(marx$mark.ft[[1]])[colnames(marx$mark.ft[[1]]) %in% rid]
+  colnames(marx$mark.ft[[1]])[isFALSE(colnames(marx$mark.ft[[1]]) %in% rid)]
 vis9 <- marx %>%
   mutate(
     # 1D vis plots

@@ -943,7 +943,8 @@ f.oned <-
            plot = 'all',
            xlim = c(-2, 2),
            dlim = 0.5,
-           alpha.min = 0.05
+           alpha.min = 0.05,
+           bw = 1
            ) {
     if (runs == 'all') {
       df <- lst %>% bind_rows()

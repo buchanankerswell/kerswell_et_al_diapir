@@ -34,7 +34,7 @@ rid <- c(
 )
 features <- 
   colnames(marx$mark.ft[[1]])[!(colnames(marx$mark.ft[[1]]) %in% rid)]
-vis13 <- marx %>%
+vis14 <- marx %>%
   mutate(
     # 1D vis plots
     vis.oned = mark.ft %>%
@@ -56,15 +56,15 @@ vis13 <- marx %>%
   )
 
 # Open PDF for plotting
-cairo_pdf('vis13.PDF',
+cairo_pdf('vis14.PDF',
           width = 11,
           height = 8.5,
           onefile = TRUE)
 # # Explore features for individual models
-# print(vis13$vis.oned[[1]])
-# print(vis13$vis.twod[[1]][[1]])
+# print(vis14$vis.oned[[1]])
+# print(vis14$vis.twod[[1]][[1]])
 # Summarise features by faceting
-vis13$mark.ft %>%
+vis14$mark.ft %>%
   f.oned(
     runs = 'all',
     nrow = 4,

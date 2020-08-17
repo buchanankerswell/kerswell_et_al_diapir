@@ -807,7 +807,7 @@ p.oned <- function(df,
     df.scaled
   if (plot == 'strip') {
     p.strip <- ggplot(df.scaled) +
-      stat_density(aes(x = val, fct_reorder(var, val, median), fill = ..density..),
+      stat_density(aes(x = val, fct_reorder(var, val, median), fill = ..density.., fill = ..density..),
                    geom = 'raster',
                    position = 'identity',
                    adjust = bw) +
@@ -829,17 +829,23 @@ p.oned <- function(df,
       )
   } else if (plot == 'ridge') {
     p <- ggplot(df.scaled) +
-      geom_density_ridges(aes(x = val, fct_reorder(var, val, median)), rel_min_height = alpha.min) +
+      geom_density_ridges(aes(x = val, fct_reorder(var, val, median), fill = ..density..), rel_min_height = alpha.min) +
       coord_cartesian(xlim = xlim) +
-      
       xlab('Scaled Value') +
       ylab('') +
-      ggtitle(fname)
+      ggtitle(fname) +
+      scale_fill_viridis_c(
+        option = 'magma',
+        limits = c(0, dlim),
+        begin = 0,
+        end = 1,
+        na.value = 'lemonchiffon'
+      )
   } else if (plot == 'all') {
     p <- list(
       p.strip = ggplot(df.scaled) +
         stat_density(
-          aes(x = val, y = fct_reorder(var, val, median), fill = ..density..),
+          aes(x = val, y = fct_reorder(var, val, median), fill = ..density.., fill = ..density..),
           geom = 'raster',
           position = 'identity',
           adjust = bw
@@ -861,11 +867,18 @@ p.oned <- function(df,
           panel.grid.minor = element_line(color = rgb(0.00146, 0.000466, 0.0139))
         ),
       p.ridge = ggplot(df.scaled) +
-        geom_density_ridges(aes(x = val, fct_reorder(var, val, median)), rel_min_height = alpha.min) +
+        geom_density_ridges(aes(x = val, fct_reorder(var, val, median), fill = ..density..), rel_min_height = alpha.min) +
         coord_cartesian(xlim = xlim) +
         xlab('Scaled Value') +
         ylab('') +
-        ggtitle(fname)
+        ggtitle(fname) +
+        scale_fill_viridis_c(
+          option = 'magma',
+          limits = c(0, dlim),
+          begin = 0,
+          end = 1,
+          na.value = 'lemonchiffon'
+        )
     )
   }
   return(p)
@@ -986,7 +999,7 @@ f.oned <-
     f.ridge <- vector(mode = 'list', length = length(n.pg))
     if (plot == 'strip') {
       p <- ggplot(df.scaled) +
-        stat_density(aes(x = val, fct_reorder(var, val, median), fill = ..density..),
+        stat_density(aes(x = val, fct_reorder(var, val, median), fill = ..density.., fill = ..density..),
                      geom = 'raster',
                      position = 'identity',
                      adjust = bw) +
@@ -1014,10 +1027,17 @@ f.oned <-
       }
     } else if (plot == 'ridge') {
       p <- ggplot(df.scaled) +
-        geom_density_ridges(aes(x = val, fct_reorder(var, val, median)), rel_min_height = alpha.min) +
+        geom_density_ridges(aes(x = val, fct_reorder(var, val, median), fill = ..density..), rel_min_height = alpha.min) +
         coord_cartesian(xlim = xlim) +
         xlab('Scaled Value') +
-        ylab('')
+        ylab('') +
+        scale_fill_viridis_c(
+          option = 'magma',
+          limits = c(0, dlim),
+          begin = 0,
+          end = 1,
+          na.value = 'lemonchiffon'
+        )
       for (i in 1:n.pg) {
         f[[i]] <- p + facet_wrap_paginate(~ model,
                                           ncol = ncol,
@@ -1028,7 +1048,7 @@ f.oned <-
       p <- list(
         p.strip = ggplot(df.scaled) +
           stat_density(
-            aes(x = val, fct_reorder(var, val, median), fill = ..density..),
+            aes(x = val, fct_reorder(var, val, median), fill = ..density.., fill = ..density..),
             geom = 'raster',
             position = 'identity',
             adjust = bw
@@ -1050,11 +1070,18 @@ f.oned <-
             panel.grid.minor = element_line(color = rgb(0.00146, 0.000466, 0.0139, 0.7))
           ),
         p.ridge = ggplot(df.scaled) +
-          geom_density_ridges(aes(x = val, fct_reorder(var, val, median)), rel_min_height = alpha.min) +
+          geom_density_ridges(aes(x = val, fct_reorder(var, val, median), fill = ..density..), rel_min_height = alpha.min) +
           coord_cartesian(xlim = xlim) +
           
           xlab('Scaled Value') +
-          ylab('')
+          ylab('') +
+          scale_fill_viridis_c(
+            option = 'magma',
+            limits = c(0, dlim),
+            begin = 0,
+            end = 1,
+            na.value = 'lemonchiffon'
+          )
       )
       for (i in 1:n.pg) {
         f.strip[[i]] <- p$p.strip + facet_wrap_paginate( ~ model,
@@ -1262,7 +1289,7 @@ a.oned <- function(lst,
   if (plot == 'strip') {
     a <- ggplot(df.scaled) +
       stat_density(
-        aes(x = val, fct_reorder(var, val, median), fill = ..density..),
+        aes(x = val, fct_reorder(var, val, median), fill = ..density.., fill = ..density..),
         color = 'lemonchiffon',
         geom = 'raster',
         position = 'identity',
@@ -1290,10 +1317,17 @@ a.oned <- function(lst,
       exit_fade()
   } else if (plot == 'ridge') {
     a <- ggplot(df.scaled) +
-      geom_density_ridges(aes(x = val, fct_reorder(var, val, median)), rel_min_height = alpha.min) +
+      geom_density_ridges(aes(x = val, fct_reorder(var, val, median), fill = ..density..), rel_min_height = alpha.min) +
       coord_cartesian(xlim = xlim) +
       xlab('Scaled Value') +
       ylab('') +
+      scale_fill_viridis_c(
+        option = 'magma',
+        limits = c(0, dlim),
+        begin = 0,
+        end = 1,
+        na.value = 'lemonchiffon'
+      ) +
       transition_states(df.scaled$model) +
       labs(title = '{closest_state}') +
       ease_aes('linear') +
@@ -1303,7 +1337,7 @@ a.oned <- function(lst,
     a <- list(
       a.strip = ggplot(df.scaled) +
         stat_density(
-          aes(x = val, fct_reorder(var, val, median), fill = ..density..),
+          aes(x = val, fct_reorder(var, val, median), fill = ..density.., fill = ..density..),
           geom = 'raster',
           position = 'identity',
           adjust = bw
@@ -1329,10 +1363,17 @@ a.oned <- function(lst,
         enter_fade() +
         exit_fade(),
       a.ridge = ggplot(df.scaled) +
-        geom_density_ridges(aes(x = val, fct_reorder(var, val, median)), rel_min_height = alpha.min) +
+        geom_density_ridges(aes(x = val, fct_reorder(var, val, median), fill = ..density..), rel_min_height = alpha.min) +
         coord_cartesian(xlim = xlim) +
         xlab('Scaled Value') +
         ylab('') +
+        scale_fill_viridis_c(
+          option = 'magma',
+          limits = c(0, dlim),
+          begin = 0,
+          end = 1,
+          na.value = 'lemonchiffon'
+        ) +
         labs(title = '{closest_state}') +
         transition_states(df.scaled$model) +
         ease_aes('linear') +

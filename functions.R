@@ -844,7 +844,7 @@ p.oned <- function(df,
           option = 'magma',
           limits = c(0, dlim),
           begin = 0,
-          end = 0.8,
+          end = 1,
           na.value = 'lemonchiffon'
         ) +
         coord_cartesian(xlim = xlim) +
@@ -986,7 +986,7 @@ f.oned <-
           option = 'magma',
           limits = c(0, dlim),
           begin = 0,
-          end = 0.8,
+          end = 1,
           na.value = 'lemonchiffon'
         ) +
         coord_cartesian(xlim = xlim) +
@@ -1029,7 +1029,7 @@ f.oned <-
             option = 'magma',
             limits = c(0, dlim),
             begin = 0,
-            end = 0.8,
+            end = 1,
             na.value = 'lemonchiffon'
           ) +
           coord_cartesian(xlim = xlim) +
@@ -1262,7 +1262,7 @@ a.oned <- function(lst,
         option = 'magma',
         limits = c(0, dlim),
         begin = 0,
-        end = 0.8,
+        end = 1,
         na.value = 'lemonchiffon'
       ) +
       coord_cartesian(xlim = xlim) +
@@ -1301,7 +1301,7 @@ a.oned <- function(lst,
           option = 'magma',
           limits = c(0, dlim),
           begin = 0,
-          end = 0.8,
+          end = 1,
           na.value = 'lemonchiffon'
         ) +
         coord_cartesian(xlim = xlim) +

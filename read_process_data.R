@@ -15,7 +15,7 @@ files <- tibble(
   paths = dir_ls('./dataset', regexp = '*marks.txt'),
   fnames = substring(paths, regexpr("/cd", paths) + 1, regexpr("_marks", paths) - 1)
 )
-files <- files %>% slice_sample(n = 8)
+files <- files %>% slice_sample(n = 16)
 # Read raw data
 marx <- tibble(model = as.factor(files$fnames),
                filepath = files$paths) %>%

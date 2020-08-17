@@ -7,25 +7,28 @@ marx
 glimpse(marx)
 
 # Visualize data distribution in 1- and 2D
-rid <- c('TIQR',
-         +          'PMedian',
-         +          'PIQR',
-         +          'dPDownSum',
-         +          'dTDownSum',
-         +          'dXDownSum',
-         +          'dYDownSum',
-         +          'deltaTPGrads',
-         +          'TMedian',
-         +          'maxConsecutiveTDown',
-         +          'dXSum',
-         +          'TDown')
-features <- colnames(marx$mark.ft[[1]])[colnames(marx$mark.ft[[1]]) %in% rid]
+rid <- c(
+  'TIQR',
+  'PMedian',
+  'PIQR',
+  'dPDownSum',
+  'dTDownSum',
+  'dXDownSum',
+  'dYDownSum',
+  'deltaTPGrads',
+  'TMedian',
+  'maxConsecutiveTDown',
+  'dXSum',
+  'TDown'
+)
+features <-
+  colnames(marx$mark.ft[[1]])[colnames(marx$mark.ft[[1]]) %in% rid]
 vis9 <- marx %>%
   mutate(
     # 1D vis plots
     vis.oned = mark.ft %>%
       l.oned(
-        features = 'all',
+        features = features,
         plot = 'all',
         xlim = c(-3, 3),
         dlim = 0.5
@@ -33,7 +36,7 @@ vis9 <- marx %>%
     # 2D vis plots
     vis.twod = mark.ft %>%
       l.twod(
-        features = 'all',
+        features = features,
         xlim = c(-3, 3),
         dlim = 0.05
       )
@@ -53,7 +56,7 @@ vis9$mark.ft %>%
     runs = 'all',
     nrow = 4,
     ncol = 4,
-    features = 'all',
+    features = features,
     plot = 'all',
     xlim = c(-3, 3),
     dlim = 0.5
@@ -77,46 +80,46 @@ vis9$mark.ft %>%
 
 # mods1 <- marx %>%
 #   mutate(
-    # # BIC
-    # bic.mod0 = mark.ft %>%
-    #   l.bic(
-    #     features = c('dTSum', 'dPSum', 'dTUpSum', 'dPUpSum'),
-    #     scale = TRUE,
-    #     plot = FALSE
-    #   ),
-    # # General GMM model
-    # mod0 = l.gmm(
-    #   lst = mark.ft,
-    #   lst.bic = bic.mod0,
-    #   features = c('dTSum', 'dPSum', 'dTUpSum', 'dPUpSum'),
-    #   G = NULL,
-    #   scale = TRUE,
-    #   hists = FALSE,
-    #   scatter = FALSE
-    # ),
-    # # Dimension Reduction
-    # dr.mod0 = l.gmm.dr(mod0),
-    # # BIC
-    # bic.mod1 = mark.ft %>%
-    #   l.bic(
-    #     G = 3,
-    #     features = c('dTSum', 'dPSum', 'dTUpSum', 'dPUpSum'),
-    #     scale = TRUE,
-    #     plot = FALSE
-    #   ),
-    # # General GMM model
-    # mod1 = l.gmm(
-    #   lst = mark.ft,
-    #   lst.bic = bic.mod1,
-    #   features = c('dTSum', 'dPSum', 'dTUpSum', 'dPUpSum'),
-    #   G = NULL,
-    #   scale = TRUE,
-    #   hists = FALSE,
-    #   scatter = FALSE
-    # ),
-    # # Dimension Reduction
-    # dr.mod1 = l.gmm.dr(mod1)
-  # )
+# # BIC
+# bic.mod0 = mark.ft %>%
+#   l.bic(
+#     features = features,
+#     scale = TRUE,
+#     plot = FALSE
+#   ),
+# # General GMM model
+# mod0 = l.gmm(
+#   lst = mark.ft,
+#   lst.bic = bic.mod0,
+#   features = features,
+#   G = NULL,
+#   scale = TRUE,
+#   hists = FALSE,
+#   scatter = FALSE
+# ),
+# # Dimension Reduction
+# dr.mod0 = l.gmm.dr(mod0),
+# # BIC
+# bic.mod1 = mark.ft %>%
+#   l.bic(
+#     G = 3,
+#     features = features,
+#     scale = TRUE,
+#     plot = FALSE
+#   ),
+# # General GMM model
+# mod1 = l.gmm(
+#   lst = mark.ft,
+#   lst.bic = bic.mod1,
+#   features = features,
+#   G = NULL,
+#   scale = TRUE,
+#   hists = FALSE,
+#   scatter = FALSE
+# ),
+# # Dimension Reduction
+# dr.mod1 = l.gmm.dr(mod1)
+# )
 # # Visualize model parameters and results
 # # Plot BIC
 # mods1$bic.mod0 %>% p.BIC()
@@ -133,7 +136,7 @@ dev.off()
 # mods1$mark.ft %>%
 #   a.oned(
 #     plot = 'all',
-#     features = c('dTSum', 'dPSum', 'dTUpSum', 'dPUpSum'),
+#     features = features,
 #     type = 'gif',
 #     xlim = c(-2, 2),
 #     dlim = 1,
@@ -144,7 +147,7 @@ dev.off()
 # mods1$mark.ft %>%
 #   a.twod(
 #     type = 'gif',
-#     features = c('dTSum', 'dPSum', 'dTUpSum', 'dPUpSum'),
+#     features = features,
 #     xlim = c(-2, 2),
 #     dlim = 0.05,
 #     save = TRUE,

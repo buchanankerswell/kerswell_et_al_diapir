@@ -774,7 +774,8 @@ p.oned <- function(df,
                    plot,
                    xlim = c(-2, 2),
                    dlim = 0.5,
-                   alpha.min = 0.05) {
+                   alpha.min = 0.05,
+                   bw = 1) {
   fname <- df$model[1]
   if (features == 'all') {
     df %>%
@@ -808,7 +809,8 @@ p.oned <- function(df,
     p.strip <- ggplot(df.scaled) +
       stat_density(aes(x = val, fct_reorder(var, val, median), fill = ..density..),
                    geom = 'raster',
-                   position = 'identity') +
+                   position = 'identity',
+                   adjust = bw) +
       scale_fill_viridis_c(
         option = 'magma',
         limits = c(0, dlim),
@@ -839,7 +841,8 @@ p.oned <- function(df,
         stat_density(
           aes(x = val, y = fct_reorder(var, val, median), fill = ..density..),
           geom = 'raster',
-          position = 'identity'
+          position = 'identity',
+          adjust = bw
         ) +
         scale_fill_viridis_c(
           option = 'magma',
@@ -984,7 +987,8 @@ f.oned <-
       p <- ggplot(df.scaled) +
         stat_density(aes(x = val, fct_reorder(var, val, median), fill = ..density..),
                      geom = 'raster',
-                     position = 'identity') +
+                     position = 'identity',
+                     adjust = bw) +
         scale_fill_viridis_c(
           option = 'magma',
           limits = c(0, dlim),
@@ -1025,7 +1029,8 @@ f.oned <-
           stat_density(
             aes(x = val, fct_reorder(var, val, median), fill = ..density..),
             geom = 'raster',
-            position = 'identity'
+            position = 'identity',
+            adjust = bw
           ) +
           scale_fill_viridis_c(
             option = 'magma',
@@ -1259,7 +1264,8 @@ a.oned <- function(lst,
         aes(x = val, fct_reorder(var, val, median), fill = ..density..),
         color = 'lemonchiffon',
         geom = 'raster',
-        position = 'identity'
+        position = 'identity',
+        adjust = bw
       ) +
       scale_fill_viridis_c(
         option = 'magma',
@@ -1298,7 +1304,8 @@ a.oned <- function(lst,
         stat_density(
           aes(x = val, fct_reorder(var, val, median), fill = ..density..),
           geom = 'raster',
-          position = 'identity'
+          position = 'identity',
+          adjust = bw
         ) +
         scale_fill_viridis_c(
           option = 'magma',

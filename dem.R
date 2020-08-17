@@ -26,11 +26,13 @@ rid <- c(
   'PUp',
   'maxConsecutivePUp',
   'maxConsecutiveTUp',
-  'dXUpSum'
+  'dXUpSum',
+  'minTPGrad',
+  'maxTPGrad'
 )
 features <- 
   colnames(marx$mark.ft[[1]])[!(colnames(marx$mark.ft[[1]]) %in% rid)]
-vis11 <- marx %>%
+vis12 <- marx %>%
   mutate(
     # 1D vis plots
     vis.oned = mark.ft %>%
@@ -39,7 +41,8 @@ vis11 <- marx %>%
         plot = 'all',
         xlim = c(-3, 3),
         dlim = 0.3,
-        alpha.min = 0.05
+        alpha.min = 0.05,
+        bw = 0.5
       ),
     # 2D vis plots
     vis.twod = mark.ft %>%
@@ -51,15 +54,15 @@ vis11 <- marx %>%
   )
 
 # Open PDF for plotting
-cairo_pdf('vis11.PDF',
+cairo_pdf('vis12.PDF',
           width = 11,
           height = 8.5,
           onefile = TRUE)
 # # Explore features for individual models
-# print(vis11$vis.oned[[1]])
-# print(vis11$vis.twod[[1]][[1]])
+# print(vis12$vis.oned[[1]])
+# print(vis12$vis.twod[[1]][[1]])
 # Summarise features by faceting
-vis11$mark.ft %>%
+vis12$mark.ft %>%
   f.oned(
     runs = 'all',
     nrow = 4,
@@ -68,7 +71,8 @@ vis11$mark.ft %>%
     plot = 'all',
     xlim = c(-3, 3),
     dlim = 0.3,
-    alpha.min = 0.05
+    alpha.min = 0.05,
+    bw = 0.5
   ) %>%
   print()
 

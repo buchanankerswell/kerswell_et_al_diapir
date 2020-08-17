@@ -38,8 +38,8 @@ cairo_pdf('vis7.PDF',
 vis7$mark.ft %>%
   f.oned(
     runs = 'all',
-    nrow = 1,
-    ncol = 1,
+    nrow = 4,
+    ncol = 4,
     features = 'all',
     plot = 'all',
     xlim = c(-3, 3),

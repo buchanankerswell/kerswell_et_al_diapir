@@ -19,6 +19,7 @@ bic.col <- mclust.options("bicPlotColors")
 bic.col[1:14] <- c(c.pal, c.pal[1:2])
 mclust.options("bicPlotColors" = bic.col)
 mclust.options("classPlotColors" = c.pal)
+rm(c.pal, bic.col)
 # proportions ----
 # Calculate ratios of rocks among classes
 proportions <- function(df) {
@@ -777,6 +778,12 @@ f.oned <-
       unnest(cols = d.scaled) %>%
       ungroup() ->
       df.scaled
+    ordr <- df %>%
+      ungroup() %>%
+      summarise(across(where(is.numeric), mean)) %>%
+      pivot_longer(cols = everything()) %>%
+      arrange(value) %>%
+      select(name)
     n.pg <- ceiling(length(unique(df.scaled$model)) / (ncol * nrow))
     f <- vector(mode = 'list', length = length(n.pg))
     f.strip <- vector(mode = 'list', length = length(n.pg))
@@ -796,6 +803,7 @@ f.oned <-
           na.value = 'lemonchiffon'
         ) +
         coord_cartesian(xlim = xlim) +
+        scale_y_discrete(limits = ordr) +
         xlab('Scaled Value') +
         ylab('') +
         theme(
@@ -813,6 +821,7 @@ f.oned <-
       p <- ggplot(df.scaled) +
         geom_density_ridges(aes(x = val, y = var)) +
         coord_cartesian(xlim = xlim) +
+        scale_y_discrete(limits = ordr) +
         xlab('Scaled Value') +
         ylab('')
       for (i in 1:n.pg) {
@@ -837,6 +846,7 @@ f.oned <-
             na.value = 'lemonchiffon'
           ) +
           coord_cartesian(xlim = xlim) +
+          scale_y_discrete(limits = ordr) +
           xlab('Scaled Value') +
           ylab('') +
           theme(
@@ -847,6 +857,7 @@ f.oned <-
         p.ridge = ggplot(df.scaled) +
           geom_density_ridges(aes(x = val, y = var)) +
           coord_cartesian(xlim = xlim) +
+          scale_y_discrete(limits = ordr) +
           xlab('Scaled Value') +
           ylab('')
       )
@@ -988,6 +999,12 @@ p.oned <- function(df,
     unnest(cols = d.scaled) %>%
     add_column(model = fname) ->
     df.scaled
+  ordr <- df %>%
+    ungroup() %>%
+    summarise(across(where(is.numeric), mean)) %>%
+    pivot_longer(cols = everything()) %>%
+    arrange(value) %>%
+    select(name)
   if (plot == 'strip') {
     p.strip <- ggplot(df.scaled) +
       stat_density(
@@ -1003,6 +1020,7 @@ p.oned <- function(df,
         na.value = 'lemonchiffon'
       ) +
       coord_cartesian(xlim = xlim) +
+      scale_y_discrete(limits = ordr) +
       xlab('Scaled Value') +
       ylab('') +
       ggtitle(fname) +
@@ -1015,6 +1033,7 @@ p.oned <- function(df,
     p <- ggplot(df.scaled) +
       geom_density_ridges(aes(x = val, y = var)) +
       coord_cartesian(xlim = xlim) +
+      scale_y_discrete(limits = ordr) +
       xlab('Scaled Value') +
       ylab('') +
       ggtitle(fname)
@@ -1034,6 +1053,7 @@ p.oned <- function(df,
           na.value = 'lemonchiffon'
         ) +
         coord_cartesian(xlim = xlim) +
+        scale_y_discrete(limits = ordr) +
         xlab('Scaled Value') +
         ylab('') +
         ggtitle(fname) +
@@ -1045,6 +1065,7 @@ p.oned <- function(df,
       p.ridge = ggplot(df.scaled) +
         geom_density_ridges(aes(x = val, y = var)) +
         coord_cartesian(xlim = xlim) +
+        scale_y_discrete(limits = ordr) +
         xlab('Scaled Value') +
         ylab('') +
         ggtitle(fname)

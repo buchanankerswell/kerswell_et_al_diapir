@@ -1,18 +1,18 @@
 source('functions.R')
 
 # Load data and glimpse its structure
-load('marx.RData')
+# load('marx.RData')
 
 marx
 glimpse(marx)
 
 # Visualize data distribution in 1- and 2D
-vis1 <- marx %>%
+vis5 <- marx %>%
   mutate(
     # 1D vis plots
     vis.oned = mark.ft %>%
       l.oned(
-        features = c('dTSum', 'dPSum', 'dTUpSum', 'dPUpSum'),
+        features = 'all',
         plot = 'all',
         xlim = c(-2, 2),
         dlim = 0.5
@@ -20,27 +20,27 @@ vis1 <- marx %>%
     # 2D vis plots
     vis.twod = mark.ft %>%
       l.twod(
-        features = c('dTSum', 'dPSum', 'dTUpSum', 'dPUpSum'),
+        features = 'all',
         xlim = c(-2, 2),
         dlim = 0.05
       )
   )
 
 # Open PDF for plotting
-cairo_pdf('ft.PDF',
+cairo_pdf('vis5.PDF',
           width = 11,
           height = 8.5,
           onefile = TRUE)
-# Explore features for individual models
-print(vis1$vis.oned[[1]])
-print(vis1$vis.twod[[1]][[1]])
+# # Explore features for individual models
+# print(vis5$vis.oned[[1]])
+# print(vis5$vis.twod[[1]][[1]])
 # Summarise features by faceting
-vis1$mark.ft %>%
+vis5$mark.ft %>%
   f.oned(
     runs = 'all',
-    nrow = 2,
-    ncol = 2,
-    features = c('dTSum', 'dPSum', 'dTUpSum', 'dPUpSum'),
+    nrow = 1,
+    ncol = 1,
+    features = 'all',
     plot = 'all',
     xlim = c(-2, 2),
     dlim = 0.5

@@ -748,7 +748,7 @@ f.oned <-
            features = 'all',
            plot = 'all',
            xlim = c(-2, 2),
-           dlim = 1) {
+           dlim = 0.5) {
     if (runs == 'all') {
       df <- lst %>% bind_rows()
     } else {
@@ -785,7 +785,6 @@ f.oned <-
       p <- ggplot(df.scaled) +
         stat_density(
           aes(x = val, y = var, fill = ..density..),
-          color = 'white',
           geom = 'raster',
           position = 'identity'
         ) +
@@ -794,7 +793,7 @@ f.oned <-
           limits = c(0, dlim),
           begin = 0,
           end = 0.8,
-          na.value = 'white'
+          na.value = 'lemonchiffon'
         ) +
         coord_cartesian(xlim = xlim) +
         xlab('Scaled Value') +
@@ -805,7 +804,7 @@ f.oned <-
           panel.grid.minor = element_line(color = rgb(0.00146, 0.000466, 0.0139, 0.7))
         )
       for (i in 1:n.pg) {
-        f[i] <- p + facet_wrap_paginate( ~ model,
+        f[[i]] <- p + facet_wrap_paginate( ~ model,
                                          ncol = ncol,
                                          nrow = nrow,
                                          page = i)
@@ -817,7 +816,7 @@ f.oned <-
         xlab('Scaled Value') +
         ylab('')
       for (i in 1:n.pg) {
-        f[i] <- p + facet_wrap_paginate( ~ model,
+        f[[i]] <- p + facet_wrap_paginate( ~ model,
                                          ncol = ncol,
                                          nrow = nrow,
                                          page = i)
@@ -835,7 +834,7 @@ f.oned <-
             limits = c(0, dlim),
             begin = 0,
             end = 0.8,
-            na.value = 'white'
+            na.value = 'lemonchiffon'
           ) +
           coord_cartesian(xlim = xlim) +
           xlab('Scaled Value') +
@@ -852,11 +851,11 @@ f.oned <-
           ylab('')
       )
       for (i in 1:n.pg) {
-        f.strip <- p$p.strip + facet_wrap_paginate(~ model,
+        f.strip[[i]] <- p$p.strip + facet_wrap_paginate(~ model,
                                                    ncol = ncol,
                                                    nrow = nrow,
                                                    page = i)
-        f.ridge <- p$p.ridge + facet_wrap_paginate(~ model,
+        f.ridge[[i]] <- p$p.ridge + facet_wrap_paginate(~ model,
                                                    ncol = ncol,
                                                    nrow = nrow,
                                                    page = i)
@@ -993,7 +992,6 @@ p.oned <- function(df,
     p.strip <- ggplot(df.scaled) +
       stat_density(
         aes(x = val, y = var, fill = ..density..),
-        color = 'white',
         geom = 'raster',
         position = 'identity'
       ) +
@@ -1246,7 +1244,7 @@ a.oned <- function(lst,
     a <- ggplot(df.scaled) +
       stat_density(
         aes(x = val, y = var, fill = ..density..),
-        color = 'white',
+        color = 'lemonchiffon',
         geom = 'raster',
         position = 'identity'
       ) +
@@ -1294,7 +1292,7 @@ a.oned <- function(lst,
           limits = c(0, dlim),
           begin = 0,
           end = 0.8,
-          na.value = 'white'
+          na.value = 'lemonchiffon'
         ) +
         coord_cartesian(xlim = xlim) +
         xlab('Scaled Value') +

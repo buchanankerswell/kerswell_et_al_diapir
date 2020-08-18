@@ -1125,7 +1125,7 @@ f.oned <-
                                            page = i)
       }
     } else if (plot == 'all') {
-      if(!is.null(mod)) {
+      if(!is.null(mods)) {
         p.ridge <- ggplot(df.scaled) +
           geom_tile(data = c, aes(x = cntr, y = var, color = cls, fill = cls, width = twosigma, group = var), alpha = 1, height = 0.2) +
           geom_density_ridges(

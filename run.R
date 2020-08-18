@@ -1,4 +1,5 @@
 rm(list = ls())
+source('functions.R')
 # source('read_process_data.R')
 load('marx.RData')
 source('dem.R')

@@ -1,5 +1,11 @@
 source('functions.R')
 
+# Open PDF for plotting
+cairo_pdf('vis18.PDF',
+          width = 11,
+          height = 8.5,
+          onefile = TRUE)
+
 # Load data and glimpse its structure
 # load('marx.RData')
 
@@ -34,12 +40,6 @@ rid <- c(
 )
 features <-
   colnames(marx$mark.ft[[1]])[!(colnames(marx$mark.ft[[1]]) %in% rid)]
-
-# Open PDF for plotting
-cairo_pdf('vis17.PDF',
-          width = 11,
-          height = 8.5,
-          onefile = TRUE)
 
 # Build models by adding layers
 # l.kmean ........... k-means (assume k = # of clusters)
@@ -109,8 +109,8 @@ m <- marx %>%
     dr.mod1 = l.gmm.dr(mod1)
   )
 # # Explore features for individual models
-# print(vis17$vis.oned[[1]])
-# print(vis17$vis.twod[[1]][[1]])
+print(m$vis.oned[[1]])
+print(m$vis.twod[[1]][[1]])
 # Summarise features by faceting
 marx$mark.ft %>%
   f.oned(

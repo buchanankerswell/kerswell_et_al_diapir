@@ -875,13 +875,13 @@ p.oned <- function(df,
             color = 'cls',
             fill = 'cls',
             width = width,
-            group = 'var'
+            group = 'cls'
           ),
           alpha = 0.4,
           height = 0.2
         ) +
         geom_point(data = c,
-                   aes(x = cntr, y = var, fill = cls, color = cls, group = var), shape = 15) +
+                   aes(x = cntr, y = var, fill = cls, color = cls, group = cls), shape = 15) +
         geom_density_ridges(
           aes(x = val, y = fct_reorder(var, val, median)),
           rel_min_height = alpha.min,
@@ -925,13 +925,13 @@ p.oned <- function(df,
             color = 'cls',
             fill = 'cls',
             width = width,
-            group = 'var'
+            group = 'cls'
           ),
           alpha = 0.4,
           height = 0.2
         ) +
         geom_point(data = c,
-                   aes(x = cntr, y = var, fill = cls, color = cls, group = var), shape = 15) +
+                   aes(x = cntr, y = var, fill = cls, color = cls, group = cls), shape = 15) +
         geom_density_ridges(
           aes(x = val, y = fct_reorder(var, val, median)),
           rel_min_height = alpha.min,
@@ -1120,7 +1120,8 @@ f.oned <-
             threesigma = sqrt(variance) * 3
           )
         c <- cntr %>% left_join(sig)
-      })
+      }, .id = 'model') %>%
+        mutate(across(where(is.character), factor))
     }
     n.pg <- ceiling(length(unique(df.scaled$model)) / (ncol * nrow))
     f <- vector(mode = 'list', length = length(n.pg))
@@ -1177,13 +1178,13 @@ f.oned <-
               color = 'cls',
               fill = 'cls',
               width = width,
-              group = 'var'
+              group = 'model'
             ),
             alpha = 0.4,
             height = 0.2
           ) +
           geom_point(data = c,
-                     aes(x = cntr, y = var, fill = cls, color = cls, group = var), shape = 15) +
+                     aes(x = cntr, y = var, fill = cls, color = cls, group = model), shape = 15) +
           geom_density_ridges(
             aes(x = val, y = fct_reorder(var, val, median)),
             rel_min_height = alpha.min,
@@ -1231,13 +1232,13 @@ f.oned <-
               color = 'cls',
               fill = 'cls',
               width = width,
-              group = 'var'
+              group = 'model'
             ),
             alpha = 0.4,
             height = 0.2
           ) +
           geom_point(data = c,
-                     aes(x = cntr, y = var, fill = cls, color = cls, group = var), shape = 15) +
+                     aes(x = cntr, y = var, fill = cls, color = cls, group = model), shape = 15) +
           geom_density_ridges(
             aes(x = val, y = fct_reorder(var, val, median)),
             rel_min_height = alpha.min,
@@ -1574,7 +1575,7 @@ a.oned <- function(lst,
             color = 'cls',
             fill = 'cls',
             width = width,
-            group = 'var'
+            group = 'cls'
           ),
           alpha = 1,
           height = 0.2
@@ -1630,7 +1631,7 @@ a.oned <- function(lst,
             color = 'cls',
             fill = 'cls',
             width = width,
-            group = 'var'
+            group = 'cls'
           ),
           alpha = 1,
           height = 0.2

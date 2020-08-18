@@ -32,9 +32,31 @@ rid <- c(
   'maxConsecutivePDown',
   'PDown'
 )
-features <- 
+features <-
   colnames(marx$mark.ft[[1]])[!(colnames(marx$mark.ft[[1]]) %in% rid)]
-vis17 <- marx %>%
+
+# Open PDF for plotting
+cairo_pdf('vis17.PDF',
+          width = 11,
+          height = 8.5,
+          onefile = TRUE)
+
+# Build models by adding layers
+# l.kmean ........... k-means (assume k = # of clusters)
+# l.bic ............. Bayesian Information Criterion
+# l.gmm ............. Gaussian Mixture Model (assume G = # of components)
+# l.gmm.da .......... GMM discriminant analysis (supervised classification)
+# l.gmm.dr .......... GMM dimension reduction
+# l.den ............. GMM layer suited for density plots
+# Add layers of visualizations
+# l.oned ............ Visualize 1D data
+# l.twod ............ Visualize 2D data
+# l.gif ............. creates gifs of marker position ('xy') and PT
+#
+# Summarise by faceting plots
+# f.summary ........ compiles selected gifs into one
+
+m <- marx %>%
   mutate(
     # 1D vis plots
     vis.oned = mark.ft %>%
@@ -43,24 +65,49 @@ vis17 <- marx %>%
         plot = 'all',
         xlim = c(-2.5, 2.5),
         dlim = 0.3,
-        alpha.min = 0.05,
+        alpha.min = 0,
         bw = 0.5
       ),
-    # 2D vis plots
-    vis.twod = mark.ft %>%
-      l.twod(
+    # BIC
+    bic.mod0 = mark.ft %>%
+      l.bic(
         features = features,
-        xlim = c(-2.5, 2.5),
-        dlim = 0.05
-      )
-  ) %>%
-  select(model, vis.oned, vis.twod)
-
-# Open PDF for plotting
-cairo_pdf('vis17.PDF',
-          width = 11,
-          height = 8.5,
-          onefile = TRUE)
+        scale = TRUE,
+        plot = FALSE
+      ),
+    # General GMM model
+    mod0 = l.gmm(
+      lst = mark.ft,
+      lst.bic = bic.mod0,
+      features = features,
+      G = NULL,
+      scale = TRUE,
+      hists = FALSE,
+      scatter = FALSE
+    ),
+    # Dimension Reduction
+    dr.mod0 = l.gmm.dr(mod0),
+    # BIC
+    bic.mod1 = mark.ft %>%
+      l.bic(
+        G = 3,
+        features = features,
+        scale = TRUE,
+        plot = FALSE
+      ),
+    # General GMM model
+    mod1 = l.gmm(
+      lst = mark.ft,
+      lst.bic = bic.mod1,
+      features = features,
+      G = NULL,
+      scale = TRUE,
+      hists = FALSE,
+      scatter = FALSE
+    ),
+    # Dimension Reduction
+    dr.mod1 = l.gmm.dr(mod1)
+  )
 # # Explore features for individual models
 # print(vis17$vis.oned[[1]])
 # print(vis17$vis.twod[[1]][[1]])
@@ -78,109 +125,51 @@ marx$mark.ft %>%
     bw = 0.5
   ) %>%
   print()
-
-# Build models by adding layers
-# l.kmean ........... k-means (assume k = # of clusters)
-# l.bic ............. Bayesian Information Criterion
-# l.gmm ............. Gaussian Mixture Model (assume G = # of components)
-# l.gmm.da .......... GMM discriminant analysis (supervised classification)
-# l.gmm.dr .......... GMM dimension reduction
-# l.den ............. GMM layer suited for density plots
-# Add layers of visualizations
-# l.oned ............ Visualize 1D data
-# l.twod ............ Visualize 2D data
-# l.gif ............. creates gifs of marker position ('xy') and PT
-#
-# Summarise by faceting plots
-# f.summary ........ compiles selected gifs into one
-
-mods1 <- marx %>%
-  mutate(
-# BIC
-bic.mod0 = mark.ft %>%
-  l.bic(
-    features = features,
-    scale = TRUE,
-    plot = FALSE
-  ),
-# General GMM model
-mod0 = l.gmm(
-  lst = mark.ft,
-  lst.bic = bic.mod0,
-  features = features,
-  G = NULL,
-  scale = TRUE,
-  hists = FALSE,
-  scatter = FALSE
-),
-# Dimension Reduction
-dr.mod0 = l.gmm.dr(mod0),
-# BIC
-bic.mod1 = mark.ft %>%
-  l.bic(
-    G = 3,
-    features = features,
-    scale = TRUE,
-    plot = FALSE
-  ),
-# General GMM model
-mod1 = l.gmm(
-  lst = mark.ft,
-  lst.bic = bic.mod1,
-  features = features,
-  G = NULL,
-  scale = TRUE,
-  hists = FALSE,
-  scatter = FALSE
-),
-# Dimension Reduction
-dr.mod1 = l.gmm.dr(mod1)
-)
 # Visualize model parameters and results
 # Plot BIC
-mods1$bic.mod0 %>% p.BIC()
-mods1$bic.mod1 %>% p.BIC()
+m$bic.mod0 %>% p.BIC()
+m$bic.mod1 %>% p.BIC()
 # # Plot scatter
-# mods1$mod0 %>% p.class()
-# mods1$mod1 %>% p.class()
+# m$mod0 %>% p.class()
+# m$mod1 %>% p.class()
 # Dimension reduction plots
-# mods1$dr.mod0 %>% p.dr.boundary()
-# mods1$dr.mod1 %>% p.dr.boundary()
+# m$dr.mod0 %>% p.dr.boundary()
+# m$dr.mod1 %>% p.dr.boundary()
 # 1D Plots
-mods1$mark.ft %>%
+m$mark.ft %>%
   f.oned(
-    mods = mods1$mod0,
+    mods = m$mod0,
     runs = 'all',
     nrow = 2,
     ncol = 2,
     features = features,
-    plot = 'ridge',
+    plot = 'all',
     xlim = c(-2.5, 2.5),
     dlim = 0.3,
-    alpha.min = 0.05,
+    alpha.min = 0,
     bw = 0.5
   ) %>%
   print()
-mods1$mark.ft %>%
+m$mark.ft %>%
   f.oned(
-    mods = mods1$mod1,
+    mods = m$mod1,
     runs = 'all',
     nrow = 2,
     ncol = 2,
     features = features,
-    plot = 'ridge',
+    plot = 'all',
     xlim = c(-2.5, 2.5),
     dlim = 0.3,
-    alpha.min = 0.05,
+    alpha.min = 0,
     bw = 0.5
   ) %>%
   print()
 # Turn off PDF
 dev.off()
 # # Summarise features by animation
-# mods1$mark.ft %>%
+# m$mark.ft %>%
 #   a.oned(
-#     mods = mods1$mod1,
+#     mods = m$mod1,
 #     plot = 'all',
 #     features = features,
 #     type = 'gif',
@@ -192,7 +181,7 @@ dev.off()
 #     fname = 'oned',
 #     fps = 20
 #   )
-# mods1$mark.ft %>%
+# m$mark.ft %>%
 #   a.twod(
 #     type = 'gif',
 #     features = features,

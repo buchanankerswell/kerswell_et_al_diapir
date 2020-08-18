@@ -731,11 +731,9 @@ l.twod <- function(lst, ...) {
 l.gif <- function(dlst, modlst, GIF = c('xy', 'PT')) {
   d <- map2(dlst, purrr::map(modlst, pluck('data')), left_join)
   if (GIF == 'xy') {
-    anim <- d %>% purrr::map(try(gif.xy)
-    )
+    anim <- d %>% purrr::map(try(gif.xy))
   } else {
-    anim <- d %>% purrr::map(try(gif.pt)
-    )
+    anim <- d %>% purrr::map(try(gif.pt))
   }
 }
 
@@ -790,34 +788,47 @@ p.oned <- function(df,
   } else {
     features <- features
   }
-    df %>%
-      ungroup() %>%
-      select(all_of(features)) %>%
-      pivot_longer(cols = everything(),
-                   names_to = 'var',
-                   values_to = 'val') %>%
-      group_by(var) %>%
-      filter(!is.na(val)) %>%
-      nest() %>%
-      mutate(d.scaled = purrr::map(data, ~ as_tibble(scale(.x)))) %>%
-      select(var, d.scaled) %>%
-      unnest(cols = d.scaled) %>%
-      add_column(model = fname) ->
-      df.scaled
-    if(!is.null(mod)) {
-      cntr <- as_tibble(mod$parameters$mean, rownames = 'var', .name_repair = 'unique') %>%
-        rename_with(~ gsub('...', '', .x), .cols = where(is.numeric)) %>%
-        pivot_longer(cols = where(is.numeric), names_to = 'cls', values_to = 'cntr') %>%
-        mutate(across(where(is.character), factor))
-      sig <- apply(mod$parameters$variance$sigma, 3, diag) %>%
-        as_tibble(rownames = 'var') %>%
-        rename_with(~ gsub('V', '', .x), .cols = where(is.numeric)) %>%
-        pivot_longer(cols = where(is.numeric), names_to = 'cls', values_to = 'variance') %>%
-        mutate(across(where(is.character), factor),
-               twosigma = sqrt(variance)*2,
-               threesigma = sqrt(variance)*3)
-      c <- cntr %>% left_join(sig)
-    }
+  df %>%
+    ungroup() %>%
+    select(all_of(features)) %>%
+    pivot_longer(cols = everything(),
+                 names_to = 'var',
+                 values_to = 'val') %>%
+    group_by(var) %>%
+    filter(!is.na(val)) %>%
+    nest() %>%
+    mutate(d.scaled = purrr::map(data, ~ as_tibble(scale(.x)))) %>%
+    select(var, d.scaled) %>%
+    unnest(cols = d.scaled) %>%
+    add_column(model = fname) ->
+    df.scaled
+  if (!is.null(mod)) {
+    cntr <-
+      as_tibble(mod$parameters$mean,
+                rownames = 'var',
+                .name_repair = 'unique') %>%
+      rename_with( ~ gsub('...', '', .x), .cols = where(is.numeric)) %>%
+      pivot_longer(
+        cols = where(is.numeric),
+        names_to = 'cls',
+        values_to = 'cntr'
+      ) %>%
+      mutate(across(where(is.character), factor))
+    sig <- apply(mod$parameters$variance$sigma, 3, diag) %>%
+      as_tibble(rownames = 'var') %>%
+      rename_with( ~ gsub('V', '', .x), .cols = where(is.numeric)) %>%
+      pivot_longer(
+        cols = where(is.numeric),
+        names_to = 'cls',
+        values_to = 'variance'
+      ) %>%
+      mutate(
+        across(where(is.character), factor),
+        twosigma = sqrt(variance) * 2,
+        threesigma = sqrt(variance) * 3
+      )
+    c <- cntr %>% left_join(sig)
+  }
   if (plot == 'strip') {
     p.strip <- ggplot(df.scaled) +
       stat_density(
@@ -847,16 +858,28 @@ p.oned <- function(df,
         panel.grid.minor = element_line(color = rgb(0.00146, 0.000466, 0.0139, 0.7))
       )
   } else if (plot == 'ridge') {
-    if(!is.null(mod)) {
-      if(sigma == 2) {
+    if (!is.null(mod)) {
+      if (sigma == 2) {
         width <- 'twosigma'
-      } else if(sigma == 3) {
+      } else if (sigma == 3) {
         width <- 'threesigma'
       } else {
         width <- 'twosigma'
       }
       p <- ggplot(df.scaled) +
-        geom_tile(data = c, aes_string(x = 'cntr', y = 'var', color = 'cls', fill = 'cls', width = width, group = 'var'), alpha = 1, height = 0.2) +
+        geom_tile(
+          data = c,
+          aes_string(
+            x = 'cntr',
+            y = 'var',
+            color = 'cls',
+            fill = 'cls',
+            width = width,
+            group = 'var'
+          ),
+          alpha = 1,
+          height = 0.2
+        ) +
         geom_density_ridges(
           aes(x = val, y = fct_reorder(var, val, median)),
           rel_min_height = alpha.min,
@@ -881,18 +904,30 @@ p.oned <- function(df,
         xlab('Scaled Value') +
         ylab('') +
         ggtitle(fname)
-    } 
+    }
   } else if (plot == 'all') {
-    if(!is.null(mod)) {
-      if(sigma == 2) {
+    if (!is.null(mod)) {
+      if (sigma == 2) {
         width <- 'twosigma'
-      } else if(sigma == 3) {
+      } else if (sigma == 3) {
         width <- 'threesigma'
       } else {
         width <- 'twosigma'
       }
       p.ridge <- ggplot(df.scaled) +
-        geom_tile(data = c, aes_string(x = 'cntr', y = 'var', color = 'cls', fill = 'cls', width = width, group = 'var'), alpha = 1, height = 0.2) +
+        geom_tile(
+          data = c,
+          aes_string(
+            x = 'cntr',
+            y = 'var',
+            color = 'cls',
+            fill = 'cls',
+            width = width,
+            group = 'var'
+          ),
+          alpha = 1,
+          height = 0.2
+        ) +
         geom_density_ridges(
           aes(x = val, y = fct_reorder(var, val, median)),
           rel_min_height = alpha.min,
@@ -917,7 +952,7 @@ p.oned <- function(df,
         xlab('Scaled Value') +
         ylab('') +
         ggtitle(fname)
-    } 
+    }
     p.strip <- ggplot(df.scaled) +
       stat_density(
         aes(
@@ -1003,7 +1038,7 @@ p.twod <- function(df,
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()
       ) +
-      facet_wrap( ~ var)
+      facet_wrap(~ var)
     f[[i]] <- p
   }
   names(f) <- features
@@ -1040,36 +1075,49 @@ f.oned <-
     } else {
       features <- features
     }
-      df %>%
-        ungroup() %>%
-        group_by(model) %>%
-        select(all_of(features)) %>%
-        pivot_longer(cols = -model,
-                     names_to = 'var',
-                     values_to = 'val') %>%
-        group_by(model, var) %>%
-        filter(!is.na(val)) %>%
-        nest() %>%
-        mutate(d.scaled = purrr::map(data, ~ as_tibble(scale(.x)))) %>%
-        select(var, d.scaled) %>%
-        unnest(cols = d.scaled) ->
-        df.scaled
-      if(!is.null(mods)) {
-       c <- purrr::map_dfr(mods, function(mod) {
-          cntr <- as_tibble(mod$parameters$mean, rownames = 'var', .name_repair = 'unique') %>%
-            rename_with(~ gsub('...', '', .x), .cols = where(is.numeric)) %>%
-            pivot_longer(cols = where(is.numeric), names_to = 'cls', values_to = 'cntr') %>%
-            mutate(across(where(is.character), factor))
-          sig <- apply(mod$parameters$variance$sigma, 3, diag) %>%
-            as_tibble(rownames = 'var') %>%
-            rename_with(~ gsub('V', '', .x), .cols = where(is.numeric)) %>%
-            pivot_longer(cols = where(is.numeric), names_to = 'cls', values_to = 'variance') %>%
-            mutate(across(where(is.character), factor),
-                   twosigma = sqrt(variance)*2,
-                   threesigma = sqrt(variance)*3)
-          c <- cntr %>% left_join(sig) 
-        })
-      }
+    df %>%
+      ungroup() %>%
+      group_by(model) %>%
+      select(all_of(features)) %>%
+      pivot_longer(cols = -model,
+                   names_to = 'var',
+                   values_to = 'val') %>%
+      group_by(model, var) %>%
+      filter(!is.na(val)) %>%
+      nest() %>%
+      mutate(d.scaled = purrr::map(data, ~ as_tibble(scale(.x)))) %>%
+      select(var, d.scaled) %>%
+      unnest(cols = d.scaled) ->
+      df.scaled
+    if (!is.null(mods)) {
+      c <- purrr::map_dfr(mods, function(mod) {
+        cntr <-
+          as_tibble(mod$parameters$mean,
+                    rownames = 'var',
+                    .name_repair = 'unique') %>%
+          rename_with( ~ gsub('...', '', .x), .cols = where(is.numeric)) %>%
+          pivot_longer(
+            cols = where(is.numeric),
+            names_to = 'cls',
+            values_to = 'cntr'
+          ) %>%
+          mutate(across(where(is.character), factor))
+        sig <- apply(mod$parameters$variance$sigma, 3, diag) %>%
+          as_tibble(rownames = 'var') %>%
+          rename_with( ~ gsub('V', '', .x), .cols = where(is.numeric)) %>%
+          pivot_longer(
+            cols = where(is.numeric),
+            names_to = 'cls',
+            values_to = 'variance'
+          ) %>%
+          mutate(
+            across(where(is.character), factor),
+            twosigma = sqrt(variance) * 2,
+            threesigma = sqrt(variance) * 3
+          )
+        c <- cntr %>% left_join(sig)
+      })
+    }
     n.pg <- ceiling(length(unique(df.scaled$model)) / (ncol * nrow))
     f <- vector(mode = 'list', length = length(n.pg))
     f.strip <- vector(mode = 'list', length = length(n.pg))
@@ -1102,22 +1150,34 @@ f.oned <-
           panel.grid.minor = element_line(color = rgb(0.00146, 0.000466, 0.0139, 0.7))
         )
       for (i in 1:n.pg) {
-        f[[i]] <- p + facet_wrap_paginate( ~ model,
-                                           ncol = ncol,
-                                           nrow = nrow,
-                                           page = i)
+        f[[i]] <- p + facet_wrap_paginate(~ model,
+                                          ncol = ncol,
+                                          nrow = nrow,
+                                          page = i)
       }
     } else if (plot == 'ridge') {
-      if(!is.null(mods)) {
-        if(sigma == 2) {
+      if (!is.null(mods)) {
+        if (sigma == 2) {
           width <- 'twosigma'
-        } else if(sigma == 3) {
+        } else if (sigma == 3) {
           width <- 'threesigma'
         } else {
           width <- 'twosigma'
         }
         p <- ggplot(df.scaled) +
-          geom_tile(data = c, aes_string(x = 'cntr', y = 'var', color = 'cls', fill = 'cls', width = width, group = 'var'), alpha = 1, height = 0.2) +
+          geom_tile(
+            data = c,
+            aes_string(
+              x = 'cntr',
+              y = 'var',
+              color = 'cls',
+              fill = 'cls',
+              width = width,
+              group = 'var'
+            ),
+            alpha = 1,
+            height = 0.2
+          ) +
           geom_density_ridges(
             aes(x = val, y = fct_reorder(var, val, median)),
             rel_min_height = alpha.min,
@@ -1142,22 +1202,34 @@ f.oned <-
           ylab('')
       }
       for (i in 1:n.pg) {
-        f[[i]] <- p + facet_wrap_paginate( ~ model,
-                                           ncol = ncol,
-                                           nrow = nrow,
-                                           page = i)
+        f[[i]] <- p + facet_wrap_paginate(~ model,
+                                          ncol = ncol,
+                                          nrow = nrow,
+                                          page = i)
       }
     } else if (plot == 'all') {
-        if(!is.null(mod)) {
-          if(sigma == 2) {
-            width <- 'twosigma'
-          } else if(sigma == 3) {
-            width <- 'threesigma'
-          } else {
-            width <- 'twosigma'
-          }
+      if (!is.null(mod)) {
+        if (sigma == 2) {
+          width <- 'twosigma'
+        } else if (sigma == 3) {
+          width <- 'threesigma'
+        } else {
+          width <- 'twosigma'
+        }
         p.ridge <- ggplot(df.scaled) +
-          geom_tile(data = c, aes_string(x = 'cntr', y = 'var', color = 'cls', fill = 'cls', width = width, group = 'var'), alpha = 1, height = 0.2) +
+          geom_tile(
+            data = c,
+            aes_string(
+              x = 'cntr',
+              y = 'var',
+              color = 'cls',
+              fill = 'cls',
+              width = width,
+              group = 'var'
+            ),
+            alpha = 1,
+            height = 0.2
+          ) +
           geom_density_ridges(
             aes(x = val, y = fct_reorder(var, val, median)),
             rel_min_height = alpha.min,
@@ -1209,14 +1281,14 @@ f.oned <-
         )
       p <- list(p.ridge = p.ridge, p.strip = p.strip)
       for (i in 1:n.pg) {
-        f.strip[[i]] <- p$p.strip + facet_wrap_paginate(~ model,
-                                                        ncol = ncol,
-                                                        nrow = nrow,
-                                                        page = i)
-        f.ridge[[i]] <- p$p.ridge + facet_wrap_paginate(~ model,
-                                                        ncol = ncol,
-                                                        nrow = nrow,
-                                                        page = i)
+        f.strip[[i]] <- p$p.strip + facet_wrap_paginate( ~ model,
+                                                         ncol = ncol,
+                                                         nrow = nrow,
+                                                         page = i)
+        f.ridge[[i]] <- p$p.ridge + facet_wrap_paginate( ~ model,
+                                                         ncol = ncol,
+                                                         nrow = nrow,
+                                                         page = i)
       }
       f <- list(f.strip = f.strip, f.ridge = f.ridge)
     }
@@ -1249,10 +1321,10 @@ f.summary <- function(dlstCol,
   if (grads == TRUE) {
     for (i in seq_along(n.pg)) {
       p <- anim +
-        facet_wrap_paginate( ~ model,
-                             nrow = 3,
-                             ncol = 4,
-                             page = i) +
+        facet_wrap_paginate(~ model,
+                            nrow = 3,
+                            ncol = 4,
+                            page = i) +
         geom_abline(size = 0.1,
                     intercept = 0,
                     slope = 1 / 18.5) +
@@ -1266,10 +1338,10 @@ f.summary <- function(dlstCol,
   } else {
     for (i in seq_along(n.pg)) {
       p <- anim +
-        facet_wrap_paginate( ~ model,
-                             nrow = 3,
-                             ncol = 4,
-                             page = i)
+        facet_wrap_paginate(~ model,
+                            nrow = 3,
+                            ncol = 4,
+                            page = i)
     }
   }
   if (save == TRUE) {
@@ -1368,7 +1440,7 @@ gif.pt <- function(df) {
       axis.text = element_text(face = 'plain', color = 'black'),
       axis.ticks = element_line(size = 0.5, color = 'black'),
       legend.direction = 'horizontal',
-      legend.justification = c(-0.2,-0.5),
+      legend.justification = c(-0.2, -0.5),
       legend.position = c(0, 0),
       axis.title = element_text(size = 12, face = 'plain'),
       plot.title = element_text(size = 14, face = 'plain')
@@ -1400,36 +1472,49 @@ a.oned <- function(lst,
   } else {
     features <- features
   }
-    df %>%
-      ungroup() %>%
-      select(all_of(features)) %>%
-      pivot_longer(cols = everything(),
-                   names_to = 'var',
-                   values_to = 'val') %>%
-      group_by(var) %>%
-      filter(!is.na(val)) %>%
-      nest() %>%
-      mutate(d.scaled = purrr::map(data, ~ as_tibble(scale(.x)))) %>%
-      select(var, d.scaled) %>%
-      unnest(cols = d.scaled) %>%
-      add_column(model = fname) ->
-      df.scaled
-    if(!is.null(mods)) {
-      c <- purrr::map_dfr(mods, function(mod) {
-        cntr <- as_tibble(mod$parameters$mean, rownames = 'var', .name_repair = 'unique') %>%
-          rename_with(~ gsub('...', '', .x), .cols = where(is.numeric)) %>%
-          pivot_longer(cols = where(is.numeric), names_to = 'cls', values_to = 'cntr') %>%
-          mutate(across(where(is.character), factor))
-        sig <- apply(mod$parameters$variance$sigma, 3, diag) %>%
-          as_tibble(rownames = 'var') %>%
-          rename_with(~ gsub('V', '', .x), .cols = where(is.numeric)) %>%
-          pivot_longer(cols = where(is.numeric), names_to = 'cls', values_to = 'variance') %>%
-          mutate(across(where(is.character), factor),
-                 twosigma = sqrt(variance)*2,
-                 threesigma = sqrt(variance)*3)
-        c <- cntr %>% left_join(sig) 
-      })
-    }
+  df %>%
+    ungroup() %>%
+    select(all_of(features)) %>%
+    pivot_longer(cols = everything(),
+                 names_to = 'var',
+                 values_to = 'val') %>%
+    group_by(var) %>%
+    filter(!is.na(val)) %>%
+    nest() %>%
+    mutate(d.scaled = purrr::map(data, ~ as_tibble(scale(.x)))) %>%
+    select(var, d.scaled) %>%
+    unnest(cols = d.scaled) %>%
+    add_column(model = fname) ->
+    df.scaled
+  if (!is.null(mods)) {
+    c <- purrr::map_dfr(mods, function(mod) {
+      cntr <-
+        as_tibble(mod$parameters$mean,
+                  rownames = 'var',
+                  .name_repair = 'unique') %>%
+        rename_with( ~ gsub('...', '', .x), .cols = where(is.numeric)) %>%
+        pivot_longer(
+          cols = where(is.numeric),
+          names_to = 'cls',
+          values_to = 'cntr'
+        ) %>%
+        mutate(across(where(is.character), factor))
+      sig <- apply(mod$parameters$variance$sigma, 3, diag) %>%
+        as_tibble(rownames = 'var') %>%
+        rename_with( ~ gsub('V', '', .x), .cols = where(is.numeric)) %>%
+        pivot_longer(
+          cols = where(is.numeric),
+          names_to = 'cls',
+          values_to = 'variance'
+        ) %>%
+        mutate(
+          across(where(is.character), factor),
+          twosigma = sqrt(variance) * 2,
+          threesigma = sqrt(variance) * 3
+        )
+      c <- cntr %>% left_join(sig)
+    })
+  }
   if (plot == 'strip') {
     a <- ggplot(df.scaled) +
       stat_density(
@@ -1464,16 +1549,28 @@ a.oned <- function(lst,
       enter_fade() +
       exit_fade()
   } else if (plot == 'ridge') {
-    if(!is.null(mods)) {
-        if(sigma == 2) {
-          width <- 'twosigma'
-        } else if(sigma == 3) {
-          width <- 'threesigma'
-        } else {
-          width <- 'twosigma'
-        }
+    if (!is.null(mods)) {
+      if (sigma == 2) {
+        width <- 'twosigma'
+      } else if (sigma == 3) {
+        width <- 'threesigma'
+      } else {
+        width <- 'twosigma'
+      }
       a <- ggplot(df.scaled) +
-        geom_tile(data = c, aes_string(x = 'cntr', y = 'var', color = 'cls', fill = 'cls', width = width, group = 'var'), alpha = 1, height = 0.2) +
+        geom_tile(
+          data = c,
+          aes_string(
+            x = 'cntr',
+            y = 'var',
+            color = 'cls',
+            fill = 'cls',
+            width = width,
+            group = 'var'
+          ),
+          alpha = 1,
+          height = 0.2
+        ) +
         geom_density_ridges(
           aes(x = val, y = fct_reorder(var, val, median)),
           rel_min_height = alpha.min,
@@ -1508,16 +1605,28 @@ a.oned <- function(lst,
         exit_fade()
     }
   } else if (plot == 'all') {
-    if(!is.null(mods)) {
-        if(sigma == 2) {
-          width <- 'twosigma'
-        } else if(sigma == 3) {
-          width <- 'threesigma'
-        } else {
-          width <- 'twosigma'
-        }
+    if (!is.null(mods)) {
+      if (sigma == 2) {
+        width <- 'twosigma'
+      } else if (sigma == 3) {
+        width <- 'threesigma'
+      } else {
+        width <- 'twosigma'
+      }
       a.ridge <- ggplot(df.scaled) +
-        geom_tile(data = c, aes_string(x = 'cntr', y = 'var', color = 'cls', fill = 'cls', width = width, group = 'var'), alpha = 1, height = 0.2) +
+        geom_tile(
+          data = c,
+          aes_string(
+            x = 'cntr',
+            y = 'var',
+            color = 'cls',
+            fill = 'cls',
+            width = width,
+            group = 'var'
+          ),
+          alpha = 1,
+          height = 0.2
+        ) +
         geom_density_ridges(
           aes(x = val, y = fct_reorder(var, val, median)),
           rel_min_height = alpha.min,
@@ -1729,7 +1838,7 @@ a.twod <- function(lst,
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()
       ) +
-      facet_wrap( ~ var)
+      facet_wrap(~ var)
     anims[[i]] <- a
   }
   names(anims) <- features

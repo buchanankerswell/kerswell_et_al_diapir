@@ -34,7 +34,7 @@ rid <- c(
 )
 features <- 
   colnames(marx$mark.ft[[1]])[!(colnames(marx$mark.ft[[1]]) %in% rid)]
-vis14 <- marx %>%
+vis15 <- marx %>%
   mutate(
     # 1D vis plots
     vis.oned = mark.ft %>%
@@ -53,18 +53,19 @@ vis14 <- marx %>%
         xlim = c(-2.5, 2.5),
         dlim = 0.05
       )
-  )
+  ) %>%
+  select(model, vis.oned, vis.twod)
 
 # Open PDF for plotting
-cairo_pdf('vis14.PDF',
+cairo_pdf('vis15.PDF',
           width = 11,
           height = 8.5,
           onefile = TRUE)
 # # Explore features for individual models
-# print(vis14$vis.oned[[1]])
-# print(vis14$vis.twod[[1]][[1]])
+# print(vis15$vis.oned[[1]])
+# print(vis15$vis.twod[[1]][[1]])
 # Summarise features by faceting
-vis14$mark.ft %>%
+marx$mark.ft %>%
   f.oned(
     runs = 'all',
     nrow = 4,
@@ -93,58 +94,87 @@ vis14$mark.ft %>%
 # Summarise by faceting plots
 # f.summary ........ compiles selected gifs into one
 
-# mods1 <- marx %>%
-#   mutate(
-# # BIC
-# bic.mod0 = mark.ft %>%
-#   l.bic(
-#     features = features,
-#     scale = TRUE,
-#     plot = FALSE
-#   ),
-# # General GMM model
-# mod0 = l.gmm(
-#   lst = mark.ft,
-#   lst.bic = bic.mod0,
-#   features = features,
-#   G = NULL,
-#   scale = TRUE,
-#   hists = FALSE,
-#   scatter = FALSE
-# ),
-# # Dimension Reduction
-# dr.mod0 = l.gmm.dr(mod0),
-# # BIC
-# bic.mod1 = mark.ft %>%
-#   l.bic(
-#     G = 3,
-#     features = features,
-#     scale = TRUE,
-#     plot = FALSE
-#   ),
-# # General GMM model
-# mod1 = l.gmm(
-#   lst = mark.ft,
-#   lst.bic = bic.mod1,
-#   features = features,
-#   G = NULL,
-#   scale = TRUE,
-#   hists = FALSE,
-#   scatter = FALSE
-# ),
-# # Dimension Reduction
-# dr.mod1 = l.gmm.dr(mod1)
-# )
-# # Visualize model parameters and results
-# # Plot BIC
-# mods1$bic.mod0 %>% p.BIC()
-# mods1$bic.mod1 %>% p.BIC()
+mods1 <- marx %>%
+  mutate(
+# BIC
+bic.mod0 = mark.ft %>%
+  l.bic(
+    features = features,
+    scale = TRUE,
+    plot = FALSE
+  ),
+# General GMM model
+mod0 = l.gmm(
+  lst = mark.ft,
+  lst.bic = bic.mod0,
+  features = features,
+  G = NULL,
+  scale = TRUE,
+  hists = FALSE,
+  scatter = FALSE
+),
+# Dimension Reduction
+dr.mod0 = l.gmm.dr(mod0),
+# BIC
+bic.mod1 = mark.ft %>%
+  l.bic(
+    G = 3,
+    features = features,
+    scale = TRUE,
+    plot = FALSE
+  ),
+# General GMM model
+mod1 = l.gmm(
+  lst = mark.ft,
+  lst.bic = bic.mod1,
+  features = features,
+  G = NULL,
+  scale = TRUE,
+  hists = FALSE,
+  scatter = FALSE
+),
+# Dimension Reduction
+dr.mod1 = l.gmm.dr(mod1)
+)
+# Visualize model parameters and results
+# Plot BIC
+mods1$bic.mod0 %>% p.BIC()
+mods1$bic.mod1 %>% p.BIC()
 # # Plot scatter
 # mods1$mod0 %>% p.class()
 # mods1$mod1 %>% p.class()
-# # Dimension reduction plots
-# mods1$dr.mod0 %>% p.dr.boundary()
-# mods1$dr.mod1 %>% p.dr.boundary()
+# Dimension reduction plots
+mods1$dr.mod0 %>% p.dr.boundary()
+mods1$dr.mod1 %>% p.dr.boundary()
+# 1D Plots
+mods1$mark.ft %>%
+  f.oned(
+    mods = mods1$mod0,
+    runs = 'all',
+    nrow = 4,
+    ncol = 4,
+    features = features,
+    plot = 'all',
+    xlim = c(-3, 3),
+    dlim = 0.3,
+    alpha.min = 0.05,
+    bw = 0.5
+  ) %>%
+  print()
+mods1$mark.ft %>%
+  f.oned(
+    mods = mods1$mod1,
+    runs = 'all',
+    nrow = 4,
+    ncol = 4,
+    features = features,
+    plot = 'all',
+    xlim = c(-3, 3),
+    dlim = 0.3,
+    alpha.min = 0.05,
+    bw = 0.5
+  ) %>%
+  print()
 # Turn off PDF
 dev.off()
 # # Summarise features by animation

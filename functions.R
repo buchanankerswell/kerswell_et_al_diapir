@@ -731,9 +731,11 @@ l.twod <- function(lst, ...) {
 l.gif <- function(dlst, modlst, GIF = c('xy', 'PT')) {
   d <- map2(dlst, purrr::map(modlst, pluck('data')), left_join)
   if (GIF == 'xy') {
-    anim <- d %>% purrr::map(try(gif.xy))
+    anim <- d %>% purrr::map(try(gif.xy)
+    )
   } else {
-    anim <- d %>% purrr::map(try(gif.pt))
+    anim <- d %>% purrr::map(try(gif.pt)
+    )
   }
 }
 
@@ -770,6 +772,7 @@ p.dr.boundary <- function(lst, ...) {
 # p.oned ----
 # Visualize features in one-dimension
 p.oned <- function(df,
+                   mod = NULL,
                    features,
                    plot,
                    xlim = c(-2, 2),
@@ -786,31 +789,46 @@ p.oned <- function(df,
   } else {
     features <- features
   }
-  ordr <- df %>%
-    ungroup() %>%
-    summarise(across(where(is.numeric), mean)) %>%
-    pivot_longer(cols = everything()) %>%
-    arrange(value)
-  df %>%
-    ungroup() %>%
-    select(all_of(features)) %>%
-    pivot_longer(cols = everything(),
-                 names_to = 'var',
-                 values_to = 'val') %>%
-    group_by(var) %>%
-    filter(!is.na(val)) %>%
-    nest() %>%
-    mutate(d.scaled = purrr::map(data, ~ as_tibble(scale(.x)))) %>%
-    select(var, d.scaled) %>%
-    unnest(cols = d.scaled) %>%
-    add_column(model = fname) ->
-    df.scaled
+    df %>%
+      ungroup() %>%
+      select(all_of(features)) %>%
+      pivot_longer(cols = everything(),
+                   names_to = 'var',
+                   values_to = 'val') %>%
+      group_by(var) %>%
+      filter(!is.na(val)) %>%
+      nest() %>%
+      mutate(d.scaled = purrr::map(data, ~ as_tibble(scale(.x)))) %>%
+      select(var, d.scaled) %>%
+      unnest(cols = d.scaled) %>%
+      add_column(model = fname) ->
+      df.scaled
+    if(!is.null(mod)) {
+      cntr <- as_tibble(mod$parameters$mean, rownames = 'var', .name_repair = 'unique') %>%
+        rename_with(~ gsub('...', '', .x), .cols = where(is.numeric)) %>%
+        pivot_longer(cols = where(is.numeric), names_to = 'cls', values_to = 'cntr') %>%
+        mutate(across(where(is.character), factor))
+      sig <- apply(mod$parameters$variance$sigma, 3, diag) %>%
+        as_tibble(rownames = 'var') %>%
+        rename_with(~ gsub('V', '', .x), .cols = where(is.numeric)) %>%
+        pivot_longer(cols = where(is.numeric), names_to = 'cls', values_to = 'variance') %>%
+        mutate(across(where(is.character), factor),
+               twosigma = sqrt(variance)*2,
+               threesigma = sqrt(variance)*3)
+      c <- cntr %>% left_join(sig)
+    }
   if (plot == 'strip') {
     p.strip <- ggplot(df.scaled) +
-      stat_density(aes(x = val, fct_reorder(var, val, median), fill = ..density..),
-                   geom = 'raster',
-                   position = 'identity',
-                   adjust = bw) +
+      stat_density(
+        aes(
+          x = val,
+          fct_reorder(var, val, median),
+          fill = ..density..
+        ),
+        geom = 'raster',
+        position = 'identity',
+        adjust = bw
+      ) +
       scale_fill_viridis_c(
         option = 'magma',
         limits = c(0, dlim),
@@ -828,44 +846,91 @@ p.oned <- function(df,
         panel.grid.minor = element_line(color = rgb(0.00146, 0.000466, 0.0139, 0.7))
       )
   } else if (plot == 'ridge') {
-    p <- ggplot(df.scaled) +
-      geom_density_ridges(aes(x = val, fct_reorder(var, val, median)), rel_min_height = alpha.min, fill = 'deeppink4', alpha = 0.5) +
-      coord_cartesian(xlim = xlim) +
-      xlab('Scaled Value') +
-      ylab('') +
-      ggtitle(fname)
-  } else if (plot == 'all') {
-    p <- list(
-      p.strip = ggplot(df.scaled) +
-        stat_density(
-          aes(x = val, y = fct_reorder(var, val, median), fill = ..density..),
-          geom = 'raster',
-          position = 'identity',
-          adjust = bw
-        ) +
-        scale_fill_viridis_c(
-          option = 'magma',
-          limits = c(0, dlim),
-          begin = 0,
-          end = 1,
-          na.value = 'lemonchiffon'
+    if(!is.null(mod)) {
+      p <- ggplot(df.scaled) +
+        geom_tile(data = c, aes(x = cntr, y = var, color = cls, fill = cls, width = twosigma, group = var), alpha = 1, height = 0.2) +
+        geom_density_ridges(
+          aes(x = val, y = fct_reorder(var, val, median)),
+          rel_min_height = alpha.min,
+          fill = 'deeppink4',
+          alpha = 0.5
         ) +
         coord_cartesian(xlim = xlim) +
+        scale_color_brewer(name = 'Group', palette = 'Paired') +
+        scale_fill_brewer(name = 'Group', palette = 'Paired') +
         xlab('Scaled Value') +
         ylab('') +
-        ggtitle(fname) +
-        theme(
-          panel.background = element_rect(fill = rgb(0.00146, 0.000466, 0.0139)),
-          panel.grid.major = element_line(color = rgb(0.00146, 0.000466, 0.0139)),
-          panel.grid.minor = element_line(color = rgb(0.00146, 0.000466, 0.0139))
-        ),
-      p.ridge = ggplot(df.scaled) +
-        geom_density_ridges(aes(x = val, fct_reorder(var, val, median)), rel_min_height = alpha.min, fill = 'deeppink4', alpha = 0.5) +
+        ggtitle(fname)
+    } else {
+      p <- ggplot(df.scaled) +
+        geom_density_ridges(
+          aes(x = val, fct_reorder(var, val, median)),
+          rel_min_height = alpha.min,
+          fill = 'deeppink4',
+          alpha = 0.5
+        ) +
         coord_cartesian(xlim = xlim) +
         xlab('Scaled Value') +
         ylab('') +
         ggtitle(fname)
-    )
+    } 
+  } else if (plot == 'all') {
+    if(!is.null(mod)) {
+      p.ridge <- ggplot(df.scaled) +
+        geom_tile(data = c, aes(x = cntr, y = var, color = cls, fill = cls, width = twosigma, group = var), alpha = 1, height = 0.2) +
+        geom_density_ridges(
+          aes(x = val, y = fct_reorder(var, val, median)),
+          rel_min_height = alpha.min,
+          fill = 'deeppink4',
+          alpha = 0.5
+        ) +
+        coord_cartesian(xlim = xlim) +
+        scale_color_brewer(name = 'Group', palette = 'Paired') +
+        scale_fill_brewer(name = 'Group', palette = 'Paired') +
+        xlab('Scaled Value') +
+        ylab('') +
+        ggtitle(fname)
+    } else {
+      p.ridge <- ggplot(df.scaled) +
+        geom_density_ridges(
+          aes(x = val, fct_reorder(var, val, median)),
+          rel_min_height = alpha.min,
+          fill = 'deeppink4',
+          alpha = 0.5
+        ) +
+        coord_cartesian(xlim = xlim) +
+        xlab('Scaled Value') +
+        ylab('') +
+        ggtitle(fname)
+    } 
+    p.strip <- ggplot(df.scaled) +
+      stat_density(
+        aes(
+          x = val,
+          y = fct_reorder(var, val, median),
+          fill = ..density..
+        ),
+        geom = 'raster',
+        position = 'identity',
+        adjust = bw
+      ) +
+      scale_fill_viridis_c(
+        option = 'magma',
+        limits = c(0, dlim),
+        begin = 0,
+        end = 1,
+        na.value = 'lemonchiffon'
+      ) +
+      coord_cartesian(xlim = xlim) +
+      xlab('Scaled Value') +
+      ylab('') +
+      ggtitle(fname) +
+      theme(
+        panel.background = element_rect(fill = rgb(0.00146, 0.000466, 0.0139)),
+        panel.grid.major = element_line(color = rgb(0.00146, 0.000466, 0.0139)),
+        panel.grid.minor = element_line(color = rgb(0.00146, 0.000466, 0.0139))
+      )
+    p <- list(p.ridge = p.ridge, p.strip = p.strip)
   }
   return(p)
 }
@@ -923,7 +988,7 @@ p.twod <- function(df,
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()
       ) +
-      facet_wrap(~ var)
+      facet_wrap( ~ var)
     f[[i]] <- p
   }
   names(f) <- features
@@ -935,6 +1000,7 @@ p.twod <- function(df,
 # visualize features in 1D for many models
 f.oned <-
   function(lst,
+           mods = NULL,
            runs = 'all',
            ncol = 4,
            nrow = 3,
@@ -943,8 +1009,7 @@ f.oned <-
            xlim = c(-2, 2),
            dlim = 0.5,
            alpha.min = 0.05,
-           bw = 1
-           ) {
+           bw = 1) {
     if (runs == 'all') {
       df <- lst %>% bind_rows()
     } else {
@@ -959,36 +1024,52 @@ f.oned <-
     } else {
       features <- features
     }
-    df %>%
-      group_by(model) %>%
-      select(all_of(features)) %>%
-      pivot_longer(cols = -model,
-                   names_to = 'var',
-                   values_to = 'val') %>%
-      group_by(model, var) %>%
-      filter(!is.na(val)) %>%
-      nest() %>%
-      mutate(d.scaled = purrr::map(data, ~ as_tibble(scale(.x)))) %>%
-      select(var, d.scaled) %>%
-      unnest(cols = d.scaled) %>%
-      ungroup() ->
-      df.scaled
-    ordr <- df %>%
-      ungroup() %>%
-      summarise(across(where(is.numeric), mean)) %>%
-      pivot_longer(cols = everything()) %>%
-      arrange(value) %>%
-      select(name)
+      df %>%
+        ungroup() %>%
+        group_by(model) %>%
+        select(all_of(features)) %>%
+        pivot_longer(cols = -model,
+                     names_to = 'var',
+                     values_to = 'val') %>%
+        group_by(model, var) %>%
+        filter(!is.na(val)) %>%
+        nest() %>%
+        mutate(d.scaled = purrr::map(data, ~ as_tibble(scale(.x)))) %>%
+        select(var, d.scaled) %>%
+        unnest(cols = d.scaled) ->
+        df.scaled
+      if(!is.null(mods)) {
+       c <- purrr::map_dfr(mods, function(mod) {
+          cntr <- as_tibble(mod$parameters$mean, rownames = 'var', .name_repair = 'unique') %>%
+            rename_with(~ gsub('...', '', .x), .cols = where(is.numeric)) %>%
+            pivot_longer(cols = where(is.numeric), names_to = 'cls', values_to = 'cntr') %>%
+            mutate(across(where(is.character), factor))
+          sig <- apply(mod$parameters$variance$sigma, 3, diag) %>%
+            as_tibble(rownames = 'var') %>%
+            rename_with(~ gsub('V', '', .x), .cols = where(is.numeric)) %>%
+            pivot_longer(cols = where(is.numeric), names_to = 'cls', values_to = 'variance') %>%
+            mutate(across(where(is.character), factor),
+                   twosigma = sqrt(variance)*2,
+                   threesigma = sqrt(variance)*3)
+          c <- cntr %>% left_join(sig) 
+        })
+      }
     n.pg <- ceiling(length(unique(df.scaled$model)) / (ncol * nrow))
     f <- vector(mode = 'list', length = length(n.pg))
     f.strip <- vector(mode = 'list', length = length(n.pg))
     f.ridge <- vector(mode = 'list', length = length(n.pg))
     if (plot == 'strip') {
       p <- ggplot(df.scaled) +
-        stat_density(aes(x = val, fct_reorder(var, val, median), fill = ..density..),
-                     geom = 'raster',
-                     position = 'identity',
-                     adjust = bw) +
+        stat_density(
+          aes(
+            x = val,
+            fct_reorder(var, val, median),
+            fill = ..density..
+          ),
+          geom = 'raster',
+          position = 'identity',
+          adjust = bw
+        ) +
         scale_fill_viridis_c(
           option = 'magma',
           limits = c(0, dlim),
@@ -997,7 +1078,6 @@ f.oned <-
           na.value = 'lemonchiffon'
         ) +
         coord_cartesian(xlim = xlim) +
-        
         xlab('Scaled Value') +
         ylab('') +
         theme(
@@ -1006,64 +1086,107 @@ f.oned <-
           panel.grid.minor = element_line(color = rgb(0.00146, 0.000466, 0.0139, 0.7))
         )
       for (i in 1:n.pg) {
-        f[[i]] <- p + facet_wrap_paginate(~ model,
-                                          ncol = ncol,
-                                          nrow = nrow,
-                                          page = i)
+        f[[i]] <- p + facet_wrap_paginate( ~ model,
+                                           ncol = ncol,
+                                           nrow = nrow,
+                                           page = i)
       }
     } else if (plot == 'ridge') {
-      p <- ggplot(df.scaled) +
-        geom_density_ridges(aes(x = val, fct_reorder(var, val, median)), rel_min_height = alpha.min, fill = 'deeppink4', alpha = 0.5) +
-        coord_cartesian(xlim = xlim) +
-        xlab('Scaled Value') +
-        ylab('')
-      for (i in 1:n.pg) {
-        f[[i]] <- p + facet_wrap_paginate(~ model,
-                                          ncol = ncol,
-                                          nrow = nrow,
-                                          page = i)
-      }
-    } else if (plot == 'all') {
-      p <- list(
-        p.strip = ggplot(df.scaled) +
-          stat_density(
-            aes(x = val, fct_reorder(var, val, median), fill = ..density..),
-            geom = 'raster',
-            position = 'identity',
-            adjust = bw
-          ) +
-          scale_fill_viridis_c(
-            option = 'magma',
-            limits = c(0, dlim),
-            begin = 0,
-            end = 1,
-            na.value = 'lemonchiffon'
+      if(!is.null(mods)) {
+        p <- ggplot(df.scaled) +
+          geom_tile(data = c, aes(x = cntr, y = var, color = cls, fill = cls, width = twosigma, group = var), alpha = 1, height = 0.2) +
+          geom_density_ridges(
+            aes(x = val, y = fct_reorder(var, val, median)),
+            rel_min_height = alpha.min,
+            fill = 'deeppink4',
+            alpha = 0.5
           ) +
           coord_cartesian(xlim = xlim) +
-          
-          xlab('Scaled Value') +
-          ylab('') +
-          theme(
-            panel.background = element_rect(fill = rgb(0.00146, 0.000466, 0.0139)),
-            panel.grid.major = element_line(color = rgb(0.00146, 0.000466, 0.0139, 0.7)),
-            panel.grid.minor = element_line(color = rgb(0.00146, 0.000466, 0.0139, 0.7))
-          ),
-        p.ridge = ggplot(df.scaled) +
-          geom_density_ridges(aes(x = val, fct_reorder(var, val, median)), rel_min_height = alpha.min, fill = 'deeppink4', alpha = 0.5) +
-          coord_cartesian(xlim = xlim) +
-          
+          scale_color_brewer(name = 'Group', palette = 'Paired') +
+          scale_fill_brewer(name = 'Group', palette = 'Paired') +
           xlab('Scaled Value') +
           ylab('')
-      )
+      } else {
+        p <- ggplot(df.scaled) +
+          geom_density_ridges(
+            aes(x = val, fct_reorder(var, val, median)),
+            rel_min_height = alpha.min,
+            fill = 'deeppink4',
+            alpha = 0.5
+          ) +
+          coord_cartesian(xlim = xlim) +
+          xlab('Scaled Value') +
+          ylab('')
+      }
       for (i in 1:n.pg) {
-        f.strip[[i]] <- p$p.strip + facet_wrap_paginate( ~ model,
-                                                         ncol = ncol,
-                                                         nrow = nrow,
-                                                         page = i)
-        f.ridge[[i]] <- p$p.ridge + facet_wrap_paginate( ~ model,
-                                                         ncol = ncol,
-                                                         nrow = nrow,
-                                                         page = i)
+        f[[i]] <- p + facet_wrap_paginate( ~ model,
+                                           ncol = ncol,
+                                           nrow = nrow,
+                                           page = i)
+      }
+    } else if (plot == 'all') {
+      if(!is.null(mod)) {
+        p.ridge <- ggplot(df.scaled) +
+          geom_tile(data = c, aes(x = cntr, y = var, color = cls, fill = cls, width = twosigma, group = var), alpha = 1, height = 0.2) +
+          geom_density_ridges(
+            aes(x = val, y = fct_reorder(var, val, median)),
+            rel_min_height = alpha.min,
+            fill = 'deeppink4',
+            alpha = 0.5
+          ) +
+          coord_cartesian(xlim = xlim) +
+          scale_color_brewer(name = 'Group', palette = 'Paired') +
+          scale_fill_brewer(name = 'Group', palette = 'Paired') +
+          xlab('Scaled Value') +
+          ylab('')
+      } else {
+        p.ridge <- ggplot(df.scaled) +
+          geom_density_ridges(
+            aes(x = val, fct_reorder(var, val, median)),
+            rel_min_height = alpha.min,
+            fill = 'deeppink4',
+            alpha = 0.5
+          ) +
+          coord_cartesian(xlim = xlim) +
+          xlab('Scaled Value') +
+          ylab('')
+      }
+      p.strip <- ggplot(df.scaled) +
+        stat_density(
+          aes(
+            x = val,
+            fct_reorder(var, val, median),
+            fill = ..density..
+          ),
+          geom = 'raster',
+          position = 'identity',
+          adjust = bw
+        ) +
+        scale_fill_viridis_c(
+          option = 'magma',
+          limits = c(0, dlim),
+          begin = 0,
+          end = 1,
+          na.value = 'lemonchiffon'
+        ) +
+        coord_cartesian(xlim = xlim) +
+        xlab('Scaled Value') +
+        ylab('') +
+        theme(
+          panel.background = element_rect(fill = rgb(0.00146, 0.000466, 0.0139)),
+          panel.grid.major = element_line(color = rgb(0.00146, 0.000466, 0.0139, 0.7)),
+          panel.grid.minor = element_line(color = rgb(0.00146, 0.000466, 0.0139, 0.7))
+        )
+      p <- list(p.ridge = p.ridge, p.strip = p.strip)
+      for (i in 1:n.pg) {
+        f.strip[[i]] <- p$p.strip + facet_wrap_paginate(~ model,
+                                                        ncol = ncol,
+                                                        nrow = nrow,
+                                                        page = i)
+        f.ridge[[i]] <- p$p.ridge + facet_wrap_paginate(~ model,
+                                                        ncol = ncol,
+                                                        nrow = nrow,
+                                                        page = i)
       }
       f <- list(f.strip = f.strip, f.ridge = f.ridge)
     }
@@ -1096,10 +1219,10 @@ f.summary <- function(dlstCol,
   if (grads == TRUE) {
     for (i in seq_along(n.pg)) {
       p <- anim +
-        facet_wrap_paginate(~ model,
-                            nrow = 3,
-                            ncol = 4,
-                            page = i) +
+        facet_wrap_paginate( ~ model,
+                             nrow = 3,
+                             ncol = 4,
+                             page = i) +
         geom_abline(size = 0.1,
                     intercept = 0,
                     slope = 1 / 18.5) +
@@ -1113,10 +1236,10 @@ f.summary <- function(dlstCol,
   } else {
     for (i in seq_along(n.pg)) {
       p <- anim +
-        facet_wrap_paginate(~ model,
-                            nrow = 3,
-                            ncol = 4,
-                            page = i)
+        facet_wrap_paginate( ~ model,
+                             nrow = 3,
+                             ncol = 4,
+                             page = i)
     }
   }
   if (save == TRUE) {
@@ -1215,7 +1338,7 @@ gif.pt <- function(df) {
       axis.text = element_text(face = 'plain', color = 'black'),
       axis.ticks = element_line(size = 0.5, color = 'black'),
       legend.direction = 'horizontal',
-      legend.justification = c(-0.2, -0.5),
+      legend.justification = c(-0.2,-0.5),
       legend.position = c(0, 0),
       axis.title = element_text(size = 12, face = 'plain'),
       plot.title = element_text(size = 14, face = 'plain')
@@ -1225,11 +1348,13 @@ gif.pt <- function(df) {
 # a.oned ----
 # Summarises one-dimension data by flicking through models
 a.oned <- function(lst,
+                   mods,
                    features = 'all',
                    plot = 'all',
                    xlim = c(-2, 2),
                    dlim = 1,
                    alpha.min = 0.05,
+                   bw = 1,
                    save = TRUE,
                    fps = 20,
                    type = 'gif',
@@ -1244,24 +1369,44 @@ a.oned <- function(lst,
   } else {
     features <- features
   }
-  df %>%
-    group_by(model) %>%
-    select(all_of(features)) %>%
-    pivot_longer(cols = -model,
-                 names_to = 'var',
-                 values_to = 'val') %>%
-    group_by(model, var) %>%
-    filter(!is.na(val)) %>%
-    nest() %>%
-    mutate(d.scaled = purrr::map(data, ~ as_tibble(scale(.x)))) %>%
-    select(var, d.scaled) %>%
-    unnest(cols = d.scaled) %>%
-    ungroup() ->
-    df.scaled
+    df %>%
+      ungroup() %>%
+      select(all_of(features)) %>%
+      pivot_longer(cols = everything(),
+                   names_to = 'var',
+                   values_to = 'val') %>%
+      group_by(var) %>%
+      filter(!is.na(val)) %>%
+      nest() %>%
+      mutate(d.scaled = purrr::map(data, ~ as_tibble(scale(.x)))) %>%
+      select(var, d.scaled) %>%
+      unnest(cols = d.scaled) %>%
+      add_column(model = fname) ->
+      df.scaled
+    if(!is.null(mods)) {
+      c <- purrr::map_dfr(mods, function(mod) {
+        cntr <- as_tibble(mod$parameters$mean, rownames = 'var', .name_repair = 'unique') %>%
+          rename_with(~ gsub('...', '', .x), .cols = where(is.numeric)) %>%
+          pivot_longer(cols = where(is.numeric), names_to = 'cls', values_to = 'cntr') %>%
+          mutate(across(where(is.character), factor))
+        sig <- apply(mod$parameters$variance$sigma, 3, diag) %>%
+          as_tibble(rownames = 'var') %>%
+          rename_with(~ gsub('V', '', .x), .cols = where(is.numeric)) %>%
+          pivot_longer(cols = where(is.numeric), names_to = 'cls', values_to = 'variance') %>%
+          mutate(across(where(is.character), factor),
+                 twosigma = sqrt(variance)*2,
+                 threesigma = sqrt(variance)*3)
+        c <- cntr %>% left_join(sig) 
+      })
+    }
   if (plot == 'strip') {
     a <- ggplot(df.scaled) +
       stat_density(
-        aes(x = val, fct_reorder(var, val, median), fill = ..density..),
+        aes(
+          x = val,
+          fct_reorder(var, val, median),
+          fill = ..density..
+        ),
         color = 'lemonchiffon',
         geom = 'raster',
         position = 'identity',
@@ -1288,56 +1433,111 @@ a.oned <- function(lst,
       enter_fade() +
       exit_fade()
   } else if (plot == 'ridge') {
-    a <- ggplot(df.scaled) +
-      geom_density_ridges(aes(x = val, fct_reorder(var, val, median)), rel_min_height = alpha.min, fill = 'deeppink4', alpha = 0.5) +
-      coord_cartesian(xlim = xlim) +
-      xlab('Scaled Value') +
-      ylab('') +
-      transition_states(df.scaled$model) +
-      labs(title = '{closest_state}') +
-      ease_aes('linear') +
-      enter_fade() +
-      exit_fade()
-  } else if (plot == 'all') {
-    a <- list(
-      a.strip = ggplot(df.scaled) +
-        stat_density(
-          aes(x = val, fct_reorder(var, val, median), fill = ..density..),
-          geom = 'raster',
-          position = 'identity',
-          adjust = bw
-        ) +
-        scale_fill_viridis_c(
-          option = 'magma',
-          limits = c(0, dlim),
-          begin = 0,
-          end = 1,
-          na.value = 'lemonchiffon'
+    if(!is.null(mods)) {
+      a <- ggplot(df.scaled) +
+        geom_tile(data = c, aes(x = cntr, y = var, color = cls, fill = cls, width = twosigma, group = var), alpha = 1, height = 0.2) +
+        geom_density_ridges(
+          aes(x = val, y = fct_reorder(var, val, median)),
+          rel_min_height = alpha.min,
+          fill = 'deeppink4',
+          alpha = 0.5
         ) +
         coord_cartesian(xlim = xlim) +
+        scale_color_brewer(name = 'Group', palette = 'Paired') +
+        scale_fill_brewer(name = 'Group', palette = 'Paired') +
         xlab('Scaled Value') +
         ylab('') +
-        labs(title = '{closest_state}') +
-        theme(
-          panel.background = element_rect(fill = rgb(0.00146, 0.000466, 0.0139)),
-          panel.grid.major = element_line(color = rgb(0.00146, 0.000466, 0.0139, 0.7)),
-          panel.grid.minor = element_line(color = rgb(0.00146, 0.000466, 0.0139, 0.7))
-        ) +
         transition_states(df.scaled$model) +
-        ease_aes('linear') +
-        enter_fade() +
-        exit_fade(),
-      a.ridge = ggplot(df.scaled) +
-        geom_density_ridges(aes(x = val, fct_reorder(var, val, median)), rel_min_height = alpha.min, fill = 'deeppink4', alpha = 0.5) +
-        coord_cartesian(xlim = xlim) +
-        xlab('Scaled Value') +
-        ylab('') +
         labs(title = '{closest_state}') +
-        transition_states(df.scaled$model) +
         ease_aes('linear') +
         enter_fade() +
         exit_fade()
-    )
+    } else {
+      a <- ggplot(df.scaled) +
+        geom_density_ridges(
+          aes(x = val, fct_reorder(var, val, median)),
+          rel_min_height = alpha.min,
+          fill = 'deeppink4',
+          alpha = 0.5
+        ) +
+        coord_cartesian(xlim = xlim) +
+        xlab('Scaled Value') +
+        ylab('') +
+        transition_states(df.scaled$model) +
+        labs(title = '{closest_state}') +
+        ease_aes('linear') +
+        enter_fade() +
+        exit_fade()
+    }
+  } else if (plot == 'all') {
+    if(!is.null(mods)) {
+      a.ridge <- ggplot(df.scaled) +
+        geom_tile(data = c, aes(x = cntr, y = var, color = cls, fill = cls, width = twosigma, group = var), alpha = 1, height = 0.2) +
+        geom_density_ridges(
+          aes(x = val, y = fct_reorder(var, val, median)),
+          rel_min_height = alpha.min,
+          fill = 'deeppink4',
+          alpha = 0.5
+        ) +
+        coord_cartesian(xlim = xlim) +
+        scale_color_brewer(name = 'Group', palette = 'Paired') +
+        scale_fill_brewer(name = 'Group', palette = 'Paired') +
+        xlab('Scaled Value') +
+        ylab('') +
+        transition_states(df.scaled$model) +
+        labs(title = '{closest_state}') +
+        ease_aes('linear') +
+        enter_fade() +
+        exit_fade()
+    } else {
+      a.ridge <- ggplot(df.scaled) +
+        geom_density_ridges(
+          aes(x = val, fct_reorder(var, val, median)),
+          rel_min_height = alpha.min,
+          fill = 'deeppink4',
+          alpha = 0.5
+        ) +
+        coord_cartesian(xlim = xlim) +
+        xlab('Scaled Value') +
+        ylab('') +
+        transition_states(df.scaled$model) +
+        labs(title = '{closest_state}') +
+        ease_aes('linear') +
+        enter_fade() +
+        exit_fade()
+    }
+    a.strip <- ggplot(df.scaled) +
+      stat_density(
+        aes(
+          x = val,
+          fct_reorder(var, val, median),
+          fill = ..density..
+        ),
+        geom = 'raster',
+        position = 'identity',
+        adjust = bw
+      ) +
+      scale_fill_viridis_c(
+        option = 'magma',
+        limits = c(0, dlim),
+        begin = 0,
+        end = 1,
+        na.value = 'lemonchiffon'
+      ) +
+      coord_cartesian(xlim = xlim) +
+      xlab('Scaled Value') +
+      ylab('') +
+      labs(title = '{closest_state}') +
+      theme(
+        panel.background = element_rect(fill = rgb(0.00146, 0.000466, 0.0139)),
+        panel.grid.major = element_line(color = rgb(0.00146, 0.000466, 0.0139, 0.7)),
+        panel.grid.minor = element_line(color = rgb(0.00146, 0.000466, 0.0139, 0.7))
+      ) +
+      transition_states(df.scaled$model) +
+      ease_aes('linear') +
+      enter_fade() +
+      exit_fade()
+    a <- list(a.ridge = a.ridge, a.strip = a.strip)
   }
   if (save == TRUE) {
     if (type == 'gif') {
@@ -1484,7 +1684,7 @@ a.twod <- function(lst,
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()
       ) +
-      facet_wrap(~ var)
+      facet_wrap( ~ var)
     anims[[i]] <- a
   }
   names(anims) <- features

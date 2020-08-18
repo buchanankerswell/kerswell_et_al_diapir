@@ -774,7 +774,7 @@ p.oned <- function(df,
                    sigma = 2,
                    features,
                    plot,
-                   xlim = c(-2, 2),
+                   xlim = c(-2.5, 2.5),
                    dlim = 0.5,
                    alpha.min = 0.05,
                    bw = 1) {
@@ -877,9 +877,11 @@ p.oned <- function(df,
             width = width,
             group = 'var'
           ),
-          alpha = 1,
+          alpha = 0.4,
           height = 0.2
         ) +
+        geom_point(data = c,
+                   aes(x = cntr, y = var, fill = cls, color = cls, group = var), shape = 15) +
         geom_density_ridges(
           aes(x = val, y = fct_reorder(var, val, median)),
           rel_min_height = alpha.min,
@@ -925,9 +927,11 @@ p.oned <- function(df,
             width = width,
             group = 'var'
           ),
-          alpha = 1,
+          alpha = 0.4,
           height = 0.2
         ) +
+        geom_point(data = c,
+                   aes(x = cntr, y = var, fill = cls, color = cls, group = var), shape = 15) +
         geom_density_ridges(
           aes(x = val, y = fct_reorder(var, val, median)),
           rel_min_height = alpha.min,
@@ -1175,9 +1179,11 @@ f.oned <-
               width = width,
               group = 'var'
             ),
-            alpha = 1,
+            alpha = 0.4,
             height = 0.2
           ) +
+          geom_point(data = c,
+                     aes(x = cntr, y = var, fill = cls, color = cls, group = var), shape = 15) +
           geom_density_ridges(
             aes(x = val, y = fct_reorder(var, val, median)),
             rel_min_height = alpha.min,
@@ -1227,9 +1233,11 @@ f.oned <-
               width = width,
               group = 'var'
             ),
-            alpha = 1,
+            alpha = 0.4,
             height = 0.2
           ) +
+          geom_point(data = c,
+                     aes(x = cntr, y = var, fill = cls, color = cls, group = var), shape = 15) +
           geom_density_ridges(
             aes(x = val, y = fct_reorder(var, val, median)),
             rel_min_height = alpha.min,

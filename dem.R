@@ -34,14 +34,14 @@ rid <- c(
 )
 features <- 
   colnames(marx$mark.ft[[1]])[!(colnames(marx$mark.ft[[1]]) %in% rid)]
-vis16 <- marx %>%
+vis17 <- marx %>%
   mutate(
     # 1D vis plots
     vis.oned = mark.ft %>%
       l.oned(
         features = features,
         plot = 'all',
-        xlim = c(-3, 3),
+        xlim = c(-2.5, 2.5),
         dlim = 0.3,
         alpha.min = 0.05,
         bw = 0.5
@@ -50,29 +50,29 @@ vis16 <- marx %>%
     vis.twod = mark.ft %>%
       l.twod(
         features = features,
-        xlim = c(-3, 3),
+        xlim = c(-2.5, 2.5),
         dlim = 0.05
       )
   ) %>%
   select(model, vis.oned, vis.twod)
 
 # Open PDF for plotting
-cairo_pdf('vis16.PDF',
+cairo_pdf('vis17.PDF',
           width = 11,
           height = 8.5,
           onefile = TRUE)
 # # Explore features for individual models
-# print(vis16$vis.oned[[1]])
-# print(vis16$vis.twod[[1]][[1]])
+# print(vis17$vis.oned[[1]])
+# print(vis17$vis.twod[[1]][[1]])
 # Summarise features by faceting
 marx$mark.ft %>%
   f.oned(
     runs = 'all',
-    nrow = 4,
-    ncol = 4,
+    nrow = 2,
+    ncol = 2,
     features = features,
     plot = 'all',
-    xlim = c(-3, 3),
+    xlim = c(-2.5, 2.5),
     dlim = 0.3,
     alpha.min = 0.05,
     bw = 0.5
@@ -155,7 +155,7 @@ mods1$mark.ft %>%
     ncol = 2,
     features = features,
     plot = 'ridge',
-    xlim = c(-3, 3),
+    xlim = c(-2.5, 2.5),
     dlim = 0.3,
     alpha.min = 0.05,
     bw = 0.5
@@ -169,7 +169,7 @@ mods1$mark.ft %>%
     ncol = 2,
     features = features,
     plot = 'ridge',
-    xlim = c(-3, 3),
+    xlim = c(-2.5, 2.5),
     dlim = 0.3,
     alpha.min = 0.05,
     bw = 0.5

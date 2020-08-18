@@ -177,21 +177,21 @@ mods1$mark.ft %>%
   print()
 # Turn off PDF
 dev.off()
-# Summarise features by animation
-mods1$mark.ft %>%
-  a.oned(
-    mods = mods1$mod1,
-    plot = 'all',
-    features = features,
-    type = 'gif',
-    xlim = c(-3, 3),
-    dlim = 0.3,
-    alpha.min = 0.05,
-    bw = 0.5,
-    save = TRUE,
-    fname = 'oned',
-    fps = 20
-  )
+# # Summarise features by animation
+# mods1$mark.ft %>%
+#   a.oned(
+#     mods = mods1$mod1,
+#     plot = 'all',
+#     features = features,
+#     type = 'gif',
+#     xlim = c(-3, 3),
+#     dlim = 0.3,
+#     alpha.min = 0.05,
+#     bw = 0.5,
+#     save = TRUE,
+#     fname = 'oned',
+#     fps = 20
+#   )
 # mods1$mark.ft %>%
 #   a.twod(
 #     type = 'gif',

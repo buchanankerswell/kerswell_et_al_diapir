@@ -144,8 +144,8 @@ mods1$bic.mod1 %>% p.BIC()
 # mods1$mod0 %>% p.class()
 # mods1$mod1 %>% p.class()
 # Dimension reduction plots
-mods1$dr.mod0 %>% p.dr.boundary()
-mods1$dr.mod1 %>% p.dr.boundary()
+# mods1$dr.mod0 %>% p.dr.boundary()
+# mods1$dr.mod1 %>% p.dr.boundary()
 # 1D Plots
 mods1$mark.ft %>%
   f.oned(

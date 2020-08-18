@@ -151,8 +151,8 @@ mods1$mark.ft %>%
   f.oned(
     mods = mods1$mod0,
     runs = 'all',
-    nrow = 4,
-    ncol = 4,
+    nrow = 2,
+    ncol = 2,
     features = features,
     plot = 'ridge',
     xlim = c(-3, 3),
@@ -165,8 +165,8 @@ mods1$mark.ft %>%
   f.oned(
     mods = mods1$mod1,
     runs = 'all',
-    nrow = 4,
-    ncol = 4,
+    nrow = 2,
+    ncol = 2,
     features = features,
     plot = 'ridge',
     xlim = c(-3, 3),

@@ -1208,7 +1208,7 @@ f.oned <-
                                           page = i)
       }
     } else if (plot == 'all') {
-      if (!is.null(mod)) {
+      if (!is.null(mods)) {
         if (sigma == 2) {
           width <- 'twosigma'
         } else if (sigma == 3) {

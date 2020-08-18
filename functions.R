@@ -773,6 +773,7 @@ p.dr.boundary <- function(lst, ...) {
 # Visualize features in one-dimension
 p.oned <- function(df,
                    mod = NULL,
+                   sigma = 2,
                    features,
                    plot,
                    xlim = c(-2, 2),
@@ -847,12 +848,19 @@ p.oned <- function(df,
       )
   } else if (plot == 'ridge') {
     if(!is.null(mod)) {
+      if(sigma == 2) {
+        width <- 'twosigma'
+      } else if(sigma == 3) {
+        width <- 'threesigma'
+      } else {
+        width <- 'twosigma'
+      }
       p <- ggplot(df.scaled) +
-        geom_tile(data = c, aes(x = cntr, y = var, color = cls, fill = cls, width = twosigma, group = var), alpha = 1, height = 0.2) +
+        geom_tile(data = c, aes_string(x = 'cntr', y = 'var', color = 'cls', fill = 'cls', width = width, group = 'var'), alpha = 1, height = 0.2) +
         geom_density_ridges(
           aes(x = val, y = fct_reorder(var, val, median)),
           rel_min_height = alpha.min,
-          fill = 'deeppink4',
+          fill = 'grey50',
           alpha = 0.5
         ) +
         coord_cartesian(xlim = xlim) +
@@ -876,12 +884,19 @@ p.oned <- function(df,
     } 
   } else if (plot == 'all') {
     if(!is.null(mod)) {
+      if(sigma == 2) {
+        width <- 'twosigma'
+      } else if(sigma == 3) {
+        width <- 'threesigma'
+      } else {
+        width <- 'twosigma'
+      }
       p.ridge <- ggplot(df.scaled) +
-        geom_tile(data = c, aes(x = cntr, y = var, color = cls, fill = cls, width = twosigma, group = var), alpha = 1, height = 0.2) +
+        geom_tile(data = c, aes_string(x = 'cntr', y = 'var', color = 'cls', fill = 'cls', width = width, group = 'var'), alpha = 1, height = 0.2) +
         geom_density_ridges(
           aes(x = val, y = fct_reorder(var, val, median)),
           rel_min_height = alpha.min,
-          fill = 'deeppink4',
+          fill = 'grey50',
           alpha = 0.5
         ) +
         coord_cartesian(xlim = xlim) +
@@ -1001,6 +1016,7 @@ p.twod <- function(df,
 f.oned <-
   function(lst,
            mods = NULL,
+           sigma = 2,
            runs = 'all',
            ncol = 4,
            nrow = 3,
@@ -1093,12 +1109,19 @@ f.oned <-
       }
     } else if (plot == 'ridge') {
       if(!is.null(mods)) {
+        if(sigma == 2) {
+          width <- 'twosigma'
+        } else if(sigma == 3) {
+          width <- 'threesigma'
+        } else {
+          width <- 'twosigma'
+        }
         p <- ggplot(df.scaled) +
-          geom_tile(data = c, aes(x = cntr, y = var, color = cls, fill = cls, width = twosigma, group = var), alpha = 1, height = 0.2) +
+          geom_tile(data = c, aes_string(x = 'cntr', y = 'var', color = 'cls', fill = 'cls', width = width, group = 'var'), alpha = 1, height = 0.2) +
           geom_density_ridges(
             aes(x = val, y = fct_reorder(var, val, median)),
             rel_min_height = alpha.min,
-            fill = 'deeppink4',
+            fill = 'grey50',
             alpha = 0.5
           ) +
           coord_cartesian(xlim = xlim) +
@@ -1125,13 +1148,20 @@ f.oned <-
                                            page = i)
       }
     } else if (plot == 'all') {
-      if(!is.null(mods)) {
+        if(!is.null(mod)) {
+          if(sigma == 2) {
+            width <- 'twosigma'
+          } else if(sigma == 3) {
+            width <- 'threesigma'
+          } else {
+            width <- 'twosigma'
+          }
         p.ridge <- ggplot(df.scaled) +
-          geom_tile(data = c, aes(x = cntr, y = var, color = cls, fill = cls, width = twosigma, group = var), alpha = 1, height = 0.2) +
+          geom_tile(data = c, aes_string(x = 'cntr', y = 'var', color = 'cls', fill = 'cls', width = width, group = 'var'), alpha = 1, height = 0.2) +
           geom_density_ridges(
             aes(x = val, y = fct_reorder(var, val, median)),
             rel_min_height = alpha.min,
-            fill = 'deeppink4',
+            fill = 'grey50',
             alpha = 0.5
           ) +
           coord_cartesian(xlim = xlim) +
@@ -1349,6 +1379,7 @@ gif.pt <- function(df) {
 # Summarises one-dimension data by flicking through models
 a.oned <- function(lst,
                    mods,
+                   sigma = 2,
                    features = 'all',
                    plot = 'all',
                    xlim = c(-2, 2),
@@ -1434,8 +1465,15 @@ a.oned <- function(lst,
       exit_fade()
   } else if (plot == 'ridge') {
     if(!is.null(mods)) {
+        if(sigma == 2) {
+          width <- 'twosigma'
+        } else if(sigma == 3) {
+          width <- 'threesigma'
+        } else {
+          width <- 'twosigma'
+        }
       a <- ggplot(df.scaled) +
-        geom_tile(data = c, aes(x = cntr, y = var, color = cls, fill = cls, width = twosigma, group = var), alpha = 1, height = 0.2) +
+        geom_tile(data = c, aes_string(x = 'cntr', y = 'var', color = 'cls', fill = 'cls', width = width, group = 'var'), alpha = 1, height = 0.2) +
         geom_density_ridges(
           aes(x = val, y = fct_reorder(var, val, median)),
           rel_min_height = alpha.min,
@@ -1471,8 +1509,15 @@ a.oned <- function(lst,
     }
   } else if (plot == 'all') {
     if(!is.null(mods)) {
+        if(sigma == 2) {
+          width <- 'twosigma'
+        } else if(sigma == 3) {
+          width <- 'threesigma'
+        } else {
+          width <- 'twosigma'
+        }
       a.ridge <- ggplot(df.scaled) +
-        geom_tile(data = c, aes(x = cntr, y = var, color = cls, fill = cls, width = twosigma, group = var), alpha = 1, height = 0.2) +
+        geom_tile(data = c, aes_string(x = 'cntr', y = 'var', color = 'cls', fill = 'cls', width = width, group = 'var'), alpha = 1, height = 0.2) +
         geom_density_ridges(
           aes(x = val, y = fct_reorder(var, val, median)),
           rel_min_height = alpha.min,

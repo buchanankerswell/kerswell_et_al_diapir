@@ -41,7 +41,7 @@ vis15 <- marx %>%
       l.oned(
         features = features,
         plot = 'all',
-        xlim = c(-2.5, 2.5),
+        xlim = c(-3, 3),
         dlim = 0.3,
         alpha.min = 0.05,
         bw = 0.5
@@ -50,7 +50,7 @@ vis15 <- marx %>%
     vis.twod = mark.ft %>%
       l.twod(
         features = features,
-        xlim = c(-2.5, 2.5),
+        xlim = c(-3, 3),
         dlim = 0.05
       )
   ) %>%
@@ -177,23 +177,26 @@ mods1$mark.ft %>%
   print()
 # Turn off PDF
 dev.off()
-# # Summarise features by animation
-# mods1$mark.ft %>%
-#   a.oned(
-#     plot = 'all',
-#     features = features,
-#     type = 'gif',
-#     xlim = c(-2, 2),
-#     dlim = 1,
-#     save = TRUE,
-#     fname = 'oned',
-#     fps = 20
-#   )
+# Summarise features by animation
+mods1$mark.ft %>%
+  a.oned(
+    mods = mods1$mod1,
+    plot = 'all',
+    features = features,
+    type = 'gif',
+    xlim = c(-3, 3),
+    dlim = 0.3,
+    alpha.min = 0.05,
+    bw = 0.5,
+    save = TRUE,
+    fname = 'oned',
+    fps = 20
+  )
 # mods1$mark.ft %>%
 #   a.twod(
 #     type = 'gif',
 #     features = features,
-#     xlim = c(-2, 2),
+#     xlim = c(-3, 3),
 #     dlim = 0.05,
 #     save = TRUE,
 #     fname = 'twod',

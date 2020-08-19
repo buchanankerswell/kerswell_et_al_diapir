@@ -163,7 +163,7 @@ m$mark.ft %>%
     ncol = 2,
     features = features,
     plot = 'ridge',
-    xlim = c(-2, 3),
+    xlim = NULL,
     dlim = 0.3,
     alpha.min = 0,
     bw = 0.5
@@ -195,7 +195,7 @@ m$mark.ft %>%
     ncol = 2,
     features = features,
     plot = 'ridge',
-    xlim = c(-2, 3),
+    xlim = NULL,
     dlim = 0.3,
     alpha.min = 0,
     bw = 0.5

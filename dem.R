@@ -65,7 +65,7 @@ m <- marx %>%
       l.oned(
         features = features,
         plot = 'all',
-        xlim = c(-2.5, 2.5),
+        xlim = c(-2, 3),
         dlim = 0.3,
         alpha.min = 0,
         bw = 0.5
@@ -112,7 +112,6 @@ m <- marx %>%
   )
 # # Explore features for individual models
 print(m$vis.oned[[1]])
-print(m$vis.twod[[1]][[1]])
 # Summarise features by faceting
 marx$mark.ft %>%
   f.oned(
@@ -121,7 +120,7 @@ marx$mark.ft %>%
     ncol = 2,
     features = features,
     plot = 'all',
-    xlim = c(-2.5, 2.5),
+    xlim = c(-2, 3),
     dlim = 0.3,
     alpha.min = 0.05,
     bw = 0.5
@@ -147,7 +146,7 @@ m$mark.ft %>%
     ncol = 2,
     features = features,
     plot = 'ridge',
-    xlim = c(-2.5, 2.5),
+    xlim = c(-2, 3),
     dlim = 0.3,
     alpha.min = 0,
     bw = 0.5
@@ -162,7 +161,7 @@ m$mark.ft %>%
     ncol = 2,
     features = features,
     plot = 'ridge',
-    xlim = c(-2.5, 2.5),
+    xlim = c(-2, 3),
     dlim = 0.3,
     alpha.min = 0,
     bw = 0.5
@@ -177,7 +176,7 @@ m$mark.ft %>%
     ncol = 2,
     features = features,
     plot = 'ridge',
-    xlim = c(-2.5, 2.5),
+    xlim = c(-2, 3),
     dlim = 0.3,
     alpha.min = 0,
     bw = 0.5
@@ -192,7 +191,7 @@ m$mark.ft %>%
     ncol = 2,
     features = features,
     plot = 'ridge',
-    xlim = c(-2.5, 2.5),
+    xlim = c(-2, 3),
     dlim = 0.3,
     alpha.min = 0,
     bw = 0.5
@@ -207,7 +206,7 @@ dev.off()
 #     plot = 'all',
 #     features = features,
 #     type = 'gif',
-#     xlim = c(-3, 3),
+#     xlim = c(-2, 3),
 #     dlim = 0.3,
 #     alpha.min = 0.05,
 #     bw = 0.5,
@@ -219,7 +218,7 @@ dev.off()
 #   a.twod(
 #     type = 'gif',
 #     features = features,
-#     xlim = c(-3, 3),
+#     xlim = c(-2, 3),
 #     dlim = 0.05,
 #     save = TRUE,
 #     fname = 'twod',

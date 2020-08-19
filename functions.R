@@ -1099,30 +1099,32 @@ f.oned <-
         mods,
         .id = 'model',
         .f = function(mod) {
-          if (mod.type == 'dr') {
-            cntr <- as_tibble(mod$mu, rownames = 'var') %>%
-              rename_with(~ gsub('V', '', .x), .cols = where(is.numeric)) %>%
-              mutate(var = factor(features)) %>%
-              pivot_longer(
-                cols = where(is.numeric),
-                names_to = 'cls',
-                values_to = 'cntr'
-              ) %>%
-              mutate(across(where(is.character), factor))
-            sig <- apply(mod$sigma, 3, diag) %>%
-              as_tibble(rownames = 'var') %>%
-              rename_with(~ gsub('V', '', .x), .cols = where(is.numeric)) %>%
-              pivot_longer(
-                cols = where(is.numeric),
-                names_to = 'cls',
-                values_to = 'variance'
-              ) %>%
-              mutate(
-                across(where(is.character), factor),
-                twosigma = sqrt(variance) * 2,
-                threesigma = sqrt(variance) * 3
-              )
-            c <- cntr %>% left_join(sig)
+          if(!is.null(mod.type)){
+            if (mod.type == 'dr') {
+              cntr <- as_tibble(mod$mu, rownames = 'var') %>%
+                rename_with(~ gsub('V', '', .x), .cols = where(is.numeric)) %>%
+                mutate(var = factor(features)) %>%
+                pivot_longer(
+                  cols = where(is.numeric),
+                  names_to = 'cls',
+                  values_to = 'cntr'
+                ) %>%
+                mutate(across(where(is.character), factor))
+              sig <- apply(mod$sigma, 3, diag) %>%
+                as_tibble(rownames = 'var') %>%
+                rename_with(~ gsub('V', '', .x), .cols = where(is.numeric)) %>%
+                pivot_longer(
+                  cols = where(is.numeric),
+                  names_to = 'cls',
+                  values_to = 'variance'
+                ) %>%
+                mutate(
+                  across(where(is.character), factor),
+                  twosigma = sqrt(variance) * 2,
+                  threesigma = sqrt(variance) * 3
+                )
+              c <- cntr %>% left_join(sig)
+            }
           } else {
             cntr <-
               as_tibble(mod$parameters$mean,

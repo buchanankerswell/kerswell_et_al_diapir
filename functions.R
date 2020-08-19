@@ -814,14 +814,14 @@ p.oned <- function(df,
   if (!is.null(mod)) {
     if (!is.null(mod.type)) {
       if (mod.type == 'dr' & dr == TRUE) {
-        ddr <- m$dr.mod1$cdn78$dir %>%
+        ddr <- mod$dir %>%
           as_tibble() %>%
           pivot_longer(cols = everything(),
                        names_to = 'var',
                        values_to = 'val')
-        cntr <- m$dr.mod1$cdn78$dir %>%
+        cntr <- mod$dir %>%
           as_tibble() %>%
-          add_column(cls = m$dr.mod1$cdn78$classification) %>%
+          add_column(cls = mod$classification) %>%
           pivot_longer(cols = -cls,
                        names_to = 'var',
                        values_to = 'val') %>%
@@ -1223,14 +1223,14 @@ f.oned <-
         .f = function(mod) {
           if (!is.null(mod.type)) {
             if (mod.type == 'dr' & dr == TRUE) {
-              ddr <- m$dr.mod1$cdn78$dir %>%
+              ddr <- mod$dir %>%
                 as_tibble() %>%
                 pivot_longer(cols = everything(),
                              names_to = 'var',
                              values_to = 'val')
-              cntr <- m$dr.mod1$cdn78$dir %>%
+              cntr <- mod$dir %>%
                 as_tibble() %>%
-                add_column(cls = m$dr.mod1$cdn78$classification) %>%
+                add_column(cls = mod$classification) %>%
                 pivot_longer(
                   cols = -cls,
                   names_to = 'var',

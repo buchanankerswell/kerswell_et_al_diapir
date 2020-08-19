@@ -141,6 +141,7 @@ m$mark.ft %>%
   f.oned(
     mods = m$mod0,
     mod.type = NULL,
+    dr = FALSE,
     runs = 'all',
     nrow = 2,
     ncol = 2,

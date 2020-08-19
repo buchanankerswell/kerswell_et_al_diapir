@@ -1,7 +1,7 @@
 source('functions.R')
 
 # Open PDF for plotting
-cairo_pdf('vis20.PDF',
+cairo_pdf('vis21.PDF',
           width = 11,
           height = 8.5,
           onefile = TRUE)
@@ -156,6 +156,7 @@ m$mark.ft %>%
   f.oned(
     mods = m$dr.mod0,
     mod.type = 'dr',
+    dr = TRUE,
     runs = 'all',
     nrow = 2,
     ncol = 2,
@@ -171,6 +172,7 @@ m$mark.ft %>%
   f.oned(
     mods = m$mod1,
     mod.type = NULL,
+    dr = FALSE,
     runs = 'all',
     nrow = 2,
     ncol = 2,
@@ -186,6 +188,7 @@ m$mark.ft %>%
   f.oned(
     mods = m$dr.mod1,
     mod.type = 'dr',
+    dr = TRUE,
     runs = 'all',
     nrow = 2,
     ncol = 2,

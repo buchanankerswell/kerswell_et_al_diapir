@@ -771,6 +771,8 @@ p.dr.boundary <- function(lst, ...) {
 # Visualize features in one-dimension
 p.oned <- function(df,
                    mod = NULL,
+                   mod.type = NULL,
+                   dr = FALSE,
                    sigma = 2,
                    features,
                    plot,
@@ -778,6 +780,13 @@ p.oned <- function(df,
                    dlim = 0.5,
                    alpha.min = 0.05,
                    bw = 1) {
+  if (sigma == 2) {
+    width <- 'twosigma'
+  } else if (sigma == 3) {
+    width <- 'threesigma'
+  } else {
+    width <- 'twosigma'
+  }
   fname <- df$model[1]
   if (features == 'all') {
     df %>%
@@ -803,31 +812,54 @@ p.oned <- function(df,
     add_column(model = fname) ->
     df.scaled
   if (!is.null(mod)) {
-    cntr <-
-      as_tibble(mod$parameters$mean,
-                rownames = 'var',
-                .name_repair = 'unique') %>%
-      rename_with( ~ gsub('...', '', .x), .cols = where(is.numeric)) %>%
-      pivot_longer(
-        cols = where(is.numeric),
-        names_to = 'cls',
-        values_to = 'cntr'
-      ) %>%
-      mutate(across(where(is.character), factor))
-    sig <- apply(mod$parameters$variance$sigma, 3, diag) %>%
-      as_tibble(rownames = 'var') %>%
-      rename_with( ~ gsub('V', '', .x), .cols = where(is.numeric)) %>%
-      pivot_longer(
-        cols = where(is.numeric),
-        names_to = 'cls',
-        values_to = 'variance'
-      ) %>%
-      mutate(
-        across(where(is.character), factor),
-        twosigma = sqrt(variance) * 2,
-        threesigma = sqrt(variance) * 3
-      )
-    c <- cntr %>% left_join(sig)
+    if (mod.type == 'dr' & dr == TRUE) {
+      ddr <- m$dr.mod1$cdn78$dir %>%
+        as_tibble() %>%
+        pivot_longer(cols = everything(),
+                     names_to = 'var',
+                     values_to = 'val')
+      cntr <- m$dr.mod1$cdn78$dir %>%
+        as_tibble() %>%
+        add_column(cls = m$dr.mod1$cdn78$classification) %>%
+        pivot_longer(cols = -cls,
+                     names_to = 'var',
+                     values_to = 'val') %>%
+        mutate(across(where(is.character), factor)) %>%
+        group_by(cls, var) %>%
+        summarise(
+          cntr = mean(val),
+          sigma = sd(val),
+          twosigma = sd(val) * 2,
+          threesigma = sd(val) * 3
+        )
+      c <- ddr %>% left_join(cntr)
+    } else {
+      cntr <-
+        as_tibble(mod$parameters$mean,
+                  rownames = 'var',
+                  .name_repair = 'unique') %>%
+        rename_with( ~ gsub('...', '', .x), .cols = where(is.numeric)) %>%
+        pivot_longer(
+          cols = where(is.numeric),
+          names_to = 'cls',
+          values_to = 'cntr'
+        ) %>%
+        mutate(across(where(is.character), factor))
+      sig <- apply(mod$parameters$variance$sigma, 3, diag) %>%
+        as_tibble(rownames = 'var') %>%
+        rename_with( ~ gsub('V', '', .x), .cols = where(is.numeric)) %>%
+        pivot_longer(
+          cols = where(is.numeric),
+          names_to = 'cls',
+          values_to = 'variance'
+        ) %>%
+        mutate(
+          across(where(is.character), factor),
+          twosigma = sqrt(variance) * 2,
+          threesigma = sqrt(variance) * 3
+        )
+      c <- cntr %>% left_join(sig)
+    }
   }
   if (plot == 'strip') {
     p.strip <- ggplot(df.scaled) +
@@ -859,41 +891,79 @@ p.oned <- function(df,
       )
   } else if (plot == 'ridge') {
     if (!is.null(mod)) {
-      if (sigma == 2) {
-        width <- 'twosigma'
-      } else if (sigma == 3) {
-        width <- 'threesigma'
-      } else {
-        width <- 'twosigma'
-      }
-      p <- ggplot(df.scaled) +
-        geom_tile(
-          data = c,
-          aes_string(
-            x = 'cntr',
-            y = 'var',
-            color = 'cls',
-            fill = 'cls',
-            width = width,
-            group = 'cls'
+      if (mod.type == 'dr' & dr == TRUE) {
+        p <- ggplot(c) +
+          geom_tile(
+            aes_string(
+              x = 'cntr',
+              y = 'var',
+              color = 'cls',
+              fill = 'cls',
+              width = width,
+              group = 'cls'
+            ),
+            alpha = 0.4,
+            height = 0.2
+          ) +
+          geom_point(aes(
+            x = cntr,
+            y = var,
+            fill = cls,
+            color = cls,
+            group = cls
           ),
-          alpha = 0.4,
-          height = 0.2
-        ) +
-        geom_point(data = c,
-                   aes(x = cntr, y = var, fill = cls, color = cls, group = cls), shape = 15) +
-        geom_density_ridges(
-          aes(x = val, y = fct_reorder(var, val, median)),
-          rel_min_height = alpha.min,
-          fill = 'grey50',
-          alpha = 0.5
-        ) +
-        coord_cartesian(xlim = xlim) +
-        scale_color_brewer(name = 'Group', palette = 'Paired') +
-        scale_fill_brewer(name = 'Group', palette = 'Paired') +
-        xlab('Scaled Value') +
-        ylab('') +
-        ggtitle(fname)
+          shape = 15) +
+          geom_density_ridges(
+            aes(x = val, y = fct_reorder(var, val, median)),
+            rel_min_height = alpha.min,
+            fill = 'grey50',
+            alpha = 0.5
+          ) +
+          coord_cartesian(xlim = xlim) +
+          scale_color_brewer(name = 'Group', palette = 'Paired') +
+          scale_fill_brewer(name = 'Group', palette = 'Paired') +
+          xlab('Scaled Value') +
+          ylab('') +
+          ggtitle(fname)
+      } else {
+        p <- ggplot(df.scaled) +
+          geom_tile(
+            data = c,
+            aes_string(
+              x = 'cntr',
+              y = 'var',
+              color = 'cls',
+              fill = 'cls',
+              width = width,
+              group = 'cls'
+            ),
+            alpha = 0.4,
+            height = 0.2
+          ) +
+          geom_point(
+            data = c,
+            aes(
+              x = cntr,
+              y = var,
+              fill = cls,
+              color = cls,
+              group = cls
+            ),
+            shape = 15
+          ) +
+          geom_density_ridges(
+            aes(x = val, y = fct_reorder(var, val, median)),
+            rel_min_height = alpha.min,
+            fill = 'grey50',
+            alpha = 0.5
+          ) +
+          coord_cartesian(xlim = xlim) +
+          scale_color_brewer(name = 'Group', palette = 'Paired') +
+          scale_fill_brewer(name = 'Group', palette = 'Paired') +
+          xlab('Scaled Value') +
+          ylab('') +
+          ggtitle(fname)
+      }
     } else {
       p <- ggplot(df.scaled) +
         geom_density_ridges(
@@ -909,41 +979,79 @@ p.oned <- function(df,
     }
   } else if (plot == 'all') {
     if (!is.null(mod)) {
-      if (sigma == 2) {
-        width <- 'twosigma'
-      } else if (sigma == 3) {
-        width <- 'threesigma'
-      } else {
-        width <- 'twosigma'
-      }
-      p.ridge <- ggplot(df.scaled) +
-        geom_tile(
-          data = c,
-          aes_string(
-            x = 'cntr',
-            y = 'var',
-            color = 'cls',
-            fill = 'cls',
-            width = width,
-            group = 'cls'
+      if (mod.type == 'dr' & dr == TRUE) {
+        p.ridge <- ggplot(c) +
+          geom_tile(
+            aes_string(
+              x = 'cntr',
+              y = 'var',
+              color = 'cls',
+              fill = 'cls',
+              width = width,
+              group = 'cls'
+            ),
+            alpha = 0.4,
+            height = 0.2
+          ) +
+          geom_point(aes(
+            x = cntr,
+            y = var,
+            fill = cls,
+            color = cls,
+            group = cls
           ),
-          alpha = 0.4,
-          height = 0.2
-        ) +
-        geom_point(data = c,
-                   aes(x = cntr, y = var, fill = cls, color = cls, group = cls), shape = 15) +
-        geom_density_ridges(
-          aes(x = val, y = fct_reorder(var, val, median)),
-          rel_min_height = alpha.min,
-          fill = 'grey50',
-          alpha = 0.5
-        ) +
-        coord_cartesian(xlim = xlim) +
-        scale_color_brewer(name = 'Group', palette = 'Paired') +
-        scale_fill_brewer(name = 'Group', palette = 'Paired') +
-        xlab('Scaled Value') +
-        ylab('') +
-        ggtitle(fname)
+          shape = 15) +
+          geom_density_ridges(
+            aes(x = val, y = fct_reorder(var, val, median)),
+            rel_min_height = alpha.min,
+            fill = 'grey50',
+            alpha = 0.5
+          ) +
+          coord_cartesian(xlim = xlim) +
+          scale_color_brewer(name = 'Group', palette = 'Paired') +
+          scale_fill_brewer(name = 'Group', palette = 'Paired') +
+          xlab('Scaled Value') +
+          ylab('') +
+          ggtitle(fname)
+      } else {
+        p.ridge <- ggplot(df.scaled) +
+          geom_tile(
+            data = c,
+            aes_string(
+              x = 'cntr',
+              y = 'var',
+              color = 'cls',
+              fill = 'cls',
+              width = width,
+              group = 'cls'
+            ),
+            alpha = 0.4,
+            height = 0.2
+          ) +
+          geom_point(
+            data = c,
+            aes(
+              x = cntr,
+              y = var,
+              fill = cls,
+              color = cls,
+              group = cls
+            ),
+            shape = 15
+          ) +
+          geom_density_ridges(
+            aes(x = val, y = fct_reorder(var, val, median)),
+            rel_min_height = alpha.min,
+            fill = 'grey50',
+            alpha = 0.5
+          ) +
+          coord_cartesian(xlim = xlim) +
+          scale_color_brewer(name = 'Group', palette = 'Paired') +
+          scale_fill_brewer(name = 'Group', palette = 'Paired') +
+          xlab('Scaled Value') +
+          ylab('') +
+          ggtitle(fname)
+      }
     } else {
       p.ridge <- ggplot(df.scaled) +
         geom_density_ridges(
@@ -1056,6 +1164,7 @@ f.oned <-
   function(lst,
            mods = NULL,
            mod.type = NULL,
+           dr = FALSE,
            sigma = 2,
            runs = 'all',
            ncol = 4,
@@ -1066,6 +1175,13 @@ f.oned <-
            dlim = 0.5,
            alpha.min = 0.05,
            bw = 1) {
+    if (sigma == 2) {
+      width <- 'twosigma'
+    } else if (sigma == 3) {
+      width <- 'threesigma'
+    } else {
+      width <- 'twosigma'
+    }
     if (runs == 'all') {
       df <- lst %>% bind_rows()
     } else {
@@ -1099,8 +1215,31 @@ f.oned <-
         mods,
         .id = 'model',
         .f = function(mod) {
-          if(!is.null(mod.type)){
-            if (mod.type == 'dr') {
+          if (!is.null(mod.type)) {
+            if (mod.type == 'dr' & dr == TRUE) {
+              ddr <- m$dr.mod1$cdn78$dir %>%
+                as_tibble() %>%
+                pivot_longer(cols = everything(),
+                             names_to = 'var',
+                             values_to = 'val')
+              cntr <- m$dr.mod1$cdn78$dir %>%
+                as_tibble() %>%
+                add_column(cls = m$dr.mod1$cdn78$classification) %>%
+                pivot_longer(
+                  cols = -cls,
+                  names_to = 'var',
+                  values_to = 'val'
+                ) %>%
+                mutate(across(where(is.character), factor)) %>%
+                group_by(cls, var) %>%
+                summarise(
+                  cntr = mean(val),
+                  sigma = sd(val),
+                  twosigma = sd(val) * 2,
+                  threesigma = sd(val) * 3
+                )
+              c <- ddr %>% left_join(cntr)
+            } else {
               cntr <- as_tibble(mod$mu, rownames = 'var') %>%
                 rename_with(~ gsub('V', '', .x), .cols = where(is.numeric)) %>%
                 mutate(var = factor(features)) %>%
@@ -1195,40 +1334,77 @@ f.oned <-
       }
     } else if (plot == 'ridge') {
       if (!is.null(mods)) {
-        if (sigma == 2) {
-          width <- 'twosigma'
-        } else if (sigma == 3) {
-          width <- 'threesigma'
-        } else {
-          width <- 'twosigma'
-        }
-        p <- ggplot(df.scaled) +
-          geom_tile(
-            data = c,
-            aes_string(
-              x = 'cntr',
-              y = 'var',
-              color = 'cls',
-              fill = 'cls',
-              width = width,
-              group = 'model'
+        if (mod.type == 'dr' & dr == TRUE) {
+          p <- ggplot(c) +
+            geom_tile(
+              aes_string(
+                x = 'cntr',
+                y = 'var',
+                color = 'cls',
+                fill = 'cls',
+                width = width,
+                group = 'cls'
+              ),
+              alpha = 0.4,
+              height = 0.2
+            ) +
+            geom_point(aes(
+              x = cntr,
+              y = var,
+              fill = cls,
+              color = cls,
+              group = cls
             ),
-            alpha = 0.4,
-            height = 0.2
-          ) +
-          geom_point(data = c,
-                     aes(x = cntr, y = var, fill = cls, color = cls, group = model), shape = 15) +
-          geom_density_ridges(
-            aes(x = val, y = fct_reorder(var, val, median)),
-            rel_min_height = alpha.min,
-            fill = 'grey50',
-            alpha = 0.5
-          ) +
-          coord_cartesian(xlim = xlim) +
-          scale_color_brewer(name = 'Group', palette = 'Paired') +
-          scale_fill_brewer(name = 'Group', palette = 'Paired') +
-          xlab('Scaled Value') +
-          ylab('')
+            shape = 15) +
+            geom_density_ridges(
+              aes(x = val, y = fct_reorder(var, val, median)),
+              rel_min_height = alpha.min,
+              fill = 'grey50',
+              alpha = 0.5
+            ) +
+            coord_cartesian(xlim = xlim) +
+            scale_color_brewer(name = 'Group', palette = 'Paired') +
+            scale_fill_brewer(name = 'Group', palette = 'Paired') +
+            xlab('Scaled Value') +
+            ylab('')
+        } else {
+          p <- ggplot(df.scaled) +
+            geom_tile(
+              data = c,
+              aes_string(
+                x = 'cntr',
+                y = 'var',
+                color = 'cls',
+                fill = 'cls',
+                width = width,
+                group = 'cls'
+              ),
+              alpha = 0.4,
+              height = 0.2
+            ) +
+            geom_point(
+              data = c,
+              aes(
+                x = cntr,
+                y = var,
+                fill = cls,
+                color = cls,
+                group = cls
+              ),
+              shape = 15
+            ) +
+            geom_density_ridges(
+              aes(x = val, y = fct_reorder(var, val, median)),
+              rel_min_height = alpha.min,
+              fill = 'grey50',
+              alpha = 0.5
+            ) +
+            coord_cartesian(xlim = xlim) +
+            scale_color_brewer(name = 'Group', palette = 'Paired') +
+            scale_fill_brewer(name = 'Group', palette = 'Paired') +
+            xlab('Scaled Value') +
+            ylab('')
+        }
       } else {
         p <- ggplot(df.scaled) +
           geom_density_ridges(
@@ -1249,40 +1425,77 @@ f.oned <-
       }
     } else if (plot == 'all') {
       if (!is.null(mods)) {
-        if (sigma == 2) {
-          width <- 'twosigma'
-        } else if (sigma == 3) {
-          width <- 'threesigma'
-        } else {
-          width <- 'twosigma'
-        }
-        p.ridge <- ggplot(df.scaled) +
-          geom_tile(
-            data = c,
-            aes_string(
-              x = 'cntr',
-              y = 'var',
-              color = 'cls',
-              fill = 'cls',
-              width = width,
-              group = 'model'
+        if (mod.type == 'dr' & dr == TRUE) {
+          p.ridge <- ggplot(c) +
+            geom_tile(
+              aes_string(
+                x = 'cntr',
+                y = 'var',
+                color = 'cls',
+                fill = 'cls',
+                width = width,
+                group = 'cls'
+              ),
+              alpha = 0.4,
+              height = 0.2
+            ) +
+            geom_point(aes(
+              x = cntr,
+              y = var,
+              fill = cls,
+              color = cls,
+              group = cls
             ),
-            alpha = 0.4,
-            height = 0.2
-          ) +
-          geom_point(data = c,
-                     aes(x = cntr, y = var, fill = cls, color = cls, group = model), shape = 15) +
-          geom_density_ridges(
-            aes(x = val, y = fct_reorder(var, val, median)),
-            rel_min_height = alpha.min,
-            fill = 'grey50',
-            alpha = 0.5
-          ) +
-          coord_cartesian(xlim = xlim) +
-          scale_color_brewer(name = 'Group', palette = 'Paired') +
-          scale_fill_brewer(name = 'Group', palette = 'Paired') +
-          xlab('Scaled Value') +
-          ylab('')
+            shape = 15) +
+            geom_density_ridges(
+              aes(x = val, y = fct_reorder(var, val, median)),
+              rel_min_height = alpha.min,
+              fill = 'grey50',
+              alpha = 0.5
+            ) +
+            coord_cartesian(xlim = xlim) +
+            scale_color_brewer(name = 'Group', palette = 'Paired') +
+            scale_fill_brewer(name = 'Group', palette = 'Paired') +
+            xlab('Scaled Value') +
+            ylab('')
+        } else {
+          p.ridge <- ggplot(df.scaled) +
+            geom_tile(
+              data = c,
+              aes_string(
+                x = 'cntr',
+                y = 'var',
+                color = 'cls',
+                fill = 'cls',
+                width = width,
+                group = 'cls'
+              ),
+              alpha = 0.4,
+              height = 0.2
+            ) +
+            geom_point(
+              data = c,
+              aes(
+                x = cntr,
+                y = var,
+                fill = cls,
+                color = cls,
+                group = cls
+              ),
+              shape = 15
+            ) +
+            geom_density_ridges(
+              aes(x = val, y = fct_reorder(var, val, median)),
+              rel_min_height = alpha.min,
+              fill = 'grey50',
+              alpha = 0.5
+            ) +
+            coord_cartesian(xlim = xlim) +
+            scale_color_brewer(name = 'Group', palette = 'Paired') +
+            scale_fill_brewer(name = 'Group', palette = 'Paired') +
+            xlab('Scaled Value') +
+            ylab('')
+        }
       } else {
         p.ridge <- ggplot(df.scaled) +
           geom_density_ridges(
@@ -1493,6 +1706,8 @@ gif.pt <- function(df) {
 # Summarises one-dimension data by flicking through models
 a.oned <- function(lst,
                    mods,
+                   mod.type = NULL,
+                   dr = FALSE,
                    sigma = 2,
                    features = 'all',
                    plot = 'all',

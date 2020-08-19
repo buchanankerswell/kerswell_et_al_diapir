@@ -1,7 +1,7 @@
 source('functions.R')
 
 # Open PDF for plotting
-cairo_pdf('vis19.PDF',
+cairo_pdf('vis20.PDF',
           width = 11,
           height = 8.5,
           onefile = TRUE)
@@ -141,6 +141,22 @@ m$bic.mod1 %>% p.BIC()
 m$mark.ft %>%
   f.oned(
     mods = m$mod0,
+    mod.type = NULL,
+    runs = 'all',
+    nrow = 2,
+    ncol = 2,
+    features = features,
+    plot = 'ridge',
+    xlim = c(-2.5, 2.5),
+    dlim = 0.3,
+    alpha.min = 0,
+    bw = 0.5
+  ) %>%
+  print()
+m$mark.ft %>%
+  f.oned(
+    mods = m$dr.mod0,
+    mod.type = 'dr',
     runs = 'all',
     nrow = 2,
     ncol = 2,
@@ -155,6 +171,22 @@ m$mark.ft %>%
 m$mark.ft %>%
   f.oned(
     mods = m$mod1,
+    mod.type = NULL,
+    runs = 'all',
+    nrow = 2,
+    ncol = 2,
+    features = features,
+    plot = 'ridge',
+    xlim = c(-2.5, 2.5),
+    dlim = 0.3,
+    alpha.min = 0,
+    bw = 0.5
+  ) %>%
+  print()
+m$mark.ft %>%
+  f.oned(
+    mods = m$dr.mod1,
+    mod.type = 'dr',
     runs = 'all',
     nrow = 2,
     ncol = 2,

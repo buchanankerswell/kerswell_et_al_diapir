@@ -1,7 +1,7 @@
 source('functions.R')
 
 # Open PDF for plotting
-cairo_pdf('vis18.PDF',
+cairo_pdf('vis19.PDF',
           width = 11,
           height = 8.5,
           onefile = TRUE)
@@ -36,7 +36,9 @@ rid <- c(
   'minTPGrad',
   'maxTPGrad',
   'maxConsecutivePDown',
-  'PDown'
+  'PDown',
+  'TMax',
+  'PMax'
 )
 features <-
   colnames(marx$mark.ft[[1]])[!(colnames(marx$mark.ft[[1]]) %in% rid)]

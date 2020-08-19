@@ -731,11 +731,9 @@ l.twod <- function(lst, ...) {
 l.gif <- function(dlst, modlst, GIF = c('xy', 'PT')) {
   d <- map2(dlst, purrr::map(modlst, pluck('data')), left_join)
   if (GIF == 'xy') {
-    anim <- d %>% purrr::map(try(gif.xy)
-    )
+    anim <- d %>% purrr::map(try(gif.xy))
   } else {
-    anim <- d %>% purrr::map(try(gif.pt)
-    )
+    anim <- d %>% purrr::map(try(gif.pt))
   }
 }
 
@@ -841,7 +839,7 @@ p.oned <- function(df,
           as_tibble(mod$parameters$mean,
                     rownames = 'var',
                     .name_repair = 'unique') %>%
-          rename_with(~ gsub('...', '', .x), .cols = where(is.numeric)) %>%
+          rename_with( ~ gsub('...', '', .x), .cols = where(is.numeric)) %>%
           pivot_longer(
             cols = where(is.numeric),
             names_to = 'cls',
@@ -850,7 +848,7 @@ p.oned <- function(df,
           mutate(across(where(is.character), factor))
         sig <- apply(mod$parameters$variance$sigma, 3, diag) %>%
           as_tibble(rownames = 'var') %>%
-          rename_with(~ gsub('V', '', .x), .cols = where(is.numeric)) %>%
+          rename_with( ~ gsub('V', '', .x), .cols = where(is.numeric)) %>%
           pivot_longer(
             cols = where(is.numeric),
             names_to = 'cls',
@@ -1158,7 +1156,7 @@ p.twod <- function(df,
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()
       ) +
-      facet_wrap( ~ var)
+      facet_wrap(~ var)
     f[[i]] <- p
   }
   names(f) <- features
@@ -1249,7 +1247,7 @@ f.oned <-
               c <- ddr %>% left_join(cntr)
             } else {
               cntr <- as_tibble(mod$mu, rownames = 'var') %>%
-                rename_with( ~ gsub('V', '', .x), .cols = where(is.numeric)) %>%
+                rename_with(~ gsub('V', '', .x), .cols = where(is.numeric)) %>%
                 mutate(var = factor(features)) %>%
                 pivot_longer(
                   cols = where(is.numeric),
@@ -1259,7 +1257,7 @@ f.oned <-
                 mutate(across(where(is.character), factor))
               sig <- apply(mod$sigma, 3, diag) %>%
                 as_tibble(rownames = 'var') %>%
-                rename_with( ~ gsub('V', '', .x), .cols = where(is.numeric)) %>%
+                rename_with(~ gsub('V', '', .x), .cols = where(is.numeric)) %>%
                 pivot_longer(
                   cols = where(is.numeric),
                   names_to = 'cls',
@@ -1277,7 +1275,7 @@ f.oned <-
               as_tibble(mod$parameters$mean,
                         rownames = 'var',
                         .name_repair = 'unique') %>%
-              rename_with( ~ gsub('...', '', .x), .cols = where(is.numeric)) %>%
+              rename_with(~ gsub('...', '', .x), .cols = where(is.numeric)) %>%
               pivot_longer(
                 cols = where(is.numeric),
                 names_to = 'cls',
@@ -1286,7 +1284,7 @@ f.oned <-
               mutate(across(where(is.character), factor))
             sig <- apply(mod$parameters$variance$sigma, 3, diag) %>%
               as_tibble(rownames = 'var') %>%
-              rename_with( ~ gsub('V', '', .x), .cols = where(is.numeric)) %>%
+              rename_with(~ gsub('V', '', .x), .cols = where(is.numeric)) %>%
               pivot_longer(
                 cols = where(is.numeric),
                 names_to = 'cls',
@@ -1335,10 +1333,10 @@ f.oned <-
           panel.grid.minor = element_line(color = rgb(0.00146, 0.000466, 0.0139, 0.7))
         )
       for (i in 1:n.pg) {
-        f[[i]] <- p + facet_wrap_paginate( ~ model,
-                                           ncol = ncol,
-                                           nrow = nrow,
-                                           page = i)
+        f[[i]] <- p + facet_wrap_paginate(~ model,
+                                          ncol = ncol,
+                                          nrow = nrow,
+                                          page = i)
       }
     } else if (plot == 'ridge') {
       if (!is.null(mods)) {
@@ -1428,10 +1426,10 @@ f.oned <-
           ylab('')
       }
       for (i in 1:n.pg) {
-        f[[i]] <- p + facet_wrap_paginate( ~ model,
-                                           ncol = ncol,
-                                           nrow = nrow,
-                                           page = i)
+        f[[i]] <- p + facet_wrap_paginate(~ model,
+                                          ncol = ncol,
+                                          nrow = nrow,
+                                          page = i)
       }
     } else if (plot == 'all') {
       if (!is.null(mods)) {
@@ -1548,14 +1546,14 @@ f.oned <-
         )
       p <- list(p.ridge = p.ridge, p.strip = p.strip)
       for (i in 1:n.pg) {
-        f.strip[[i]] <- p$p.strip + facet_wrap_paginate(~ model,
-                                                        ncol = ncol,
-                                                        nrow = nrow,
-                                                        page = i)
-        f.ridge[[i]] <- p$p.ridge + facet_wrap_paginate(~ model,
-                                                        ncol = ncol,
-                                                        nrow = nrow,
-                                                        page = i)
+        f.strip[[i]] <- p$p.strip + facet_wrap_paginate( ~ model,
+                                                         ncol = ncol,
+                                                         nrow = nrow,
+                                                         page = i)
+        f.ridge[[i]] <- p$p.ridge + facet_wrap_paginate( ~ model,
+                                                         ncol = ncol,
+                                                         nrow = nrow,
+                                                         page = i)
       }
       f <- list(f.strip = f.strip, f.ridge = f.ridge)
     }
@@ -1588,10 +1586,10 @@ f.summary <- function(dlstCol,
   if (grads == TRUE) {
     for (i in seq_along(n.pg)) {
       p <- anim +
-        facet_wrap_paginate( ~ model,
-                             nrow = 3,
-                             ncol = 4,
-                             page = i) +
+        facet_wrap_paginate(~ model,
+                            nrow = 3,
+                            ncol = 4,
+                            page = i) +
         geom_abline(size = 0.1,
                     intercept = 0,
                     slope = 1 / 18.5) +
@@ -1605,10 +1603,10 @@ f.summary <- function(dlstCol,
   } else {
     for (i in seq_along(n.pg)) {
       p <- anim +
-        facet_wrap_paginate( ~ model,
-                             nrow = 3,
-                             ncol = 4,
-                             page = i)
+        facet_wrap_paginate(~ model,
+                            nrow = 3,
+                            ncol = 4,
+                            page = i)
     }
   }
   if (save == TRUE) {
@@ -1707,7 +1705,7 @@ gif.pt <- function(df) {
       axis.text = element_text(face = 'plain', color = 'black'),
       axis.ticks = element_line(size = 0.5, color = 'black'),
       legend.direction = 'horizontal',
-      legend.justification = c(-0.2,-0.5),
+      legend.justification = c(-0.2, -0.5),
       legend.position = c(0, 0),
       axis.title = element_text(size = 12, face = 'plain'),
       plot.title = element_text(size = 14, face = 'plain')
@@ -1761,7 +1759,7 @@ a.oned <- function(lst,
         as_tibble(mod$parameters$mean,
                   rownames = 'var',
                   .name_repair = 'unique') %>%
-        rename_with(~ gsub('...', '', .x), .cols = where(is.numeric)) %>%
+        rename_with( ~ gsub('...', '', .x), .cols = where(is.numeric)) %>%
         pivot_longer(
           cols = where(is.numeric),
           names_to = 'cls',
@@ -1770,7 +1768,7 @@ a.oned <- function(lst,
         mutate(across(where(is.character), factor))
       sig <- apply(mod$parameters$variance$sigma, 3, diag) %>%
         as_tibble(rownames = 'var') %>%
-        rename_with(~ gsub('V', '', .x), .cols = where(is.numeric)) %>%
+        rename_with( ~ gsub('V', '', .x), .cols = where(is.numeric)) %>%
         pivot_longer(
           cols = where(is.numeric),
           names_to = 'cls',
@@ -2107,7 +2105,7 @@ a.twod <- function(lst,
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()
       ) +
-      facet_wrap( ~ var)
+      facet_wrap(~ var)
     anims[[i]] <- a
   }
   names(anims) <- features

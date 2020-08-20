@@ -204,7 +204,7 @@ dev.off()
 f.summary(
   m$data.tidy,
   m$mod0,
-  runs = 'all',
+  runs = 'cde46',
   GIF = 'PT',
   ncol = 2,
   nrow = 2,
@@ -216,7 +216,7 @@ f.summary(
 f.summary(
   m$data.tidy,
   m$dr.mod0,
-  runs = 'all',
+  runs = 'cde46',
   GIF = 'PT',
   ncol = 2,
   nrow = 2,
@@ -228,7 +228,7 @@ f.summary(
 f.summary(
   m$data.tidy,
   m$mod1,
-  runs = 'all',
+  runs = 'cde46',
   GIF = 'PT',
   ncol = 2,
   nrow = 2,
@@ -240,7 +240,7 @@ f.summary(
 f.summary(
   m$data.tidy,
   m$dr.mod1,
-  runs = 'all',
+  runs = 'cde46',
   GIF = 'PT',
   ncol = 2,
   nrow = 2,

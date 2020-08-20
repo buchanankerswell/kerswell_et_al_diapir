@@ -67,8 +67,7 @@ m <- marx %>%
         plot = 'all',
         xlim = c(-2, 3),
         dlim = 0.3,
-        alpha.min = 0,
-        bw = 0.5
+        alpha.min = 0
       ),
     # BIC
     bic.mod0 = mark.ft %>%
@@ -79,13 +78,10 @@ m <- marx %>%
       ),
     # General GMM model
     mod0 = l.gmm(
-      lst = mark.ft,
-      lst.bic = bic.mod0,
+      mark.ft,
+      bic.mod0,
       features = features,
-      G = NULL,
-      scale = TRUE,
-      hists = FALSE,
-      scatter = FALSE
+      scale = TRUE
     ),
     # Dimension Reduction
     dr.mod0 = l.gmm.dr(mod0),
@@ -99,13 +95,10 @@ m <- marx %>%
       ),
     # General GMM model
     mod1 = l.gmm(
-      lst = mark.ft,
-      lst.bic = bic.mod1,
+      mark.ft,
+      bic.mod1,
       features = features,
-      G = NULL,
-      scale = TRUE,
-      hists = FALSE,
-      scatter = FALSE
+      scale = TRUE
     ),
     # Dimension Reduction
     dr.mod1 = l.gmm.dr(mod1)
@@ -115,15 +108,12 @@ print(m$vis.oned[[1]])
 # Summarise features by faceting
 marx$mark.ft %>%
   f.oned(
-    runs = 'all',
     nrow = 2,
     ncol = 2,
     features = features,
-    plot = 'all',
     xlim = c(-2, 3),
     dlim = 0.3,
-    alpha.min = 0.05,
-    bw = 0.5
+    alpha.min = 0.05
   ) %>%
   print()
 # Visualize model parameters and results
@@ -137,17 +127,13 @@ m$bic.mod1 %>% p.BIC()
 f.oned(
   m$mark.ft,
   m$mod0,
-  mod.type = NULL,
-  dr = FALSE,
-  runs = 'all',
   nrow = 2,
   ncol = 2,
   features = features,
   plot = 'ridge',
   xlim = c(-2, 3),
   dlim = 0.3,
-  alpha.min = 0,
-  bw = 0.5
+  alpha.min = 0
 ) %>%
   print()
 f.oned(
@@ -155,31 +141,25 @@ f.oned(
   m$dr.mod0,
   mod.type = 'dr',
   dr = TRUE,
-  runs = 'all',
   nrow = 2,
   ncol = 2,
   features = features,
   plot = 'ridge',
   xlim = NULL,
   dlim = 0.3,
-  alpha.min = 0,
-  bw = 0.5
+  alpha.min = 0
 ) %>%
   print()
 f.oned(
   m$mark.ft,
   m$mod1,
-  mod.type = NULL,
-  dr = FALSE,
-  runs = 'all',
   nrow = 2,
   ncol = 2,
   features = features,
   plot = 'ridge',
   xlim = c(-2, 3),
   dlim = 0.3,
-  alpha.min = 0,
-  bw = 0.5
+  alpha.min = 0
 ) %>%
   print()
 f.oned(
@@ -187,7 +167,6 @@ f.oned(
   m$dr.mod1,
   mod.type = 'dr',
   dr = TRUE,
-  runs = 'all',
   nrow = 2,
   ncol = 2,
   features = features,

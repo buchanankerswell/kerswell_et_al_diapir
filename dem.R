@@ -133,98 +133,119 @@ m$bic.mod1 %>% p.BIC()
 # # Plot scatter
 # m$mod0 %>% p.class()
 # m$mod1 %>% p.class()
-# Dimension reduction plots
-# m$dr.mod0 %>% p.dr.boundary()
-# m$dr.mod1 %>% p.dr.boundary()
-# 1D Plots
-m$mark.ft %>%
-  f.oned(
-    mods = m$mod0,
-    mod.type = NULL,
-    dr = FALSE,
-    runs = 'all',
-    nrow = 2,
-    ncol = 2,
-    features = features,
-    plot = 'ridge',
-    xlim = c(-2, 3),
-    dlim = 0.3,
-    alpha.min = 0,
-    bw = 0.5
-  ) %>%
+# 1D facet plots
+f.oned(
+  m$mark.ft,
+  m$mod0,
+  mod.type = NULL,
+  dr = FALSE,
+  runs = 'all',
+  nrow = 2,
+  ncol = 2,
+  features = features,
+  plot = 'ridge',
+  xlim = c(-2, 3),
+  dlim = 0.3,
+  alpha.min = 0,
+  bw = 0.5
+) %>%
   print()
-m$mark.ft %>%
-  f.oned(
-    mods = m$dr.mod0,
-    mod.type = 'dr',
-    dr = TRUE,
-    runs = 'all',
-    nrow = 2,
-    ncol = 2,
-    features = features,
-    plot = 'ridge',
-    xlim = NULL,
-    dlim = 0.3,
-    alpha.min = 0,
-    bw = 0.5
-  ) %>%
+f.oned(
+  m$mark.ft,
+  m$dr.mod0,
+  mod.type = 'dr',
+  dr = TRUE,
+  runs = 'all',
+  nrow = 2,
+  ncol = 2,
+  features = features,
+  plot = 'ridge',
+  xlim = NULL,
+  dlim = 0.3,
+  alpha.min = 0,
+  bw = 0.5
+) %>%
   print()
-m$mark.ft %>%
-  f.oned(
-    mods = m$mod1,
-    mod.type = NULL,
-    dr = FALSE,
-    runs = 'all',
-    nrow = 2,
-    ncol = 2,
-    features = features,
-    plot = 'ridge',
-    xlim = c(-2, 3),
-    dlim = 0.3,
-    alpha.min = 0,
-    bw = 0.5
-  ) %>%
+f.oned(
+  m$mark.ft,
+  m$mod1,
+  mod.type = NULL,
+  dr = FALSE,
+  runs = 'all',
+  nrow = 2,
+  ncol = 2,
+  features = features,
+  plot = 'ridge',
+  xlim = c(-2, 3),
+  dlim = 0.3,
+  alpha.min = 0,
+  bw = 0.5
+) %>%
   print()
-m$mark.ft %>%
-  f.oned(
-    mods = m$dr.mod1,
-    mod.type = 'dr',
-    dr = TRUE,
-    runs = 'all',
-    nrow = 2,
-    ncol = 2,
-    features = features,
-    plot = 'ridge',
-    xlim = NULL,
-    dlim = 0.3,
-    alpha.min = 0,
-    bw = 0.5
-  ) %>%
+f.oned(
+  m$mark.ft,
+  m$dr.mod1,
+  mod.type = 'dr',
+  dr = TRUE,
+  runs = 'all',
+  nrow = 2,
+  ncol = 2,
+  features = features,
+  plot = 'ridge',
+  xlim = NULL,
+  dlim = 0.3,
+  alpha.min = 0,
+  bw = 0.5
+) %>%
   print()
-# Turn off PDF
+# Close PDF
 dev.off()
-# # Summarise features by animation
-# m$mark.ft %>%
-#   a.oned(
-#     mods = m$mod1,
-#     plot = 'all',
-#     features = features,
-#     type = 'gif',
-#     xlim = c(-2, 3),
-#     dlim = 0.3,
-#     alpha.min = 0.05,
-#     bw = 0.5,
-#     save = TRUE,
-#     fname = 'oned',
-#     fps = 20
-#   )
-# m$mark.ft %>%
-#   a.twod(
-#     type = 'gif',
-#     features = features,
-#     xlim = c(-2, 3),
-#     dlim = 0.05,
-#     save = TRUE,
-#     fname = 'twod',
-#     fps = 20
-#   )
+# Visualise fit
+f.summary(
+  m$data.tidy,
+  m$mod0,
+  runs = 'all',
+  GIF = 'PT',
+  ncol = 2,
+  nrow = 2,
+  grads = TRUE,
+  save = TRUE,
+  fname = 'vis21.mod0'
+) %>%
+  print()
+f.summary(
+  m$data.tidy,
+  m$dr.mod0,
+  runs = 'all',
+  GIF = 'PT',
+  ncol = 2,
+  nrow = 2,
+  grads = TRUE,
+  save = TRUE,
+  fname = 'vis21.mod0'
+) %>%
+  print()
+f.summary(
+  m$data.tidy,
+  m$mod1,
+  runs = 'all',
+  GIF = 'PT',
+  ncol = 2,
+  nrow = 2,
+  grads = TRUE,
+  save = TRUE,
+  fname = 'vis21.mod0'
+) %>%
+  print()
+f.summary(
+  m$data.tidy,
+  m$dr.mod1,
+  runs = 'all',
+  GIF = 'PT',
+  ncol = 2,
+  nrow = 2,
+  grads = TRUE,
+  save = TRUE,
+  fname = 'vis21.mod0'
+) %>%
+  print()

@@ -1762,7 +1762,8 @@ f.summary <- function(lst,
       as_tibble() %>%
       rename(cls = value) %>%
       add_column(markerID = factor(unique(.x$markerID))) %>%
-      left_join(.x)
+      left_join(.x) %>%
+      mutate(across(contains('cls'), factor))
   )
   if (runs == 'all') {
     df <- d %>% bind_rows()

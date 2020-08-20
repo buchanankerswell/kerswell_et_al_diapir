@@ -222,7 +222,7 @@ f.summary(
   nrow = 2,
   grads = TRUE,
   save = TRUE,
-  fname = 'vis21.mod0'
+  fname = 'vis21.dr.mod0'
 ) %>%
   print()
 f.summary(
@@ -234,7 +234,7 @@ f.summary(
   nrow = 2,
   grads = TRUE,
   save = TRUE,
-  fname = 'vis21.mod0'
+  fname = 'vis21.mod1'
 ) %>%
   print()
 f.summary(
@@ -246,6 +246,6 @@ f.summary(
   nrow = 2,
   grads = TRUE,
   save = TRUE,
-  fname = 'vis21.mod0'
+  fname = 'vis21.dr.mod1'
 ) %>%
   print()

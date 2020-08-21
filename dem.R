@@ -1,7 +1,7 @@
 source('functions.R')
 
 # Open PDF for plotting
-cairo_pdf('vis21.PDF',
+cairo_pdf('vis.PDF',
           width = 11,
           height = 8.5,
           onefile = TRUE)
@@ -15,30 +15,30 @@ glimpse(marx)
 # Visualize data distribution in 1- and 2D
 rid <- c(
   'markerID',
-  'model',
-  'TIQR',
-  'PMedian',
-  'PIQR',
-  'dPDownSum',
-  'dTDownSum',
-  'dXDownSum',
-  'dYDownSum',
-  'deltaTPGrads',
-  'TMedian',
-  'maxConsecutiveTDown',
-  'dXSum',
-  'TDown',
-  'TUp',
-  'PUp',
-  'maxConsecutivePUp',
-  'maxConsecutiveTUp',
-  'dXUpSum',
-  'minTPGrad',
-  'maxTPGrad',
-  'maxConsecutivePDown',
-  'PDown',
-  'TMax',
-  'PMax'
+  'model'
+  # 'TIQR',
+  # 'PMedian',
+  # 'PIQR',
+  # 'dPDownSum',
+  # 'dTDownSum',
+  # 'dXDownSum',
+  # 'dYDownSum',
+  # 'deltaTPGrads',
+  # 'TMedian',
+  # 'maxConsecutiveTDown',
+  # 'dXSum',
+  # 'TDown',
+  # 'TUp',
+  # 'PUp',
+  # 'maxConsecutivePUp',
+  # 'maxConsecutiveTUp',
+  # 'dXUpSum',
+  # 'minTPGrad',
+  # 'maxTPGrad',
+  # 'maxConsecutivePDown',
+  # 'PDown',
+  # 'TMax',
+  # 'PMax'
 )
 features <-
   colnames(marx$mark.ft[[1]])[!(colnames(marx$mark.ft[[1]]) %in% rid)]
@@ -108,12 +108,12 @@ print(m$vis.oned[[1]])
 # Summarise features by faceting
 marx$mark.ft %>%
   f.oned(
-    nrow = 2,
-    ncol = 2,
+    nrow = 4,
+    ncol = 4,
     features = features,
     xlim = c(-2, 3),
     dlim = 0.3,
-    alpha.min = 0.05
+    alpha.min = 0.02
   ) %>%
   print()
 # Visualize model parameters and results
@@ -127,8 +127,8 @@ m$bic.mod1 %>% p.BIC()
 f.oned(
   m$mark.ft,
   m$mod0,
-  nrow = 2,
-  ncol = 2,
+  nrow = 4,
+  ncol = 4,
   features = features,
   plot = 'ridge',
   xlim = c(-2, 3),
@@ -141,8 +141,8 @@ f.oned(
   m$dr.mod0,
   mod.type = 'dr',
   dr = TRUE,
-  nrow = 2,
-  ncol = 2,
+  nrow = 4,
+  ncol = 4,
   features = features,
   plot = 'ridge',
   xlim = NULL,
@@ -153,8 +153,8 @@ f.oned(
 f.oned(
   m$mark.ft,
   m$mod1,
-  nrow = 2,
-  ncol = 2,
+  nrow = 4,
+  ncol = 4,
   features = features,
   plot = 'ridge',
   xlim = c(-2, 3),
@@ -167,14 +167,13 @@ f.oned(
   m$dr.mod1,
   mod.type = 'dr',
   dr = TRUE,
-  nrow = 2,
-  ncol = 2,
+  nrow = 4,
+  ncol = 4,
   features = features,
   plot = 'ridge',
   xlim = NULL,
   dlim = 0.3,
-  alpha.min = 0,
-  bw = 0.5
+  alpha.min = 0
 ) %>%
   print()
 # Close PDF
@@ -185,11 +184,11 @@ f.summary(
   m$mod0,
   runs = 'cde46',
   GIF = 'PT',
-  ncol = 2,
-  nrow = 2,
+  ncol = 4,
+  nrow = 4,
   grads = TRUE,
   save = TRUE,
-  fname = 'vis21.mod0'
+  fname = 'vis.mod0'
 ) %>%
   print()
 f.summary(
@@ -197,11 +196,11 @@ f.summary(
   m$dr.mod0,
   runs = 'cde46',
   GIF = 'PT',
-  ncol = 2,
-  nrow = 2,
+  ncol = 4,
+  nrow = 4,
   grads = TRUE,
   save = TRUE,
-  fname = 'vis21.dr.mod0'
+  fname = 'vis.dr.mod0'
 ) %>%
   print()
 f.summary(
@@ -209,11 +208,11 @@ f.summary(
   m$mod1,
   runs = 'cde46',
   GIF = 'PT',
-  ncol = 2,
-  nrow = 2,
+  ncol = 4,
+  nrow = 4,
   grads = TRUE,
   save = TRUE,
-  fname = 'vis21.mod1'
+  fname = 'vis.mod1'
 ) %>%
   print()
 f.summary(
@@ -221,10 +220,10 @@ f.summary(
   m$dr.mod1,
   runs = 'cde46',
   GIF = 'PT',
-  ncol = 2,
-  nrow = 2,
+  ncol = 4,
+  nrow = 4,
   grads = TRUE,
   save = TRUE,
-  fname = 'vis21.dr.mod1'
+  fname = 'vis.dr.mod1'
 ) %>%
   print()

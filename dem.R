@@ -1,7 +1,7 @@
 source('functions.R')
 
 # Open PDF for plotting
-cairo_pdf('vis2.PDF',
+cairo_pdf('vis.PDF',
           width = 11,
           height = 8.5,
           onefile = TRUE)
@@ -12,7 +12,7 @@ cairo_pdf('vis2.PDF',
 marx
 glimpse(marx)
 
-# vis2ualize data distribution in 1- and 2D
+# visualize data distribution in 1- and 2D
 rid <- c(
   'markerID',
   'model'
@@ -47,12 +47,12 @@ features <-
 # l.kmean ........... k-means (assume k = # of clusters)
 # l.bic ............. Bayesian Information Criterion
 # l.gmm ............. Gaussian Mixture Model (assume G = # of components)
-# l.gmm.da .......... GMM discriminant analysis (supervis2ed classification)
+# l.gmm.da .......... GMM discriminant analysis (supervised classification)
 # l.gmm.dr .......... GMM dimension reduction
 # l.den ............. GMM layer suited for density plots
-# Add layers of vis2ualizations
-# l.oned ............ vis2ualize 1D data
-# l.twod ............ vis2ualize 2D data
+# Add layers of visualizations
+# l.oned ............ visualize 1D data
+# l.twod ............ visualize 2D data
 # l.gif ............. creates gifs of marker position ('xy') and PT
 #
 # Summarise by faceting plots
@@ -60,8 +60,8 @@ features <-
 
 m <- marx %>%
   mutate(
-    # 1D vis2 plots
-    vis2.oned = mark.ft %>%
+    # 1D vis plots
+    vis.oned = mark.ft %>%
       l.oned(
         features = features,
         plot = 'all',
@@ -73,7 +73,7 @@ m <- marx %>%
     bic.mod0 = mark.ft %>%
       l.bic(
         features = features,
-        init = 'SVD',
+        init = NULL,
         scale = TRUE,
         plot = FALSE
       ),
@@ -90,7 +90,7 @@ m <- marx %>%
     bic.mod1 = mark.ft %>%
       l.bic(
         G = 3,
-        init = 'SVD',
+        init = NULL,
         features = features,
         scale = TRUE,
         plot = FALSE
@@ -106,7 +106,7 @@ m <- marx %>%
     dr.mod1 = l.gmm.dr(mod1)
   )
 # # Explore features for individual models
-print(m$vis2.oned[[1]])
+print(m$vis.oned[[1]])
 # Summarise features by faceting
 marx$mark.ft %>%
   f.oned(
@@ -118,7 +118,7 @@ marx$mark.ft %>%
     alpha.min = 0.02
   ) %>%
   print()
-# vis2ualize model parameters and results
+# visualize model parameters and results
 # Plot BIC
 m$bic.mod0 %>% p.BIC()
 m$bic.mod1 %>% p.BIC()
@@ -180,7 +180,7 @@ f.oned(
   print()
 # Close PDF
 dev.off()
-# vis2ualise fit
+# visualise fit
 f.summary(
   m$data.tidy,
   m$mod0,
@@ -190,7 +190,7 @@ f.summary(
   nrow = 4,
   grads = TRUE,
   save = TRUE,
-  fname = 'vis2.mod0'
+  fname = 'vis.mod0'
 ) %>%
   print()
 f.summary(
@@ -202,7 +202,7 @@ f.summary(
   nrow = 4,
   grads = TRUE,
   save = TRUE,
-  fname = 'vis2.dr.mod0'
+  fname = 'vis.dr.mod0'
 ) %>%
   print()
 f.summary(
@@ -214,7 +214,7 @@ f.summary(
   nrow = 4,
   grads = TRUE,
   save = TRUE,
-  fname = 'vis2.mod1'
+  fname = 'vis.mod1'
 ) %>%
   print()
 f.summary(
@@ -226,6 +226,6 @@ f.summary(
   nrow = 4,
   grads = TRUE,
   save = TRUE,
-  fname = 'vis2.dr.mod1'
+  fname = 'vis.dr.mod1'
 ) %>%
   print()

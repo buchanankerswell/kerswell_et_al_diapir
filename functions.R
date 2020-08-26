@@ -740,7 +740,7 @@ l.gif <- function(lst, mods, GIF = c('xy', 'PT')) {
 # p.BIC ----
 # BIC Plot
 p.BIC <- function(lst, ...) {
-  purrr::map(lst, plot)
+  purrr::map(lst, ~plot(.x))
 }
 # p.class ----
 # Classification scatter plot
@@ -1198,7 +1198,7 @@ p.oned <- function(df,
 # Visualize gaussian density of features in 2D
 p.twod <- function(df,
                    features = 'all',
-                   xlim = c(-2, 2),
+                   xlim = c(-2, 3),
                    dlim = 0.05) {
   fname <- df$model[1]
   if (features == 'all') {
@@ -1269,7 +1269,7 @@ f.oned <-
            nrow = 3,
            features = 'all',
            plot = 'all',
-           xlim = c(-2, 2),
+           xlim = c(-2, 3),
            dlim = 0.5,
            alpha.min = 0.02,
            bw = 0.5) {
@@ -1298,7 +1298,8 @@ f.oned <-
     } else {
       features <- features
     }
-    df %>%
+    lst %>%
+      bind_rows() %>%
       ungroup() %>%
       group_by(model) %>%
       select(all_of(features)) %>%
@@ -1764,7 +1765,7 @@ f.summary <- function(lst,
     lst <- lst %>% keep(!(names(lst) %in% runs))
     mods <- mods %>% keep(!(names(mods) %in% runs))
   }
-  d <- purrr::map2(
+  df <- purrr::map2_dfr(
     lst,
     mods,
     ~ .y$classification %>%
@@ -1921,7 +1922,7 @@ a.oned <- function(lst,
                    sigma = 2,
                    features = 'all',
                    plot = 'all',
-                   xlim = c(-2, 2),
+                   xlim = c(-2, 3),
                    dlim = 1,
                    alpha.min = 0.02,
                    bw = 0.5,
@@ -2246,7 +2247,7 @@ a.oned <- function(lst,
 # Summarises two-dimension data by flicking through models
 a.twod <- function(lst,
                    features = 'all',
-                   xlim = c(-2, 2),
+                   xlim = c(-2, 3),
                    dlim = 0.05,
                    save = TRUE,
                    fps = 20,

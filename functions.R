@@ -330,7 +330,9 @@ add.ft <- function(df) {
                             which(removeCol == 'model'))]
   dat <- df %>%
     group_by(markerID) %>%
+    add_count(markerID, name = 'tsteps') %>%
     mutate(
+      tMax = max(time),
       PMax = max(Pkbar, na.rm = TRUE),
       PMedian = median(Pkbar, na.rm = TRUE),
       PIQR = IQR(Pkbar, na.rm = TRUE),

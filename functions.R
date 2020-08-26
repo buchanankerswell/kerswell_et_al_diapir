@@ -319,7 +319,8 @@ data.tidy <- function(df) {
       xposkm = (xpos / 1000) - 20,
       yposkm = (ypos / 1000) - 20
     ) %>%
-    drop_na()
+    drop_na() %>%
+    filter(type != 0)
   return(dat)
 }
 # add.ft ----
@@ -511,6 +512,10 @@ b.ic <- function(df,
   if (scale == FALSE) {
     BIC <- mclustBIC(gmmData, G = G)
   } else {
+    gmmData <- gmmData %>%
+      tibble() %>%
+      scale() %>%
+      replace_na(0)
     BIC <- mclustBIC(scale(gmmData), G = G)
   }
   print(summary(BIC))

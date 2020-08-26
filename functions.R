@@ -498,6 +498,7 @@ k.mean <- function(df,
 b.ic <- function(df,
                  features = 'all',
                  G = NULL,
+                 init = NULL,
                  scale = FALSE,
                  plot = TRUE) {
   if (features == 'all') {
@@ -512,13 +513,17 @@ b.ic <- function(df,
     ungroup() %>%
     select(which(colnames(df) %in% features))
   if (scale == FALSE) {
-    BIC <- mclustBIC(gmmData, G = G)
+    gmmData <- gmmData
   } else {
     gmmData <- gmmData %>%
       tibble() %>%
       scale() %>%
       replace_na(0)
-    BIC <- mclustBIC(scale(gmmData), G = G)
+  }
+  if(!is.null(init)) {
+    BIC <- mclustBIC(gmmData, G = G, initialization = list(hcPairs = hc(gmmData, use = init)))
+  } else {
+    BIC <- mclustBIC(gmmData, G = G)
   }
   print(summary(BIC))
   if (plot == TRUE) {

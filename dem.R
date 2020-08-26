@@ -73,6 +73,7 @@ m <- marx %>%
     bic.mod0 = mark.ft %>%
       l.bic(
         features = features,
+        init = 'SVD',
         scale = TRUE,
         plot = FALSE
       ),
@@ -89,6 +90,7 @@ m <- marx %>%
     bic.mod1 = mark.ft %>%
       l.bic(
         G = 3,
+        init = 'SVD',
         features = features,
         scale = TRUE,
         plot = FALSE

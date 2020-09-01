@@ -21,14 +21,14 @@ marx <- tibble(model = as.factor(files$fnames),
                filepath = files$paths) %>%
   left_join(data.coupling) %>%
   left_join(data.elevator) %>%
-  mutate(data.raw = purrr::map(filepath, ~ data.get(.x)))
+  mutate(data.raw = purrr::map(filepath, data.get))
 names(marx$data.raw) <- files$fnames
 # Tidy data and add features for ML classification
 marx <- marx %>%
   mutate(data.tidy = data.raw %>% 
-           purrr::map(~ data.tidy(.x)),
+           purrr::map(data.tidy),
          mark.ft = data.tidy %>%
-           purrr::map(~ add.ft(.x)))
+           purrr::map(add.ft))
 # Clean up environment
 rm(list = couplingList)
 rm(couplingList, data.coupling, data.elevator, files, bic.col, c.pal)

@@ -101,6 +101,6 @@ mods <- marx %>%
   )
 
 # Clean up environment
-rm(rid, features)
+rm(rid, features, marx)
 rm(list=lsf.str())
 save.image('mods.RData')

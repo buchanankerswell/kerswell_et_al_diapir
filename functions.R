@@ -1760,8 +1760,8 @@ f.oned <-
     return(f)
   }
 # f.summary ----
-# Combine gifs into one faceted summary gif
-f.summary <- function(lst,
+# Facet GIFs
+f.gif <- function(lst,
                       mods,
                       runs = 'all',
                       GIF = c('xy', 'PT'),

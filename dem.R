@@ -56,7 +56,7 @@ features <-
 # l.gif ............. creates gifs of marker position ('xy') and PT
 #
 # Summarise by faceting plots
-# f.summary ........ compiles selected gifs into one
+# f.gif ........ compiles selected gifs into one
 
 m <- marx %>%
   mutate(
@@ -182,7 +182,7 @@ f.oned(
 # Close PDF
 dev.off()
 # visualise fit
-f.summary(
+f.gif(
   m$data.tidy,
   m$mod0,
   runs = 'cde46',
@@ -193,7 +193,7 @@ f.summary(
   save = TRUE,
   fname = 'vis.mod0'
 )
-f.summary(
+f.gif(
   m$data.tidy,
   m$dr.mod0,
   runs = 'cde46',
@@ -204,7 +204,7 @@ f.summary(
   save = TRUE,
   fname = 'vis.dr.mod0'
 )
-f.summary(
+f.gif(
   m$data.tidy,
   m$mod1,
   runs = 'cde46',
@@ -215,7 +215,7 @@ f.summary(
   save = TRUE,
   fname = 'vis.mod1'
 )
-f.summary(
+f.gif(
   m$data.tidy,
   m$dr.mod1,
   runs = 'cde46',

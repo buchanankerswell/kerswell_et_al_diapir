@@ -1302,7 +1302,8 @@ f.oned <-
       }
     }
     if (features == 'all') {
-      df %>%
+      lst %>%
+        bind_rows() %>%
         ungroup() %>%
         select(where(is.numeric)) %>%
         colnames() ->
@@ -1703,8 +1704,7 @@ f.oned <-
             scale_color_brewer(name = 'Group', palette = 'Paired') +
             scale_fill_brewer(name = 'Group', palette = 'Paired') +
             xlab('Scaled Value') +
-            ylab('') +
-            ggtitle(fname)
+            ylab('')
         }
       } else {
         p.ridge <- ggplot(df.scaled) +

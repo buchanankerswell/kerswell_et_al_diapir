@@ -107,6 +107,7 @@ m <- marx %>%
   )
 # # Explore features for individual models
 print(m$vis.oned[[1]])
+print(m$vis.oned[[2]])
 # Summarise features by faceting
 marx$mark.ft %>%
   f.oned(
@@ -191,8 +192,7 @@ f.summary(
   grads = TRUE,
   save = TRUE,
   fname = 'vis.mod0'
-) %>%
-  print()
+)
 f.summary(
   m$data.tidy,
   m$dr.mod0,
@@ -203,8 +203,7 @@ f.summary(
   grads = TRUE,
   save = TRUE,
   fname = 'vis.dr.mod0'
-) %>%
-  print()
+)
 f.summary(
   m$data.tidy,
   m$mod1,
@@ -215,8 +214,7 @@ f.summary(
   grads = TRUE,
   save = TRUE,
   fname = 'vis.mod1'
-) %>%
-  print()
+)
 f.summary(
   m$data.tidy,
   m$dr.mod1,
@@ -227,5 +225,4 @@ f.summary(
   grads = TRUE,
   save = TRUE,
   fname = 'vis.dr.mod1'
-) %>%
-  print()
+)

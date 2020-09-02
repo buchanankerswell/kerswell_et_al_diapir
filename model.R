@@ -117,25 +117,25 @@ mods <- marx %>%
       scale = TRUE
     ),
     # Dimension Reduction
-    dr.mod2 = l.gmm.dr(mod2),
-    # BIC
-    bic.mod3 = mark.ft %>%
-      l.bic(
-        G = 3,
-        init = 'SVD',
-        features = c('tsteps', 'tMax', 'dPSum', 'dPUpSum', 'dTSum', 'dTUpSum'),
-        scale = TRUE,
-        plot = FALSE
-      ),
-    # General GMM model
-    mod3 = l.gmm(
-      mark.ft,
-      bic.mod3,
-      features = c('tsteps', 'tMax', 'dPSum', 'dPUpSum', 'dTSum', 'dTUpSum'),
-      scale = TRUE
-    ),
-    # Dimension Reduction
-    dr.mod3 = l.gmm.dr(mod3)
+    dr.mod2 = l.gmm.dr(mod2)
+    # # BIC
+    # bic.mod3 = mark.ft %>%
+    #   l.bic(
+    #     G = 3,
+    #     init = 'SVD',
+    #     features = c('tsteps', 'tMax', 'dPSum', 'dPUpSum', 'dTSum', 'dTUpSum'),
+    #     scale = TRUE,
+    #     plot = FALSE
+    #   ),
+    # # General GMM model
+    # mod3 = l.gmm(
+    #   mark.ft,
+    #   bic.mod3,
+    #   features = c('tsteps', 'tMax', 'dPSum', 'dPUpSum', 'dTSum', 'dTUpSum'),
+    #   scale = TRUE
+    # ),
+    # # Dimension Reduction
+    # dr.mod3 = l.gmm.dr(mod3)
   )
 
 # Clean up environment

@@ -554,7 +554,11 @@ gmm <- function(df,
   if (scale == FALSE) {
     m <- Mclust(gmmData, G = G, x = x)
   } else {
-    m <- Mclust(scale(gmmData), G = G, x = x)
+    gmmData <- gmmData %>%
+      tibble() %>%
+      scale() %>%
+      replace_na(0)
+    m <- Mclust(gmmData, G = G, x = x)
   }
   print(summary(m))
   df$class <- as.factor(m$classification)

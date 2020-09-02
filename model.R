@@ -6,7 +6,7 @@ source('functions.R')
 print(marx)
 glimpse(marx)
 
-# visualize data distribution in 1- and 2D
+# Select features
 rid <- c(
   'markerID',
   'model'
@@ -36,6 +36,8 @@ rid <- c(
 )
 features <-
   colnames(marx$mark.ft[[1]])[!(colnames(marx$mark.ft[[1]]) %in% rid)]
+
+# visualize data distribution in 1- and 2D
 
 # Build models by adding layers
 # l.kmean ........... k-means (assume k = # of clusters)
@@ -137,6 +139,6 @@ mods <- marx %>%
   )
 
 # Clean up environment
-rm(rid, features, marx)
+rm(rid, marx)
 rm(list=lsf.str())
 save.image('mods.RData')

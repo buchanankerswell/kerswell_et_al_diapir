@@ -117,32 +117,32 @@ f.oned(
   alpha.min = 0
 ) %>%
   print()
-f.oned(
-  mods$mark.ft,
-  mods$mod3,
-  nrow = 4,
-  ncol = 4,
-  features = c('tsteps', 'tMax', 'dPSum', 'dPUpSum', 'dTSum', 'dTUpSum'),
-  plot = 'ridge',
-  xlim = c(-2, 3),
-  dlim = 0.3,
-  alpha.min = 0
-) %>%
-  print()
-f.oned(
-  mods$mark.ft,
-  mods$dr.mod3,
-  mod.type = 'dr',
-  dr = TRUE,
-  nrow = 4,
-  ncol = 4,
-  features = c('tsteps', 'tMax', 'dPSum', 'dPUpSum', 'dTSum', 'dTUpSum'),
-  plot = 'ridge',
-  xlim = NULL,
-  dlim = 0.3,
-  alpha.min = 0
-) %>%
-  print()
+# f.oned(
+#   mods$mark.ft,
+#   mods$mod3,
+#   nrow = 4,
+#   ncol = 4,
+#   features = c('tsteps', 'tMax', 'dPSum', 'dPUpSum', 'dTSum', 'dTUpSum'),
+#   plot = 'ridge',
+#   xlim = c(-2, 3),
+#   dlim = 0.3,
+#   alpha.min = 0
+# ) %>%
+#   print()
+# f.oned(
+#   mods$mark.ft,
+#   mods$dr.mod3,
+#   mod.type = 'dr',
+#   dr = TRUE,
+#   nrow = 4,
+#   ncol = 4,
+#   features = c('tsteps', 'tMax', 'dPSum', 'dPUpSum', 'dTSum', 'dTUpSum'),
+#   plot = 'ridge',
+#   xlim = NULL,
+#   dlim = 0.3,
+#   alpha.min = 0
+# ) %>%
+#   print()
 # Close PDF
 dev.off()
 # visualise fit
@@ -212,25 +212,25 @@ f.gif(
   save = TRUE,
   fname = 'vis.dr.mod2'
 )
-f.gif(
-  mods$data.tidy,
-  mods$mod3,
-  runs = 'cde46',
-  GIF = 'PT',
-  ncol = 4,
-  nrow = 4,
-  grads = TRUE,
-  save = TRUE,
-  fname = 'vis.mod3'
-)
-f.gif(
-  mods$data.tidy,
-  mods$dr.mod3,
-  runs = 'cde46',
-  GIF = 'PT',
-  ncol = 4,
-  nrow = 4,
-  grads = TRUE,
-  save = TRUE,
-  fname = 'vis.dr.mod3'
-)
+# f.gif(
+#   mods$data.tidy,
+#   mods$mod3,
+#   runs = 'cde46',
+#   GIF = 'PT',
+#   ncol = 4,
+#   nrow = 4,
+#   grads = TRUE,
+#   save = TRUE,
+#   fname = 'vis.mod3'
+# )
+# f.gif(
+#   mods$data.tidy,
+#   mods$dr.mod3,
+#   runs = 'cde46',
+#   GIF = 'PT',
+#   ncol = 4,
+#   nrow = 4,
+#   grads = TRUE,
+#   save = TRUE,
+#   fname = 'vis.dr.mod3'
+# )

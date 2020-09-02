@@ -5,14 +5,17 @@ source('functions.R')
 
 print(mods)
 
+# Open PDF for saving plots
+cairo_pdf('vis.PDF', width = 11, height = 8.5, onefile = TRUE)
+
 # Explore features for individual models
 print(mods$vis.oned[[1]])
-print(mods$vis.oned[[22]])
+print(mods$vis.oned[[2]])
 # Summarise features by faceting
 marx$mark.ft %>%
   f.oned(
-    nrow = 4,
-    ncol = 4,
+    nrow = 2,
+    ncol = 2,
     features = 'all',
     xlim = c(-2, 3),
     dlim = 0.3,
@@ -21,8 +24,8 @@ marx$mark.ft %>%
   print()
 marx$mark.ft %>%
   f.oned(
-    nrow = 4,
-    ncol = 4,
+    nrow = 2,
+    ncol = 2,
     features = c('tsteps', 'tMax', 'dPSum', 'dPUpSum', 'dTSum', 'dTUpSum'),
     xlim = c(-2, 3),
     dlim = 0.3,
@@ -42,8 +45,8 @@ mods$bic.mod3 %>% p.BIC()
 f.oned(
   mods$mark.ft,
   mods$mod0,
-  nrow = 4,
-  ncol = 4,
+  nrow = 2,
+  ncol = 2,
   features = features,
   plot = 'ridge',
   xlim = c(-2, 3),
@@ -56,8 +59,8 @@ f.oned(
   mods$dr.mod0,
   mod.type = 'dr',
   dr = TRUE,
-  nrow = 4,
-  ncol = 4,
+  nrow = 2,
+  ncol = 2,
   features = features,
   plot = 'ridge',
   xlim = NULL,
@@ -68,8 +71,8 @@ f.oned(
 f.oned(
   mods$mark.ft,
   mods$mod1,
-  nrow = 4,
-  ncol = 4,
+  nrow = 2,
+  ncol = 2,
   features = features,
   plot = 'ridge',
   xlim = c(-2, 3),
@@ -82,8 +85,8 @@ f.oned(
   mods$dr.mod1,
   mod.type = 'dr',
   dr = TRUE,
-  nrow = 4,
-  ncol = 4,
+  nrow = 2,
+  ncol = 2,
   features = features,
   plot = 'ridge',
   xlim = NULL,
@@ -94,8 +97,8 @@ f.oned(
 f.oned(
   mods$mark.ft,
   mods$mod2,
-  nrow = 4,
-  ncol = 4,
+  nrow = 2,
+  ncol = 2,
   features = c('tsteps', 'tMax', 'dPSum', 'dPUpSum', 'dTSum', 'dTUpSum'),
   plot = 'ridge',
   xlim = c(-2, 3),
@@ -108,8 +111,8 @@ f.oned(
   mods$dr.mod2,
   mod.type = 'dr',
   dr = TRUE,
-  nrow = 4,
-  ncol = 4,
+  nrow = 2,
+  ncol = 2,
   features = c('tsteps', 'tMax', 'dPSum', 'dPUpSum', 'dTSum', 'dTUpSum'),
   plot = 'ridge',
   xlim = NULL,
@@ -120,8 +123,8 @@ f.oned(
 # f.oned(
 #   mods$mark.ft,
 #   mods$mod3,
-#   nrow = 4,
-#   ncol = 4,
+#   nrow = 2,
+#   ncol = 2,
 #   features = c('tsteps', 'tMax', 'dPSum', 'dPUpSum', 'dTSum', 'dTUpSum'),
 #   plot = 'ridge',
 #   xlim = c(-2, 3),
@@ -134,8 +137,8 @@ f.oned(
 #   mods$dr.mod3,
 #   mod.type = 'dr',
 #   dr = TRUE,
-#   nrow = 4,
-#   ncol = 4,
+#   nrow = 2,
+#   ncol = 2,
 #   features = c('tsteps', 'tMax', 'dPSum', 'dPUpSum', 'dTSum', 'dTUpSum'),
 #   plot = 'ridge',
 #   xlim = NULL,
@@ -143,16 +146,18 @@ f.oned(
 #   alpha.min = 0
 # ) %>%
 #   print()
+
 # Close PDF
 dev.off()
+
 # visualise fit
 f.gif(
   mods$data.tidy,
   mods$mod0,
   runs = 'cde46',
   GIF = 'PT',
-  ncol = 4,
-  nrow = 4,
+  ncol = 2,
+  nrow = 2,
   grads = TRUE,
   save = TRUE,
   fname = 'vis.mod0'
@@ -162,8 +167,8 @@ f.gif(
   mods$dr.mod0,
   runs = 'cde46',
   GIF = 'PT',
-  ncol = 4,
-  nrow = 4,
+  ncol = 2,
+  nrow = 2,
   grads = TRUE,
   save = TRUE,
   fname = 'vis.dr.mod0'
@@ -173,8 +178,8 @@ f.gif(
   mods$mod1,
   runs = 'cde46',
   GIF = 'PT',
-  ncol = 4,
-  nrow = 4,
+  ncol = 2,
+  nrow = 2,
   grads = TRUE,
   save = TRUE,
   fname = 'vis.mod1'
@@ -184,8 +189,8 @@ f.gif(
   mods$dr.mod1,
   runs = 'cde46',
   GIF = 'PT',
-  ncol = 4,
-  nrow = 4,
+  ncol = 2,
+  nrow = 2,
   grads = TRUE,
   save = TRUE,
   fname = 'vis.dr.mod1'
@@ -195,8 +200,8 @@ f.gif(
   mods$mod2,
   runs = 'cde46',
   GIF = 'PT',
-  ncol = 4,
-  nrow = 4,
+  ncol = 2,
+  nrow = 2,
   grads = TRUE,
   save = TRUE,
   fname = 'vis.mod2'
@@ -206,8 +211,8 @@ f.gif(
   mods$dr.mod2,
   runs = 'cde46',
   GIF = 'PT',
-  ncol = 4,
-  nrow = 4,
+  ncol = 2,
+  nrow = 2,
   grads = TRUE,
   save = TRUE,
   fname = 'vis.dr.mod2'
@@ -217,8 +222,8 @@ f.gif(
 #   mods$mod3,
 #   runs = 'cde46',
 #   GIF = 'PT',
-#   ncol = 4,
-#   nrow = 4,
+#   ncol = 2,
+#   nrow = 2,
 #   grads = TRUE,
 #   save = TRUE,
 #   fname = 'vis.mod3'
@@ -228,8 +233,8 @@ f.gif(
 #   mods$dr.mod3,
 #   runs = 'cde46',
 #   GIF = 'PT',
-#   ncol = 4,
-#   nrow = 4,
+#   ncol = 2,
+#   nrow = 2,
 #   grads = TRUE,
 #   save = TRUE,
 #   fname = 'vis.dr.mod3'

@@ -120,32 +120,18 @@ f.oned(
   alpha.min = 0
 ) %>%
   print()
-# f.oned(
-#   mods$mark.ft,
-#   mods$mod3,
-#   nrow = 2,
-#   ncol = 2,
-#   features = c('tsteps', 'tMax', 'dPSum', 'dPUpSum', 'dTSum', 'dTUpSum'),
-#   plot = 'ridge',
-#   xlim = c(-2, 3),
-#   dlim = 0.3,
-#   alpha.min = 0
-# ) %>%
-#   print()
-# f.oned(
-#   mods$mark.ft,
-#   mods$dr.mod3,
-#   mod.type = 'dr',
-#   dr = TRUE,
-#   nrow = 2,
-#   ncol = 2,
-#   features = c('tsteps', 'tMax', 'dPSum', 'dPUpSum', 'dTSum', 'dTUpSum'),
-#   plot = 'ridge',
-#   xlim = NULL,
-#   dlim = 0.3,
-#   alpha.min = 0
-# ) %>%
-#   print()
+f.oned(
+  mods$mark.ft,
+  mods$mod3,
+  nrow = 2,
+  ncol = 2,
+  features = c('tsteps', 'tMax'),
+  plot = 'ridge',
+  xlim = c(-2, 3),
+  dlim = 0.3,
+  alpha.min = 0
+) %>%
+  print()
 
 # Close PDF
 dev.off()

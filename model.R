@@ -121,7 +121,7 @@ mods <- marx %>%
     # BIC
     bic.mod3 = mark.ft %>%
       l.bic(
-        G = NULL,
+        G = 3,
         init = NULL,
         features = c('tsteps', 'tMax'),
         scale = TRUE,

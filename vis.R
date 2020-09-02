@@ -6,7 +6,7 @@ source('functions.R')
 print(mods)
 
 # Open PDF for saving plots
-cairo_pdf('vis2.PDF', width = 11, height = 8.5, onefile = TRUE)
+cairo_pdf('vis3.PDF', width = 11, height = 8.5, onefile = TRUE)
 
 # Explore features for individual models
 print(mods$vis.oned[[1]])
@@ -156,7 +156,7 @@ dev.off()
 #   nrow = 2,
 #   grads = TRUE,
 #   save = TRUE,
-#   fname = 'vis2.mod0'
+#   fname = 'vis3.mod0'
 # )
 # f.gif(
 #   mods$data.tidy,
@@ -167,7 +167,7 @@ dev.off()
 #   nrow = 2,
 #   grads = TRUE,
 #   save = TRUE,
-#   fname = 'vis2.dr.mod0'
+#   fname = 'vis3.dr.mod0'
 # )
 # f.gif(
 #   mods$data.tidy,
@@ -178,7 +178,7 @@ dev.off()
 #   nrow = 2,
 #   grads = TRUE,
 #   save = TRUE,
-#   fname = 'vis2.mod1'
+#   fname = 'vis3.mod1'
 # )
 # f.gif(
 #   mods$data.tidy,
@@ -189,7 +189,7 @@ dev.off()
 #   nrow = 2,
 #   grads = TRUE,
 #   save = TRUE,
-#   fname = 'vis2.dr.mod1'
+#   fname = 'vis3.dr.mod1'
 # )
 f.gif(
   mods$data.tidy,
@@ -200,7 +200,7 @@ f.gif(
   nrow = 2,
   grads = TRUE,
   save = TRUE,
-  fname = 'vis2.mod2'
+  fname = 'vis3.mod2'
 )
 # f.gif(
 #   mods$data.tidy,
@@ -211,7 +211,7 @@ f.gif(
 #   nrow = 2,
 #   grads = TRUE,
 #   save = TRUE,
-#   fname = 'vis2.dr.mod2'
+#   fname = 'vis3.dr.mod2'
 # )
 f.gif(
   mods$data.tidy,
@@ -222,5 +222,5 @@ f.gif(
   nrow = 2,
   grads = TRUE,
   save = TRUE,
-  fname = 'vis2.mod3'
+  fname = 'vis3.mod3'
 )

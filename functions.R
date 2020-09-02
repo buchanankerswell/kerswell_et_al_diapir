@@ -621,9 +621,17 @@ gmm.da <- function(df,
     ungroup() %>%
     select(which(colnames(df) %in% features))
   if (scale == FALSE) {
+    gmmData <- gmmData
+  } else {
+    gmmData <- gmmData %>%
+      tibble() %>%
+      scale() %>%
+      replace_na(0)
+  }
+  if (scale == FALSE) {
     m <- MclustDA(gmmData, cls, modelType = 'EDDA')
   } else {
-    m <- MclustDA(scale(gmmData), cls, modelType = 'EDDA')
+    m <- MclustDA(gmmData, cls, modelType = 'EDDA')
   }
   print(summary(m))
   df$class <- m$class

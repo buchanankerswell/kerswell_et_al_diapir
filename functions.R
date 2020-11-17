@@ -1,5 +1,5 @@
-library(tidyverse)
 library(mclust)
+library(tidyverse)
 library(ggforce)
 library(patchwork)
 library(gridExtra)
@@ -8,8 +8,8 @@ library(ggridges)
 library(gifski)
 library(progress)
 
-# Read binary (.prn) files
-read_binary <- function(dir, prn = seq(10, 15, 1), marx.est = 50000, area = c(500000, 1260000, 17500, 28500), markers = TRUE, grid = FALSE){
+# Read binary (.prn) files and trace markers
+read_grid_marx <- function(dir, prn = seq(10, 15, 1), marx.est = 50000, area = c(500000, 1260000, 17500, 28500), markers = TRUE, grid = FALSE){
   if(grid == FALSE & markers == FALSE) {
     stop('grid and markers cannot both be FALSE')
   }
@@ -38,12 +38,12 @@ read_binary <- function(dir, prn = seq(10, 15, 1), marx.est = 50000, area = c(50
   
   # Counters
   mfind <- 0 # Marker counter
-  fcur <- 1 # File counter
   g.count <- 1 # Grid counter
+  tstep <- 1 # .prn (tstep) counter
   
-  for(nm in prn){
+  for(nt in prn){
     # Filename
-    fname <- fnames.ordered[nm]
+    fname <- fnames.ordered[nt]
     # Open connection
     f.prn <- file(fname, 'rb')
     # Read sizes of variables
@@ -75,7 +75,6 @@ read_binary <- function(dir, prn = seq(10, 15, 1), marx.est = 50000, area = c(50
     # Skip rock properties
     curpos <- 4+2*4+16*8+rocknum*(8*24+4)
     seek(f.prn, curpos, 'start')
-    
     if(grid == FALSE & markers == TRUE) {
       # Initialize matrices
       pr <- matrix(NA, znumz, xnumx)
@@ -151,15 +150,12 @@ read_binary <- function(dir, prn = seq(10, 15, 1), marx.est = 50000, area = c(50
         }
       }
     }
-    
     # Skip all nodes
     curpos2 <- curpos+(4*22+8*4)*xnumx*znumz
     seek(f.prn, curpos2, 'start')  
-    
     # Read gridline positions
     gx <- readBin(f.prn, 'numeric', xnumx, 4)
     gz <- readBin(f.prn, 'numeric', znumz, 4)
-    
     if(grid == TRUE) {
       # Progress bar
       pb.eii <- progress_bar$new(format = 'Calc. Stress & Strain [:bar] :percent in: :elapsed', total = (xnumx*znumz)-4, clear = FALSE, width = 60)
@@ -171,21 +167,17 @@ read_binary <- function(dir, prn = seq(10, 15, 1), marx.est = 50000, area = c(50
         }
       }
     }
-    
     if(markers == TRUE){
       # Skip all boundary conditions
       curpos3 <- curpos2+(xnumx+znumz)*4+(4*4+8*3)*(boundnum-1)
-      
       # Pressure points coordinates
       px <- gx
       px[2:xnumx] <- (gx[1:xnumx-1]+gx[2:xnumx])/2
       pz <- gz
       pz[2:znumz] <- (gz[1:znumz-1]+gz[2:znumz])/2
-      
       # Progress bar
       pb.marx.find <- progress_bar$new(format = 'Reading Markers [:bar] :percent in: :elapsed', total = marknum, clear = FALSE, width = 60)
       pb.marx <- progress_bar$new(format = 'Update Marker PT [:bar] :percent in: :elapsed', total = mfind, clear = FALSE, width = 60)
-      
       # Find Markers
       if(mfind == 0){
         seek(f.prn, curpos3, 'start')
@@ -199,11 +191,11 @@ read_binary <- function(dir, prn = seq(10, 15, 1), marx.est = 50000, area = c(50
           if(mx>=xmin & mx<=xmax & mz>=zmin & mz<=zmax & mt>1){
             mfind <- mfind+1
             mmm[mfind] <- m # global index
-            mty[mfind,nm] <- mt # type
-            mti[mfind,nm] <- timesum # time [yr]
-            mxx[mfind,nm] <- mx # x [m]
-            mzz[mfind,nm] <- mz # z [m]
-            mtk[mfind,nm] <- mk # T [K]
+            mty[mfind,tstep] <- mt # type
+            mti[mfind,tstep] <- timesum # time [yr]
+            mxx[mfind,tstep] <- mx # x [m]
+            mzz[mfind,tstep] <- mz # z [m]
+            mtk[mfind,tstep] <- mk # T [K]
             # Interpolate pressure
             # Find indexes for the upper-left pressure node by bisection
             jmin <- 2
@@ -238,7 +230,7 @@ read_binary <- function(dir, prn = seq(10, 15, 1), marx.est = 50000, area = c(50
             dxm <- (mx-px[i])/(px[i+1]-px[i])
             dzm <- (mz-pz[j])/(pz[j+1]-pz[j])
             # P [bar]
-            mpb[mfind,nm] <- 1e-5*((1-dxm)*(1-dzm)*pr[j,i]+(dxm)*(1-dzm)*pr[j,i+1]+(1-dxm)*(dzm)*pr[j+1,i]+(dxm)*(dzm)*pr[j+1,i+1])
+            mpb[mfind,tstep] <- 1e-5*((1-dxm)*(1-dzm)*pr[j,i]+(dxm)*(1-dzm)*pr[j,i+1]+(1-dxm)*(dzm)*pr[j+1,i]+(dxm)*(dzm)*pr[j+1,i+1])
           }
           pb.marx.find$tick()
         }
@@ -257,11 +249,11 @@ read_binary <- function(dir, prn = seq(10, 15, 1), marx.est = 50000, area = c(50
           mz <- mbuf[2]
           mk <- mbuf[3]
           # Save marker data
-          mty[mi,nm] <- mt # type
-          mti[mi,nm] <- timesum # time [yr]
-          mxx[mi,nm] <- mx # x [m]
-          mzz[mi,nm] <- mz # z [m]
-          mtk[mi,nm] <- mk # T [K]
+          mty[mi,tstep] <- mt # type
+          mti[mi,tstep] <- timesum # time [yr]
+          mxx[mi,tstep] <- mx # x [m]
+          mzz[mi,tstep] <- mz # z [m]
+          mtk[mi,tstep] <- mk # T [K]
           # Interpolate pressure
           # Find indexes for the upper-left pressure node by bisection
           jmin <- 2
@@ -296,8 +288,10 @@ read_binary <- function(dir, prn = seq(10, 15, 1), marx.est = 50000, area = c(50
           dxm <- (mx-px[i])/(px[i+1]-px[i])
           dzm <- (mz-pz[j])/(pz[j+1]-pz[j])
           # P [bar]
-          mpb[mi,nm] <- 1e-5*((1-dxm)*(1-dzm)*pr[j,i]+(dxm)*(1-dzm)*pr[j,i+1]+(1-dxm)*(dzm)*pr[j+1,i]+(dxm)*(dzm)*pr[j+1,i+1])
+          mpb[mi,tstep] <- 1e-5*((1-dxm)*(1-dzm)*pr[j,i]+(dxm)*(1-dzm)*pr[j,i+1]+(1-dxm)*(dzm)*pr[j+1,i]+(dxm)*(dzm)*pr[j+1,i+1])
         }
+        # .prn (tstep) counter
+        tstep <- tstep+1
         pb.marx$tick()
       }
       # Close connection
@@ -355,7 +349,6 @@ read_binary <- function(dir, prn = seq(10, 15, 1), marx.est = 50000, area = c(50
     grids[g.count] <- get(paste0('grid.', stringr::str_extract(fname, 'cd.[0-9]+.[0-9]+')))
     g.count <- g.count + 1
   }
-  
   # Save markers
   assign(paste0('marx.', fname %>% stringr::str_extract('cd.[1-9]+')), list(
     m.ti = mti %>% as_tibble(rownames = 'id', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-id, names_to = 'tstep', values_to = 'time') %>% mutate('tstep' = tstep %>% substr(4,5) %>% as.integer()),
@@ -365,7 +358,6 @@ read_binary <- function(dir, prn = seq(10, 15, 1), marx.est = 50000, area = c(50
     m.pb = mpb %>% as_tibble(rownames = 'id', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-id, names_to = 'tstep', values_to = 'P') %>% mutate('tstep' = tstep %>% substr(4,5) %>% as.integer()),
     m.ty = mty %>% as_tibble(rownames = 'id', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-id, names_to = 'tstep', values_to = 'type') %>% mutate('tstep' = tstep %>% substr(4,5) %>% as.integer())
   ) %>% purrr::reduce(left_join, by = c('id', 'tstep')) %>% group_by(id) %>% tidyr::drop_na())
-  
   if(markers == TRUE & grid == TRUE) {
     # Print markers
     print(get(paste0('marx.', fname %>% stringr::str_extract('cd.[1-9]+'))))

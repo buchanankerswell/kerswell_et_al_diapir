@@ -1,8 +1,0 @@
-rm(list = ls())
-rm(list=lsf.str())
-source('functions.R')
-load('marx.RData')
-source('model.R')
-load('marx.RData')
-load('mods.RData')
-source('vis.R')

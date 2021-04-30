@@ -1,51 +1,71 @@
-library(mclust)
-library(tidyverse)
-library(ggforce)
-library(patchwork)
-library(gridExtra)
-library(gganimate)
-library(ggridges)
-library(gifski)
-library(progress)
+# Load packages
+# Quiet loading
+sshhh <- function(p){
+  suppressWarnings(
+    suppressPackageStartupMessages(
+      library(p, character.only=TRUE)))}
+
+# Package list
+c('magrittr', 'tidyr', 'readr', 'purrr',
+  'mclust', 'ggforce', 'dplyr',
+  'patchwork', 'gridExtra', 'gganimate',
+  'ggridges', 'gifski', 'progress',
+  'parallel') -> p.list
+
+cat('Loading libraries:', p.list, sep = '\n')
+
+# auto-load quietly
+sapply(p.list, sshhh)
+
+cat('Loading functions\n')
 
 # Read binary (.prn) files and trace markers
-read_grid_marx <- function(dir, prn = seq(10, 15, 1), marx.est = 50000, area = c(500000, 1260000, 17500, 28500), markers = TRUE, grid = FALSE){
+trace_marx <- function(
+  prn.paths,
+  marx.est = 50000,
+  area = c(500000, 1260000, 17500, 28500),
+  markers = TRUE,
+  grid = FALSE){
   if(grid == FALSE & markers == FALSE) {
     stop('grid and markers cannot both be FALSE')
   }
   # List prn files
-  fnames <- list.files(dir, '*.prn', full.names = T)
-  f.order <- order(fnames %>% purrr::map_int(~.x %>% stringr::str_extract('[0-9]+.prn+') %>% stringr::str_extract('[0-9]+') %>% as.integer()))
-  fnames.ordered <- fnames[f.order]
-  
+  fpaths <- prn.paths
+  forder <- order(
+    fpaths %>%
+    purrr::map_int(~.x %>% stringr::str_extract('[0-9]+.prn+') %>%
+    stringr::str_extract('[0-9]+') %>%
+    as.integer()))
+  fpaths.ordered <- fpaths[forder]
+
   # Create marker arrays (n.markers x n.tsteps)
   mmm <- matrix(NA, marx.est) # marker global index
-  mty <- matrix(NA, marx.est, length(prn)) # type
-  mti <- matrix(NA, marx.est, length(prn)) # time, [yr]
-  mxx <- matrix(NA, marx.est, length(prn)) # x, [m]
-  mzz <- matrix(NA, marx.est, length(prn)) # y, [m]
-  mtk <- matrix(NA, marx.est, length(prn)) # T, [K]
-  mpb <- matrix(NA, marx.est, length(prn)) # P, [bar]
-  
+  mty <- matrix(NA, marx.est, length(fpaths)) # type
+  mti <- matrix(NA, marx.est, length(fpaths)) # time, [yr]
+  mxx <- matrix(NA, marx.est, length(fpaths)) # x, [m]
+  mzz <- matrix(NA, marx.est, length(fpaths)) # y, [m]
+  mtk <- matrix(NA, marx.est, length(fpaths)) # T, [K]
+  mpb <- matrix(NA, marx.est, length(fpaths)) # P, [bar]
+
   # Create grid array
-  grids <- vector('list', length(prn))
-  
+  grids <- vector('list', length(fpaths))
+
   # Coordinates of the sampling area, [m]
   xmin <- area[1]
   xmax <- area[2]
   zmin <- area[3]
   zmax <- area[4]
-  
+
   # Counters
   mfind <- 0 # Marker counter
   g.count <- 1 # Grid counter
   tstep <- 1 # .prn (tstep) counter
-  
-  for(nt in prn){
+
+  for(path in fpaths){
     # Filename
-    fname <- fnames.ordered[nt]
+    f <- path
     # Open connection
-    f.prn <- file(fname, 'rb')
+    f.prn <- file(f, 'rb')
     # Read sizes of variables
     readBin(f.prn, 'integer', 4, 1, signed = F)
     # Read model parameters
@@ -79,7 +99,14 @@ read_grid_marx <- function(dir, prn = seq(10, 15, 1), marx.est = 50000, area = c
       # Initialize matrices
       pr <- matrix(NA, znumz, xnumx)
       # Progress bar
-      pb.nodes <- progress_bar$new(format = paste0('Reading Pressure Nodes [', stringr::str_extract(fname, 'cd.[0-9]{2}.[0-9]+'), '] [:bar] :percent in: :elapsed'), total = xnumx*znumz, clear = FALSE, width = 60)
+      pb.nodes <- progress_bar$new(
+        format = paste0(
+          'Reading Pressure Nodes [',
+          stringr::str_extract(f, 'cd.[0-9]{2}.[0-9]+'),
+          '] [:bar] :percent in: :elapsed'),
+        total = xnumx*znumz,
+        clear = FALSE,
+        width = 60)
       # Read nodes information
       for(i in seq_len(xnumx)){
         for(j in seq_len(znumz)){
@@ -115,7 +142,14 @@ read_grid_marx <- function(dir, prn = seq(10, 15, 1), marx.est = 50000, area = c
       eii <- matrix(1, znumz, xnumx)*1e-16
       sii <- matrix(1, znumz, xnumx)*1e+4
       # Progress bar
-      pb.nodes <- progress_bar$new(format = paste0('Reading Nodes [', stringr::str_extract(fname, 'cd.[0-9]{2}.[0-9]+'), '] [:bar] :percent in: :elapsed'), total = xnumx*znumz, clear = FALSE, width = 60)
+      pb.nodes <- progress_bar$new(
+        format = paste0(
+          'Reading Nodes [',
+          stringr::str_extract(f, 'cd.[0-9]{2}.[0-9]+'),
+          '] [:bar] :percent in: :elapsed'),
+        total = xnumx*znumz,
+        clear = FALSE,
+        width = 60)
       # Read nodes information
       for(i in seq_len(xnumx)){
         for(j in seq_len(znumz)){
@@ -158,7 +192,11 @@ read_grid_marx <- function(dir, prn = seq(10, 15, 1), marx.est = 50000, area = c
     gz <- readBin(f.prn, 'numeric', znumz, 4)
     if(grid == TRUE) {
       # Progress bar
-      pb.eii <- progress_bar$new(format = 'Calc. Stress & Strain [:bar] :percent in: :elapsed', total = (xnumx*znumz)-4, clear = FALSE, width = 60)
+      pb.eii <- progress_bar$new(
+        format = 'Calc. Stress & Strain [:bar] :percent in: :elapsed',
+        total = (xnumx*znumz)-2440,
+        clear = FALSE,
+        width = 60)
       for (i in seq_len(xnumx-2)){
         for (j in seq_len(znumz-2)){
           eii[j+1,i+1]=(exz[j+1,i+1]^2+((exx[j+1,i+1]+exx[j+2,i+1]+exx[j+1,i+2]+exx[j+2,i+2])/4)^2)^0.5;
@@ -176,8 +214,16 @@ read_grid_marx <- function(dir, prn = seq(10, 15, 1), marx.est = 50000, area = c
       pz <- gz
       pz[2:znumz] <- (gz[1:znumz-1]+gz[2:znumz])/2
       # Progress bar
-      pb.marx.find <- progress_bar$new(format = 'Reading Markers [:bar] :percent in: :elapsed', total = marknum, clear = FALSE, width = 60)
-      pb.marx <- progress_bar$new(format = 'Update Marker PT [:bar] :percent in: :elapsed', total = mfind, clear = FALSE, width = 60)
+      pb.marx.find <- progress_bar$new(
+        format = 'Reading Markers [:bar] :percent in: :elapsed',
+        total = marknum,
+        clear = FALSE,
+        width = 60)
+      pb.marx <- progress_bar$new(
+        format = 'Update Marker PT [:bar] :percent in: :elapsed',
+        total = mfind,
+        clear = FALSE,
+        width = 60)
       # Find Markers
       if(mfind == 0){
         seek(f.prn, curpos3, 'start')
@@ -300,7 +346,7 @@ read_grid_marx <- function(dir, prn = seq(10, 15, 1), marx.est = 50000, area = c
         break
       }
     }
-    # Save grid
+    # save grid
     rownames(pr) <- gz; colnames(pr) <- gx
     rownames(vx) <- gz; colnames(vx) <- gx
     rownames(vz) <- gz; colnames(vz) <- gx
@@ -322,7 +368,7 @@ read_grid_marx <- function(dir, prn = seq(10, 15, 1), marx.est = 50000, area = c
     rownames(cp) <- gz; colnames(cp) <- gx
     rownames(kt) <- gz; colnames(kt) <- gx
     rownames(ht) <- gz; colnames(ht) <- gx
-    assign(paste0('grid.', stringr::str_extract(fname, 'cd.[0-9]+.[0-9]+')), list(
+    assign(paste0('grid.', stringr::str_extract(f, 'cd.[0-9]+.[0-9]+')), list(
       pr = pr %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'pr') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
       vx = vx %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'vx') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
       vz = vz %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'vz') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
@@ -346,11 +392,11 @@ read_grid_marx <- function(dir, prn = seq(10, 15, 1), marx.est = 50000, area = c
       kt = kt %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'kt') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
       ht = ht %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'ht') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer())
     ))
-    grids[g.count] <- get(paste0('grid.', stringr::str_extract(fname, 'cd.[0-9]+.[0-9]+')))
+    grids[g.count] <- get(paste0('grid.', stringr::str_extract(f, 'cd.[0-9]+.[0-9]+')))
     g.count <- g.count + 1
   }
-  # Save markers
-  assign(paste0('marx.', fname %>% stringr::str_extract('cd.[1-9]+')), list(
+  # save markers
+  assign(paste0('marx.', f %>% stringr::str_extract('cd.[1-9]+')), list(
     m.ti = mti %>% as_tibble(rownames = 'id', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-id, names_to = 'tstep', values_to = 'time') %>% mutate('tstep' = tstep %>% substr(4,5) %>% as.integer()),
     m.xx = mxx %>% as_tibble(rownames = 'id', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-id, names_to = 'tstep', values_to = 'x') %>% mutate('tstep' = tstep %>% substr(4,5) %>% as.integer()),
     m.zz = mzz %>% as_tibble(rownames = 'id', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-id, names_to = 'tstep', values_to = 'z') %>% mutate('tstep' = tstep %>% substr(4,5) %>% as.integer()),
@@ -360,15 +406,15 @@ read_grid_marx <- function(dir, prn = seq(10, 15, 1), marx.est = 50000, area = c
   ) %>% purrr::reduce(left_join, by = c('id', 'tstep')) %>% group_by(id) %>% tidyr::drop_na())
   if(markers == TRUE & grid == TRUE) {
     # Print markers
-    print(get(paste0('marx.', fname %>% stringr::str_extract('cd.[1-9]+'))))
-    print(table(get(paste0('marx.', fname %>% stringr::str_extract('cd.[1-9]+')))$type))
+    print(get(paste0('marx.', f %>% stringr::str_extract('cd.[1-9]+'))))
+    print(table(get(paste0('marx.', f %>% stringr::str_extract('cd.[1-9]+')))$type))
     return(list(grid = grids,
-                marx = get(paste0('marx.', fname %>% stringr::str_extract('cd.[1-9]+')))))
+                marx = get(paste0('marx.', f %>% stringr::str_extract('cd.[1-9]+')))))
   } else if(markers == TRUE & grid == FALSE) {
     # Print markers
-    print(get(paste0('marx.', fname %>% stringr::str_extract('cd.[1-9]+'))))
-    print(table(get(paste0('marx.', fname %>% stringr::str_extract('cd.[1-9]+')))$type))
-    return(get(paste0('marx.', fname %>% stringr::str_extract('cd.[1-9]+'))))
+    print(get(paste0('marx.', f %>% stringr::str_extract('cd.[1-9]+'))))
+    print(table(get(paste0('marx.', f %>% stringr::str_extract('cd.[1-9]+')))$type))
+    return(get(paste0('marx.', f %>% stringr::str_extract('cd.[1-9]+'))))
   } else if(markers == FALSE & grid == TRUE) {
     return(grids)
   }
@@ -407,7 +453,12 @@ marx_ft <- function(df) {
 
 # b.ic ----
 # Bayesian Information Criterion
-b.ic <- function(df, features = 'all', G = NULL, init = NULL, scale = FALSE) {
+b.ic <- function(
+  df,
+  features = 'all',
+  G = NULL,
+  init = NULL,
+  scale = FALSE) {
   if (features == 'all') {
     features <- df %>%
       ungroup() %>%
@@ -462,6 +513,7 @@ gmm <- function(df, features = 'all', G = NULL, bic = NULL) {
   df$class <- as.factor(m$classification)
   return(m)
 }
+
 # gmm.den ----
 # GMM density model
 gmm.den <- function(df,

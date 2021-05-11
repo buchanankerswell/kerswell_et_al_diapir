@@ -17,7 +17,7 @@ fun <- function(model) {
   trace_marx(
     prn.paths = fpaths,
     marx.est = 500000,
-    area = c(500000, 1260000, 17500, 28500),
+    area = c(1250000, 1260000, 17500, 28500),
     markers = T,
     grid = T)
 }

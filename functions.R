@@ -22,7 +22,7 @@ cat('Loading functions\n')
 # Read binary (.prn) files and trace markers
 trace_marx <- function(
   prn.paths,
-  marx.est = 50000,
+  marx.est = 2000000,
   area = c(500000, 1260000, 17500, 28500),
   markers = TRUE,
   grid = FALSE){
@@ -37,6 +37,7 @@ trace_marx <- function(
     stringr::str_extract('[0-9]+') %>%
     as.integer()))
   fpaths.ordered <- fpaths[forder]
+  fnames <- fpaths %>% stringr::str_extract('cd[a-z][0-9]+_[0-9]+')
 
   # Create marker arrays (n.markers x n.tsteps)
   mmm <- matrix(NA, marx.est) # marker global index
@@ -391,8 +392,8 @@ trace_marx <- function(
       cp = cp %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'cp') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
       kt = kt %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'kt') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
       ht = ht %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'ht') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer())
-    ))
-    grids[g.count] <- get(paste0('grid.', stringr::str_extract(f, 'cd.[0-9]+.[0-9]+')))
+    ) %>% purrr::reduce(dplyr::left_join))
+    grids[[g.count]] <- get(paste0('grid.', stringr::str_extract(f, 'cd.[0-9]+.[0-9]+')))
     g.count <- g.count + 1
   }
   # save markers
@@ -408,7 +409,7 @@ trace_marx <- function(
     # Print markers
     print(get(paste0('marx.', f %>% stringr::str_extract('cd.[1-9]+'))))
     print(table(get(paste0('marx.', f %>% stringr::str_extract('cd.[1-9]+')))$type))
-    return(list(grid = grids,
+    return(list(grid = grids %>% purrr::set_names(fnames),
                 marx = get(paste0('marx.', f %>% stringr::str_extract('cd.[1-9]+')))))
   } else if(markers == TRUE & grid == FALSE) {
     # Print markers

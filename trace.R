@@ -1,7 +1,7 @@
 source('functions.R')
 
 # File paths (prn binaries)
-prns <- list.files('../I2VIS', pattern = '.prn', full.names = T)
+prns <- list.files('data/I2VIS', pattern = '.prn', full.names = T)
 mods <- prns %>% stringr::str_extract('cd[a-z]{1}[0-9]{2,3}')
 
 # Compile filepaths
@@ -23,8 +23,13 @@ fun <- function(model) {
 }
 
 models <- unique(mods)
+cat('\nFound binary files for:', models, sep = '\n')
 
-parallel::mclapply(models, fun, mc.cores = 32) %>%
+cores <- parallel::detectCores()
+
+cat('\nParallel markers tracing with', cores, 'cores\n')
+
+parallel::mclapply(models, fun, mc.cores = cores) %>%
 purrr::set_names(models) -> marx
 
 # Save

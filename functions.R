@@ -9,7 +9,7 @@ sshhh <- function(p){
 c('magrittr', 'tidyr', 'readr', 'purrr',
   'mclust', 'ggforce', 'dplyr',
   'patchwork', 'gridExtra', 'gganimate',
-  'ggridges', 'gifski', 'progress',
+  'ggridges', 'progress',
   'parallel') -> p.list
 
 cat('Loading libraries:', p.list, sep = '\n')
@@ -22,10 +22,10 @@ cat('Loading functions\n')
 # Read binary (.prn) files and trace markers
 trace_marx <- function(
   prn.paths,
-  marx.est = 2000000,
+  marx.est = 20000,
   area = c(500000, 1260000, 17500, 28500),
   markers = TRUE,
-  grid = FALSE){
+  grid = TRUE){
   if(grid == FALSE & markers == FALSE) {
     stop('grid and markers cannot both be FALSE')
   }
@@ -37,7 +37,7 @@ trace_marx <- function(
     stringr::str_extract('[0-9]+') %>%
     as.integer()))
   fpaths.ordered <- fpaths[forder]
-  fnames <- fpaths %>% stringr::str_extract('cd[a-z][0-9]+_[0-9]+')
+  fnames <- fpaths.ordered %>% stringr::str_extract('cd[a-z][0-9]+_[0-9]+')
 
   # Create marker arrays (n.markers x n.tsteps)
   mmm <- matrix(NA, marx.est) # marker global index
@@ -62,9 +62,11 @@ trace_marx <- function(
   g.count <- 1 # Grid counter
   tstep <- 1 # .prn (tstep) counter
 
-  for(path in fpaths){
+  for(path in fpaths.ordered){
     # Filename
     f <- path
+    # Model name
+    f.name <- stringr::str_extract(f, 'cd.[0-9]+.[0-9]+')
     # Open connection
     f.prn <- file(f, 'rb')
     # Read sizes of variables
@@ -96,6 +98,7 @@ trace_marx <- function(
     # Skip rock properties
     curpos <- 4+2*4+16*8+rocknum*(8*24+4)
     seek(f.prn, curpos, 'start')
+
     if(grid == FALSE & markers == TRUE) {
       # Initialize matrices
       pr <- matrix(NA, znumz, xnumx)
@@ -103,11 +106,11 @@ trace_marx <- function(
       pb.nodes <- progress_bar$new(
         format = paste0(
           'Reading Pressure Nodes [',
-          stringr::str_extract(f, 'cd.[0-9]{2}.[0-9]+'),
+          f.name,
           '] [:bar] :percent in: :elapsed'),
         total = xnumx*znumz,
         clear = FALSE,
-        width = 60)
+        width = 100)
       # Read nodes information
       for(i in seq_len(xnumx)){
         for(j in seq_len(znumz)){
@@ -146,11 +149,11 @@ trace_marx <- function(
       pb.nodes <- progress_bar$new(
         format = paste0(
           'Reading Nodes [',
-          stringr::str_extract(f, 'cd.[0-9]{2}.[0-9]+'),
+          f.name,
           '] [:bar] :percent in: :elapsed'),
         total = xnumx*znumz,
         clear = FALSE,
-        width = 60)
+        width = 100)
       # Read nodes information
       for(i in seq_len(xnumx)){
         for(j in seq_len(znumz)){
@@ -185,27 +188,35 @@ trace_marx <- function(
         }
       }
     }
+
     # Skip all nodes
     curpos2 <- curpos+(4*22+8*4)*xnumx*znumz
-    seek(f.prn, curpos2, 'start')  
+    seek(f.prn, curpos2, 'start')
     # Read gridline positions
     gx <- readBin(f.prn, 'numeric', xnumx, 4)
     gz <- readBin(f.prn, 'numeric', znumz, 4)
+
     if(grid == TRUE) {
       # Progress bar
       pb.eii <- progress_bar$new(
-        format = 'Calc. Stress & Strain [:bar] :percent in: :elapsed',
+        format =
+          paste0('Calc. Stress & Strain [',
+                 f.name,
+                 '] [:bar] :percent in: :elapsed'),
         total = (xnumx*znumz)-2440,
         clear = FALSE,
-        width = 60)
+        width = 100)
       for (i in seq_len(xnumx-2)){
         for (j in seq_len(znumz-2)){
-          eii[j+1,i+1]=(exz[j+1,i+1]^2+((exx[j+1,i+1]+exx[j+2,i+1]+exx[j+1,i+2]+exx[j+2,i+2])/4)^2)^0.5;
-          sii[j+1,i+1]=(sxz[j+1,i+1]^2+((sxx[j+1,i+1]+sxx[j+2,i+1]+sxx[j+1,i+2]+sxx[j+2,i+2])/4)^2)^0.5;
+          eii[j+1,i+1] <-
+            (exz[j+1,i+1]^2+((exx[j+1,i+1]+exx[j+2,i+1]+exx[j+1,i+2]+exx[j+2,i+2])/4)^2)^0.5;
+          sii[j+1,i+1] <-
+            (sxz[j+1,i+1]^2+((sxx[j+1,i+1]+sxx[j+2,i+1]+sxx[j+1,i+2]+sxx[j+2,i+2])/4)^2)^0.5;
           pb.eii$tick()
         }
       }
     }
+
     if(markers == TRUE){
       # Skip all boundary conditions
       curpos3 <- curpos2+(xnumx+znumz)*4+(4*4+8*3)*(boundnum-1)
@@ -215,16 +226,16 @@ trace_marx <- function(
       pz <- gz
       pz[2:znumz] <- (gz[1:znumz-1]+gz[2:znumz])/2
       # Progress bar
-      pb.marx.find <- progress_bar$new(
-        format = 'Reading Markers [:bar] :percent in: :elapsed',
+      pb.marx <- progress_bar$new(
+        format =
+          paste0('Reading ',
+                 marknum,
+                 ' Markers [',
+                 f.name,
+                 '] [:bar] :percent in: :elapsed'),
         total = marknum,
         clear = FALSE,
-        width = 60)
-      pb.marx <- progress_bar$new(
-        format = 'Update Marker PT [:bar] :percent in: :elapsed',
-        total = mfind,
-        clear = FALSE,
-        width = 60)
+        width = 100)
       # Find Markers
       if(mfind == 0){
         seek(f.prn, curpos3, 'start')
@@ -277,9 +288,13 @@ trace_marx <- function(
             dxm <- (mx-px[i])/(px[i+1]-px[i])
             dzm <- (mz-pz[j])/(pz[j+1]-pz[j])
             # P [bar]
-            mpb[mfind,tstep] <- 1e-5*((1-dxm)*(1-dzm)*pr[j,i]+(dxm)*(1-dzm)*pr[j,i+1]+(1-dxm)*(dzm)*pr[j+1,i]+(dxm)*(dzm)*pr[j+1,i+1])
+            mpb[mfind,tstep] <-
+              1e-5*((1-dxm)*(1-dzm)*pr[j,i]+
+                    (dxm)*(1-dzm)*pr[j,i+1]+
+                    (1-dxm)*(dzm)*pr[j+1,i]+
+                    (dxm)*(dzm)*pr[j+1,i+1])
           }
-          pb.marx.find$tick()
+          pb.marx$tick()
         }
         if(mfind == 0){
           break
@@ -335,121 +350,188 @@ trace_marx <- function(
           dxm <- (mx-px[i])/(px[i+1]-px[i])
           dzm <- (mz-pz[j])/(pz[j+1]-pz[j])
           # P [bar]
-          mpb[mi,tstep] <- 1e-5*((1-dxm)*(1-dzm)*pr[j,i]+(dxm)*(1-dzm)*pr[j,i+1]+(1-dxm)*(dzm)*pr[j+1,i]+(dxm)*(dzm)*pr[j+1,i+1])
+          mpb[mi,tstep] <-
+            1e-5*((1-dxm)*(1-dzm)*pr[j,i]+
+                  (dxm)*(1-dzm)*pr[j,i+1]+
+                  (1-dxm)*(dzm)*pr[j+1,i]+
+                  (dxm)*(dzm)*pr[j+1,i+1])
         }
-        # .prn (tstep) counter
-        tstep <- tstep+1
-        pb.marx$tick()
       }
       # Close connection
       close(f.prn)
       if(mfind == 0){
         break
       }
+      # .prn (tstep) counter
+      tstep <- tstep+1
     }
-    # save grid
-    rownames(pr) <- gz; colnames(pr) <- gx
-    rownames(vx) <- gz; colnames(vx) <- gx
-    rownames(vz) <- gz; colnames(vz) <- gx
-    rownames(exx) <- gz; colnames(exx) <- gx
-    rownames(ezz) <- gz; colnames(ezz) <- gx
-    rownames(exz) <- gz; colnames(exz) <- gx
-    rownames(sxx) <- gz; colnames(sxx) <- gx
-    rownames(sxz) <- gz; colnames(sxz) <- gx
-    rownames(ro) <- gz; colnames(ro) <- gx
-    rownames(nu) <- gz; colnames(nu) <- gx
-    rownames(nd) <- gz; colnames(nd) <- gx
-    rownames(mu) <- gz; colnames(mu) <- gx
-    rownames(ep) <- gz; colnames(ep) <- gx
-    rownames(et) <- gz; colnames(et) <- gx
-    rownames(pr0) <- gz; colnames(pr0) <- gx
-    rownames(prb) <- gz; colnames(prb) <- gx
-    rownames(dv) <- gz; colnames(dv) <- gx
-    rownames(tk) <- gz; colnames(tk) <- gx
-    rownames(cp) <- gz; colnames(cp) <- gx
-    rownames(kt) <- gz; colnames(kt) <- gx
-    rownames(ht) <- gz; colnames(ht) <- gx
-    assign(paste0('grid.', stringr::str_extract(f, 'cd.[0-9]+.[0-9]+')), list(
-      pr = pr %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'pr') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
-      vx = vx %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'vx') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
-      vz = vz %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'vz') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
-      exx = exx %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'exx') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
-      ezz = ezz %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'ezz') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
-      exz = exz %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'exz') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
-      sxx = sxx %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'sxx') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
-      szz = szz %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'szz') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
-      sxz = sxz %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'sxz') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
-      ro = ro %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'ro') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
-      nu = nu %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'nu') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
-      nd = nd %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'nd') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
-      mu = mu %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'mu') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
-      ep = ep %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'ep') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
-      et = et %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'et') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
-      pr0 = pr0 %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'pr0') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
-      prb = prb %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'prb') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
-      dv = dv %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'dv') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
-      tk = tk %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'tk') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
-      cp = cp %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'cp') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
-      kt = kt %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'kt') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer()),
-      ht = ht %>% as_tibble(rownames = 'z', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-z, names_to = 'x', values_to = 'ht') %>% mutate('x' = x %>% as.integer(), 'z' = z %>% as.integer())
-    ) %>% purrr::reduce(dplyr::left_join))
-    grids[[g.count]] <- get(paste0('grid.', stringr::str_extract(f, 'cd.[0-9]+.[0-9]+')))
+
+    # Save grid
+    assign(paste0('grid.', f.name),
+      # Combine into one tibble
+      purrr::map2(
+        list(pr, vx, vz, exx, ezz, exz, sxx,
+             szz, sxz, ro, nu, nd, mu, ep,
+             et, pr0, prb, dv, tk, cp, kt, ht),
+        c('pr', 'vx', 'vz', 'exx', 'ezz', 'exz', 'sxx',
+          'szz', 'sxz', 'ro', 'nu', 'nd', 'mu', 'ep',
+          'et', 'pr0', 'prb', 'dv', 'tk', 'cp', 'kt', 'ht'),
+        ~{rownames(.x) <- gz
+          colnames(.x) <- gx
+          .x %>%
+          as_tibble(rownames = 'z') %>%
+          tidyr::pivot_longer(-z, names_to = 'x', values_to = .y) %>%
+          mutate('x' = as.integer(x), 'z' = as.integer(z))}) %>%
+      purrr::reduce(dplyr::left_join, by = c('z', 'x')))
+
+    # Save
+    grids[[g.count]] <- get(paste0('grid.', f.name))
     g.count <- g.count + 1
+    cat('\nSaving', paste0('grid.', f.name))
+
   }
-  # save markers
-  assign(paste0('marx.', f %>% stringr::str_extract('cd.[1-9]+')), list(
-    m.ti = mti %>% as_tibble(rownames = 'id', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-id, names_to = 'tstep', values_to = 'time') %>% mutate('tstep' = tstep %>% substr(4,5) %>% as.integer()),
-    m.xx = mxx %>% as_tibble(rownames = 'id', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-id, names_to = 'tstep', values_to = 'x') %>% mutate('tstep' = tstep %>% substr(4,5) %>% as.integer()),
-    m.zz = mzz %>% as_tibble(rownames = 'id', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-id, names_to = 'tstep', values_to = 'z') %>% mutate('tstep' = tstep %>% substr(4,5) %>% as.integer()),
-    m.tk = mtk %>% as_tibble(rownames = 'id', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-id, names_to = 'tstep', values_to = 'T') %>% mutate('tstep' = tstep %>% substr(4,5) %>% as.integer()),
-    m.pb = mpb %>% as_tibble(rownames = 'id', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-id, names_to = 'tstep', values_to = 'P') %>% mutate('tstep' = tstep %>% substr(4,5) %>% as.integer()),
-    m.ty = mty %>% as_tibble(rownames = 'id', .name_repair = ~ vctrs::vec_as_names(..., repair = 'unique', quiet = T)) %>% tidyr::pivot_longer(-id, names_to = 'tstep', values_to = 'type') %>% mutate('tstep' = tstep %>% substr(4,5) %>% as.integer())
-  ) %>% purrr::reduce(left_join, by = c('id', 'tstep')) %>% group_by(id) %>% tidyr::drop_na())
+
+  # Save markers
+  assign(paste0('marx.', f %>% stringr::str_extract('cd.[1-9]+')),
+    # Combine into one tibble
+    purrr::map2(
+      list(mti, mxx, mzz, mtk, mpb, mty),
+      c('time', 'x', 'z', 'T', 'P', 'type'),
+      ~{.x %>%
+        as_tibble(rownames = 'id') %>%
+        tidyr::pivot_longer(-id, names_to = 'tstep', values_to = .y) %>%
+        mutate('tstep' = tstep %>% stringr::str_extract('[0-9]+') %>% as.integer(),
+               'id' = as.integer(id))}) %>%
+    purrr::reduce(dplyr::left_join, by = c('id', 'tstep')) %>%
+    group_by(id) %>%
+    tidyr::drop_na())
+  cat('\nSaving markers', paste0('marx.', f %>% stringr::str_extract('cd.[1-9]+')), '\n')
+
   if(markers == TRUE & grid == TRUE) {
+    # Print grids
+    cat('\nSaved ', length(grids), ' grids:')
+    cat('\n', fnames, sep = '\n')
     # Print markers
     print(get(paste0('marx.', f %>% stringr::str_extract('cd.[1-9]+'))))
+    cat('\nMarker types')
     print(table(get(paste0('marx.', f %>% stringr::str_extract('cd.[1-9]+')))$type))
+
     return(list(grid = grids %>% purrr::set_names(fnames),
                 marx = get(paste0('marx.', f %>% stringr::str_extract('cd.[1-9]+')))))
+
   } else if(markers == TRUE & grid == FALSE) {
     # Print markers
     print(get(paste0('marx.', f %>% stringr::str_extract('cd.[1-9]+'))))
+    cat('\nMarker types')
     print(table(get(paste0('marx.', f %>% stringr::str_extract('cd.[1-9]+')))$type))
+
     return(get(paste0('marx.', f %>% stringr::str_extract('cd.[1-9]+'))))
   } else if(markers == FALSE & grid == TRUE) {
+    # Print grids
+    cat('\nSaved ', length(grids), ' grids:')
+    cat('\n', fnames, sep = '\n')
     return(grids)
   }
+
 }
 
-# Computes features (columns) for ML clustering
-marx_ft <- function(df) {
-  d <- df %>%
-   add_count(tstep) %>%
-   summarise(
-     max.t = max(time),
-     # max.P = max(P),
-     # med.P = median(P),
-     # iqr.P = IQR(P),
-     # up.dP = sum(diff(P) > 0),
-     # down.dP = sum(diff(P) < 0),
-     runup.dP = {rn <- rle(diff(P) > 0); rn$lengths[which(rn$values == TRUE)] %>% max()},
-     # rundown.dP = {rn <- rle(diff(P) > 0); rn$lengths[which(rn$values == FALSE)] %>% max()},
-     sum.dP = sum(diff(P)),
-     # sumup.dP = sum(diff(P)[which(diff(P) > 0)]),
-     # sumdown.dP = sum(diff(P)[which(diff(P) < 0)]),
-     # max.T = max(T),
-     # med.T = median(T),
-     # iqr.T = IQR(T),
-     # up.dT = sum(diff(T) > 0),
-     # down.dT = sum(diff(T) < 0),
-     runup.dT = {rn <- rle(diff(T) > 0); rn$lengths[which(rn$values == TRUE)] %>% max()},
-     # rundown.dT = {rn <- rle(diff(T) > 0); rn$lengths[which(rn$values == FALSE)] %>% max()},
-     sum.dT = sum(diff(T)),
-     # sumup.dT = sum(diff(T)[which(diff(T) > 0)]),
-     # sumdown.dT = sum(diff(T)[which(diff(T) < 0)]),
-     .groups = 'keep'
-   )
-  return(d)
+# Load RData files and save markers and grids
+load_marx <- function(path) {
+  # Model name
+  mod <- path %>% stringr::str_extract('cd.[0-9]+')
+  cat('\nLoading markers and grids [', mod, ']', sep = '')
+  # Load .RData file
+  load(path)
+  # Save markers and grids separately
+  grid <- get(mod)$grid
+  marx <- get(mod)$marx
+  cat('\nSaving markers and grids [', mod, ']', sep = '')
+  assign(paste0(mod, '.grid'), grid, envir = .GlobalEnv)
+  assign(paste0(mod, '.marx'), marx, envir = .GlobalEnv)
+}
+
+# Save available features
+c('max.t',
+  'max.P',
+  'med.P',
+  'iqr.P',
+  'max.T',
+  'med.T',
+  'iqr.T',
+  'up.dP',
+  'down.dP',
+  'runup.dP',
+  'rundown.dP',
+  'sum.dP',
+  'sumup.dP',
+  'sumdown.dP',
+  'up.dT',
+  'down.dT',
+  'runup.dT',
+  'rundown.dT',
+  'sum.dT',
+  'sumup.dT',
+  'sumdown.dT') -> features
+
+# Computes marker features
+marx_ft <- function(df, features = 'all') {
+  if(features == 'all') {
+    cat('\nComputing features:',
+        'max.t',
+        'max.P',
+        'med.P',
+        'iqr.P',
+        'max.T',
+        'med.T',
+        'iqr.T',
+        'up.dP',
+        'down.dP',
+        'runup.dP',
+        'rundown.dP',
+        'sum.dP',
+        'sumup.dP',
+        'sumdown.dP',
+        'up.dT',
+        'down.dT',
+        'runup.dT',
+        'rundown.dT',
+        'sum.dT',
+        'sumup.dT',
+        'sumdown.dT',
+        sep = '\n')
+  } else {
+    cat('\nComputing features:', features, sep = '\n')
+  }
+  # Compute features
+  df %>%
+  summarise(
+    max.t = max(time),
+    max.P = max(P),
+    med.P = median(P),
+    iqr.P = IQR(P),
+    max.T = max(T),
+    med.T = median(T),
+    iqr.T = IQR(T),
+    up.dP = sum(diff(P) > 0),
+    down.dP = sum(diff(P) < 0),
+    runup.dP = {rn <- rle(diff(P) > 0); rn$lengths[which(rn$values == TRUE)] %>% max()},
+    rundown.dP = {rn <- rle(diff(P) > 0); rn$lengths[which(rn$values == FALSE)] %>% max()},
+    sum.dP = sum(diff(P)),
+    sumup.dP = sum(diff(P)[which(diff(P) > 0)]),
+    sumdown.dP = sum(diff(P)[which(diff(P) < 0)]),
+    up.dT = sum(diff(T) > 0),
+    down.dT = sum(diff(T) < 0),
+    runup.dT = {rn <- rle(diff(T) > 0); rn$lengths[which(rn$values == TRUE)] %>% max()},
+    rundown.dT = {rn <- rle(diff(T) > 0); rn$lengths[which(rn$values == FALSE)] %>% max()},
+    sum.dT = sum(diff(T)),
+    sumup.dT = sum(diff(T)[which(diff(T) > 0)]),
+    sumdown.dT = sum(diff(T)[which(diff(T) < 0)]),
+    .groups = 'keep') -> d
+  if(features == 'all' | length(features) == 0) {
+    return(d)
+  } else {
+    return(d %>% select(features))
+  }
 }
 
 # b.ic ----

@@ -1,18 +1,23 @@
-load('data/marx.RData')
+# Load functions and libraries
 source('functions.R')
 
-mod.names <- ls()[grepl('marx.*cd', ls())]
-marx.lst <- mod.names %>% purrr::map(get) %>% set_names(mod.names)
+# Load marker and grid data
+paths <- list.files('data', pattern = '_marx.RData', full.names = T)
+models <- paths %>% stringr::str_extract('cd.[0-9]+')
 
-load('data/coupling.RData')
-d.coupling <- reducedAllModelsDataframe %>%
-  as_tibble() %>%
-  group_by(z1100)
+# Summarise marker features
+purrr::map2(models, paths, ~{
+  # Load markers
+  load_marx(.y)
+  # Compute features
+  get(paste0(.x, '.marx')) %>%
+  marx_ft()
+  # Remove markers and grids
+  rm(list = paste0(.x, '.marx'), envir = .GlobalEnv)
+  rm(list = paste0(.x, '.grid'), envir = .GlobalEnv)
+}) %>%
+purrr::set_names(models) -> marx.features
 
-marx <- tibble(
-  model = mod.names,
-  marx = marx.lst,
-  marx.ft = purrr::map(marx.lst, marx_ft)
-)
-
-# save(marx, file = 'data/comp.RData')
+# Save
+cat('\nSaving marker features to data/marx_features.RData')
+save(marx.features, file = 'data/marx_features.RData')

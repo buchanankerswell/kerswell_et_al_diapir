@@ -114,7 +114,7 @@ trace_marx <- function(
       # Read nodes information
       for(i in seq_len(xnumx)){
         for(j in seq_len(znumz)){
-          vbuf <- readBin(f.prn, 'numeric', 1, 4)
+          vbuf <- readBin(f.prn, 'numeric', 3, 4)
           pr[j,i] <- vbuf[1]
           pb.nodes$tick()
         }
@@ -157,7 +157,7 @@ trace_marx <- function(
       # Read nodes information
       for(i in seq_len(xnumx)){
         for(j in seq_len(znumz)){
-          vbuf <- readBin(f.prn, 'numeric', 1, 4)
+          vbuf <- readBin(f.prn, 'numeric', 3, 4)
           pr[j,i] <- vbuf[1]
           vx[j,i] <- vbuf[2]
           vz[j,i] <- vbuf[3]
@@ -388,7 +388,6 @@ trace_marx <- function(
     grids[[g.count]] <- get(paste0('grid.', f.name))
     g.count <- g.count + 1
     cat('\nSaving', paste0('grid.', f.name))
-
   }
 
   # Save markers
@@ -435,6 +434,19 @@ trace_marx <- function(
 
 }
 
+# Save rock type colormap
+tibble(type = seq_len(40), r = c(0.792, 0.50588, 1, 0.68235, 1, 0.75294,
+    0.50196, 0, 0, 0, 0.3, 0.14118, 0, 0.9, 0.4, 0.8549, 0.95294, 0.35294, 0.1,
+    0, 0, 0, 0, 1, 1, 0.46667, 0.50196, 0.72549, 0.82549, 0.6, 1, 0.99216, 0.84706,
+    0.9, 0.8, 1, 0.6, 0.6, 0.1, 0.6), g = c(0.862, 0.99608, 0.50196, 0.34118, 0.50196,
+    0.75294, 0.50196, 0.50196, 0.84314, 0, 0.3, 0.72157, 0.50196, 0.4, 0, 0.59608,
+    0.20392, 0.16863, 0.6, 0, 0, 0, 0, 1, 0.90196, 0.46667, 0.50196, 0.015686,
+    0.43922, 0, 0, 0.38824, 0.078431, 0.2, 0, 0.6, 0.4, 0.8, 0.8, 0.5), b = c(0.988,
+    0.78824, 0, 0, 0, 0.75294, 0.50196, 0, 0, 0.71765, 0.9, 0.99216, 1, 1, 0,
+    0.36078, 0.086275, 0.027451, 0, 0, 0, 0, 0, 0.31765, 0.18824, 0.23529, 0,
+    0.78431, 0.99608, 0, 0, 0.30196, 0.15294, 0.2, 0, 0, 0, 0, 0, 0)) %>%
+mutate(color = rgb(r, g, b, 1)) -> c.map
+
 # Load RData files and save markers and grids
 load_marx <- function(path) {
   # Model name
@@ -442,22 +454,52 @@ load_marx <- function(path) {
   cat('\nLoading markers and grids [', mod, ']', sep = '')
   # Load .RData file
   load(path)
-  # Save markers and grids separately
-  grid <- get(mod)$grid
-  marx <- get(mod)$marx
+  # Take the markers dataframe and ...
+  cat('\nCropping and filtering markers [', mod, ']', sep = '')
+  marx <- get(mod)$marx %>%
+  # Crop tsteps before marker type change
+    slice(if(is.na(which(type != dplyr::lag(type))[1])) seq_len(n())
+          else seq_len(which(type != dplyr::lag(type))[1])-1) %>%
+  # Depth from crust surface
+  mutate('z' = z-18) %>%
+  # Add rock type color map
+  left_join(c.map, by = 'type') %>%
+  select(-c(r, g, b))
+  # Extract time from marker dataframe
+  time <- unique(marx$time)
+  # Add time metadata field to grids
+  grid <- purrr::map2(get(mod)$grid, time, ~{attr(.x, 'time') <- .y; .x})
+  # Save
   cat('\nSaving markers and grids [', mod, ']', sep = '')
+  # Save markers and grids separately
   assign(paste0(mod, '.grid'), grid, envir = .GlobalEnv)
   assign(paste0(mod, '.marx'), marx, envir = .GlobalEnv)
 }
 
 # Save available features
-c('max.t',
+c(
+  'tsteps',
+  'under.three.kbar',
+  'under.ten.kbar',
+  'above.thirty.kbar',
+  'under.one.hundred.c',
+  'under.five.hundred.c',
+  'above.seven.hundred.c',
   'max.P',
   'med.P',
+  'mean.P',
   'iqr.P',
   'max.T',
   'med.T',
+  'mean.T',
   'iqr.T',
+  'up.dx',
+  'down.dx',
+  'runup.dx',
+  'rundown.dx',
+  'sum.dx',
+  'sumup.dx',
+  'sumdown.dx',
   'up.dP',
   'down.dP',
   'runup.dP',
@@ -477,13 +519,26 @@ c('max.t',
 marx_ft <- function(df, features = 'all') {
   if(features == 'all') {
     cat('\nComputing features:',
-        'max.t',
+        'tsteps',
+        'under.three.kbar',
+        'under.ten.kbar',
+        'above.thirty.kbar',
+        'under.one.hundred.c',
+        'under.five.hundred.c',
+        'above.seven.hundred.c',
         'max.P',
         'med.P',
         'iqr.P',
         'max.T',
         'med.T',
         'iqr.T',
+        'up.dx',
+        'down.dx',
+        'runup.dx',
+        'rundown.dx',
+        'sum.dx',
+        'sumup.dx',
+        'sumdown.dx',
         'up.dP',
         'down.dP',
         'runup.dP',
@@ -505,13 +560,28 @@ marx_ft <- function(df, features = 'all') {
   # Compute features
   df %>%
   summarise(
-    max.t = max(time),
+    tsteps = n(),
+    under.three.kbar = sum(P < 3e3),
+    under.ten.kbar = sum(P < 1e4),
+    above.thirty.kbar = sum(P > 3e4),
+    under.one.hundred.c = sum(T < 373),
+    under.five.hundred.c = sum(T < 773),
+    above.seven.hundred.c = sum(T > 973),
     max.P = max(P),
     med.P = median(P),
+    mean.P = mean(P),
     iqr.P = IQR(P),
     max.T = max(T),
     med.T = median(T),
+    mean.T = mean(T),
     iqr.T = IQR(T),
+    up.dx = sum(diff(x) > 0),
+    down.dx = sum(diff(x) < 0),
+    runup.dx = {rn <- rle(diff(x) > 0); rn$lengths[which(rn$values == TRUE)] %>% max()},
+    rundown.dx = {rn <- rle(diff(x) > 0); rn$lengths[which(rn$values == FALSE)] %>% max()},
+    sum.dP = sum(diff(P)),
+    sumup.dP = sum(diff(P)[which(diff(P) > 0)]),
+    sumdown.dP = sum(diff(P)[which(diff(P) < 0)]),
     up.dP = sum(diff(P) > 0),
     down.dP = sum(diff(P) < 0),
     runup.dP = {rn <- rle(diff(P) > 0); rn$lengths[which(rn$values == TRUE)] %>% max()},
@@ -527,11 +597,492 @@ marx_ft <- function(df, features = 'all') {
     sumup.dT = sum(diff(T)[which(diff(T) > 0)]),
     sumdown.dT = sum(diff(T)[which(diff(T) < 0)]),
     .groups = 'keep') -> d
+  # Clean up infinites
+  d[d == -Inf] <- 0
+  d[d == Inf] <- 0
+  # Save
   if(features == 'all' | length(features) == 0) {
     return(d)
   } else {
     return(d %>% select(features))
   }
+}
+
+# Markers motion movie
+marx_motion_mov <- function(df, name, class = FALSE) {
+  cat('\nAnimating marker motions [', name, ']', sep = '')
+  # Color by type or class
+  if(class) {
+  # Draw plot
+  df %>%
+  mutate('time' = round(time/1e6, 3),
+         'type' = as.factor(type),
+         'class' = as.factor(class)) %>%
+  ggplot() +
+  geom_point(aes(x = x/1000, y = z/1000, color = class, group = id), size = 0.3) +
+  guides(color = guide_legend(nrow = 1, byrow = T)) +
+  labs(
+    title = paste0('[', name, '] Time: {round(frame_time, 2)} Ma'),
+    x = 'Distance [km]',
+    y = 'Depth [km]',
+    color = 'Rock Type') +
+  scale_y_reverse() +
+  coord_fixed() +
+  scale_color_brewer(palette = 'Paired') +
+  theme_classic() +
+  theme(
+    legend.position = 'bottom'
+  ) +
+  exit_fade() +
+  transition_time(time) +
+  ease_aes('linear') -> p
+  fname <- paste0('figs/anim/', name, '_motion_class.mp4')
+  cat('\nSaving movie to figs/anim/', name, '_motion_class.mp4', sep = '')
+  } else {
+  # Draw plot
+  df %>%
+  mutate('time' = round(time/1e6, 3),
+         'type' = as.factor(type)) %>%
+  ggplot() +
+  geom_point(aes(x = x/1000, y = z/1000, color = type, group = id), size = 0.3) +
+  guides(color = guide_legend(nrow = 1, byrow = T)) +
+  labs(
+    title = paste0('[', name, '] Time: {round(frame_time, 2)} Ma'),
+    x = 'Distance [km]',
+    y = 'Depth [km]',
+    color = 'Rock Type') +
+  scale_y_reverse() +
+  coord_fixed() +
+  scale_color_manual(
+    values = unique(c.map$color)[as.factor(c.map$type) %>% unique() %>% order()],
+    breaks = unique(c.map$type)[as.factor(c.map$type) %>% unique() %>% order()],
+    na.value = 'white') +
+  theme_classic() +
+  theme(
+    legend.position = 'bottom'
+  ) +
+  exit_fade() +
+  transition_time(time) +
+  ease_aes('linear') -> p
+  fname <- paste0('figs/anim/', name, '_motion.mp4')
+  cat('\nSaving movie to figs/anim/', name, '_motion.mp4', sep = '')
+  }
+  # Save video
+  cat('\nSaving movie to figs/anim/', name, '_motion.mp4', sep = '')
+  animate(
+    p,
+    fps = 30,
+    duration = 20,
+    width = 8,
+    height = 4,
+    units = 'in',
+    res = 300,
+    renderer = av_renderer(file = fname)
+  )
+}
+
+# Markers boxplot movie
+marx_boxplot_mov <- function(df, name) {
+  cat('\nAnimating marker boxplots [', name, ']', sep = '')
+  # Draw plot
+  df %>%
+  mutate(
+    'time' = round(time/1e6, 3),
+    'x' = x/1000,
+    'z' = z/1000,
+    'P' = P/1e4,
+    'T' = T-273
+  ) %>%
+  rename(
+    'P [kbar]' = P,
+    'T [C]' = T,
+    'x [km]' = x,
+    'z [km]' = z
+  ) %>%
+  pivot_longer(-c(id, tstep, type, time, color), names_to = 'param') %>%
+  group_by(param) %>%
+  ggplot() +
+  geom_boxplot(aes(x = value, y = param, group = param)) +
+  labs(
+    title = paste0('[', name, '] Time: {round(frame_time, 2)} Ma'),
+    x = NULL,
+    y = NULL) +
+  facet_wrap(~param, scales = 'free') +
+  theme_classic() +
+  theme(
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.line.y = element_blank()
+  ) +
+  exit_fade() +
+  transition_time(time) +
+  ease_aes('linear') -> p
+  # Save video
+  cat('\nSaving movie to figs/anim/', name, '_boxplot.mp4', sep = '')
+  animate(
+    p,
+    fps = 30,
+    duration = 20,
+    width = 4,
+    height = 4,
+    units = 'in',
+    res = 300,
+    renderer = av_renderer(file = paste0('figs/anim/', name, '_boxplot.mp4'))
+  )
+}
+
+# Markers PT movie
+marx_PT_mov <- function(df, name, class = FALSE) {
+  cat('\nPlotting marker PT paths [', name, ']', sep = '')
+  # Color by type or class
+  if(class) {
+  # Draw plot
+  df %>%
+  mutate('time' = round(time/1e6, 3),
+         'type' = as.factor(type),
+         'class' = as.factor(class)) %>%
+  ggplot() +
+  geom_point(aes(x = T-273, P/1e4, color = class, group = id), size = 0.3) +
+  guides(color = guide_legend(nrow = 1, byrow = T)) +
+  labs(
+    title = paste0('[', name, '] Time: {round(frame_time, 2)} Ma'),
+    x = 'Temperature [C]',
+    y = 'Pressure [GPa]',
+    color = 'Rock Type') +
+  coord_cartesian(
+    xlim = c(0, 1500),
+    ylim = c(0, 4)) +
+  scale_color_brewer(palette = 'Paired') +
+  theme_classic() +
+  theme(
+    legend.position = 'bottom'
+  ) +
+  exit_fade() +
+  transition_time(time) +
+  ease_aes('linear') -> p
+  fname <- paste0('figs/anim/', name, '_PT_class.mp4')
+  cat('\nSaving movie to figs/anim/', name, '_PT_class.mp4', sep = '')
+  } else {
+  # Draw plot
+  df %>%
+  mutate('time' = round(time/1e6, 3),
+         'type' = as.factor(type)) %>%
+  ggplot() +
+  geom_point(aes(x = T-273, P/1e4, color = type, group = id), size = 0.3) +
+  guides(color = guide_legend(nrow = 1, byrow = T)) +
+  labs(
+    title = paste0('[', name, '] Time: {round(frame_time, 2)} Ma'),
+    x = 'Temperature [C]',
+    y = 'Pressure [GPa]',
+    color = 'Rock Type') +
+  coord_cartesian(
+    xlim = c(0, 1500),
+    ylim = c(0, 4)) +
+  scale_color_manual(
+    values = unique(c.map$color)[as.factor(c.map$type) %>% unique() %>% order()],
+    breaks = unique(c.map$type)[as.factor(c.map$type) %>% unique() %>% order()],
+    na.value = 'white') +
+  theme_classic() +
+  theme(
+    legend.position = 'bottom'
+  ) +
+  exit_fade() +
+  transition_time(time) +
+  ease_aes('linear') -> p
+  fname <- paste0('figs/anim/', name, '_PT.mp4')
+  cat('\nSaving movie to figs/anim/', name, '_PT.mp4', sep = '')
+  }
+  # Save video
+  animate(
+    p,
+    fps = 30,
+    duration = 20,
+    width = 7,
+    height = 7,
+    units = 'in',
+    res = 300,
+    renderer = av_renderer(file = fname)
+  )
+}
+
+# Markers features plot
+marx_features_plot <- function(df, name) {
+  cat('\nPlotting marker features [', name, ']', sep = '')
+  # Draw plot
+  df %>%
+  pivot_longer(-id, names_to = 'param') %>%
+  group_by(param) %>%
+  ggplot() +
+  geom_histogram(aes(x = value, group = param), bins = 20) +
+  facet_wrap(~param, scale = 'free') +
+  labs(
+    title = paste0('[', name, '] Marker Features'),
+    x = NULL,
+    y = NULL) +
+  theme_classic() -> p
+  # Save video
+  cat('\nSaving plot to figs/anim/', name, '_features.png', sep = '')
+  ggsave(
+    plot = p,
+    filename = paste0('figs/features/', name, '_features.png'),
+    device = 'png',
+    type = 'cairo',
+    width = 7,
+    height = 7,
+    units = 'in',
+    dpi = 300
+  )
+}
+
+draw_grid <- function(
+  nodes = NULL,
+  time,
+  box = c(up = -18, down = 200, left = 0, right = 2000),
+  arrows = FALSE,
+  leg.pos = 'right',
+  base.size = 11,
+  p.type = c(
+    'stress',
+    'strain',
+    'density',
+    'temperature',
+    'viscosity',
+    'stream'),
+  v.pal = 'magma',
+  v.direction = 1,
+  transparent = TRUE) {
+  n <- nodes
+  if (p.type == 'temperature') {
+    if (!is.null(n)) {
+      n %>% ggplot() +
+      geom_contour_fill(
+        aes(x = x/1000, y = z/1000, z = tk - 273),
+        size = 0.1,
+        color = NA,
+        breaks = c(0, seq(100, 1900, 200))) +
+      geom_text_contour(
+        aes(x = x/1000, y = z/1000, z = tk - 273),
+        stroke = 0.2,
+        size = 3,
+        breaks = c(0, seq(100, 1900, 200))) +
+      labs(
+        x = 'km',
+        y = 'km',
+        fill = bquote(degree * C),
+        title = paste0('Temperature  ', time, ' Ma')) +
+      coord_equal(expand = F) +
+      scale_y_reverse(limits = c(box[2], box[1])) +
+      scale_x_continuous(limits = c(box[3], box[4])) +
+      scale_fill_viridis_c(option = v.pal, direction = v.direction, na.value = 'transparent') +
+      theme_minimal(base_size = base.size) +
+      theme(legend.position = leg.pos, axis.text = element_text(color = 'black')) -> p
+      if(arrows == TRUE){
+        p +
+        geom_arrow(
+          aes(x = x/1000, y = z/1000, dx = vx, dy = (-vz)),
+          skip = 5,
+          alpha = 0.3,
+          show.legend = F) -> p
+      }
+    }
+  } else if (p.type == 'stress') {
+    if (!is.null(n)) {
+      n %>% ggplot() +
+      geom_contour_fill(
+        aes(x = x/1000, y = z/1000, z = log10(sii)),
+        size = 0.1,
+        color = NA,
+        breaks = c(0, seq(100, 1900, 200))) +
+      geom_text_contour(
+        aes(x = x/1000, y = z/1000, z = tk - 273),
+        stroke = 0.2,
+        size = 3,
+        breaks = c(0, seq(100, 1900, 200))) +
+      labs(
+        x = 'km',
+        y = 'km',
+        fill = bquote(log(Pa)),
+        title = paste0('Log stress  ', time, ' Ma')) +
+      coord_equal(expand = F) +
+      scale_y_reverse(limits = c(box[2], box[1])) +
+      scale_x_continuous(limits = c(box[3], box[4])) +
+      scale_fill_viridis_c(option = v.pal, direction = v.direction, na.value = 'transparent') +
+      theme_minimal(base_size = base.size) +
+      theme(legend.position = leg.pos, axis.text = element_text(color = 'black')) -> p
+      if(arrows == TRUE){
+        p +
+        geom_arrow(
+          aes(x = x/1000, y = z/1000, dx = vx, dy = (-vz)),
+          skip = 5,
+          alpha = 0.3,
+          show.legend = F) -> p
+      }
+    }
+  } else if (p.type == 'strain') {
+    if (!is.null(n)) {
+      n %>% ggplot() +
+      geom_contour_fill(
+        aes(x = x/1000, y = z/1000, z = log10(eii)),
+        size = 0.1,
+        color = NA,
+        breaks = c(0, seq(100, 1900, 200))) +
+      geom_text_contour(
+        aes(x = x/1000, y = z/1000, z = tk - 273),
+        stroke = 0.2,
+        size = 3,
+        breaks = c(0, seq(100, 1900, 200))) +
+      labs(
+        x = 'km',
+        y = 'km',
+        fill = bquote(log(s^-1)),
+        title = paste0('Log strain rate  ', time, ' Ma')) +
+      coord_equal(expand = F) +
+      scale_y_reverse(limits = c(box[2], box[1])) +
+      scale_x_continuous(limits = c(box[3], box[4])) +
+      scale_fill_viridis_c(option = v.pal, direction = v.direction, na.value = 'transparent') +
+      theme_minimal(base_size = base.size) +
+      theme(legend.position = leg.pos, axis.text = element_text(color = 'black')) -> p
+      if(arrows == TRUE){
+        p +
+        geom_arrow(
+          aes(x = x/1000, y = z/1000, dx = vx, dy = (-vz)),
+          skip = 5,
+          alpha = 0.3,
+          show.legend = F) -> p
+      }
+    }
+  } else if (p.type == 'density') {
+    if (!is.null(n)) {
+      n %>% ggplot() +
+      geom_contour_fill(
+        aes(x = x/1000, y = z/1000, z = ro),
+        size = 0.1,
+        color = NA,
+        breaks = c(0, seq(100, 1900, 200))) +
+      geom_text_contour(
+        aes(x = x/1000, y = z/1000, z = tk - 273),
+        stroke = 0.2,
+        size = 3,
+        breaks = c(0, seq(100, 1900, 200))) +
+      labs(
+        x = 'km',
+        y = 'km',
+        fill = bquote(kg~m^-3),
+        title = paste0('Density  ', time, ' Ma')) +
+      coord_equal(expand = F) +
+      scale_y_reverse(limits = c(box[2], box[1])) +
+      scale_x_continuous(limits = c(box[3], box[4])) +
+      scale_fill_viridis_c(option = v.pal, direction = v.direction, na.value = 'transparent') +
+      theme_minimal(base_size = base.size) +
+      theme(legend.position = leg.pos, axis.text = element_text(color = 'black')) -> p
+      if(arrows == TRUE){
+        p +
+        geom_arrow(
+          aes(x = x/1000, y = z/1000, dx = vx, dy = (-vz)),
+          skip = 5,
+          alpha = 0.3,
+          show.legend = F) -> p
+      }
+    }
+  } else if (p.type == 'viscosity') {
+    if (!is.null(n)) {
+      n %>% ggplot() +
+      geom_contour_fill(
+        aes(x = x/1000, y = z/1000, z = log10(nu)),
+        size = 0.1,
+        color = NA,
+        breaks = c(0, seq(100, 1900, 200))) +
+      geom_text_contour(
+        aes(x = x/1000, y = z/1000, z = tk - 273),
+        stroke = 0.2,
+        size = 3,
+        breaks = c(0, seq(100, 1900, 200))) +
+      labs(
+        x = 'km',
+        y = 'km',
+        fill = bquote(log(Pa %.% s)),
+        title = paste0('Log Viscosity  ', time, ' Ma')) +
+      coord_equal(expand = F) +
+      scale_y_reverse(limits = c(box[2], box[1])) +
+      scale_x_continuous(limits = c(box[3], box[4])) +
+      scale_fill_viridis_c(option = v.pal, direction = v.direction, na.value = 'transparent') +
+      theme_minimal(base_size = base.size) +
+      theme(legend.position = leg.pos, axis.text = element_text(color = 'black')) -> p
+      if(arrows == TRUE){
+        p +
+        geom_arrow(
+          aes(x = x/1000, y = z/1000, dx = vx, dy = (-vz)),
+          skip = 5,
+          alpha = 0.3,
+          show.legend = F) -> p
+      }
+    }
+  } else if (p.type == 'stream') {
+    if (!is.null(n)) {
+      n %>% ggplot() +
+        geom_contour_fill(
+          aes(x = x / 1000, y = z / 1000, z = tk - 273),
+          size = 0.1,
+          color = 'white',
+          alpha = 0.5,
+          breaks = c(0, seq(100, 1900, 200)),
+          show.legend = F) +
+        geom_streamline(
+          aes(
+            x = x / 1000,
+            y = z / 1000,
+            dx = vx,
+            dy = (-vz),
+            color = sqrt(..dx.. ^ 2 + ..dy.. ^ 2) * 31540000 * 100, alpha = ..step..),
+          S = 5,
+          dt = 31540000 * 1000 / 5,
+          arrow = NULL,
+          L = 10,
+          res = 1,
+          skip = 5,
+          lineend = 'round',
+          size = 0.3) +
+        geom_contour(
+          aes(x = x / 1000, y = z / 1000, z = tk - 273),
+          size = 0.15,
+          color = 'white',
+          na.rm = T,
+          breaks = c(0, seq(100, 1900, 200))) +
+        geom_text_contour(
+          aes(x = x / 1000, y = z / 1000, z = tk - 273),
+          stroke = 0.2,
+          size = 3,
+          breaks = c(0, seq(100, 1900, 200))) +
+        labs(
+          x = 'km',
+          y = 'km',
+          color = bquote(cm ~ yr ^ -1),
+          title = paste0('Streams  ', time, ' Ma')) +
+        guides(alpha = F, fill = F) +
+        coord_equal(expand = F) +
+        scale_y_reverse(limits = c(box[2], box[1])) +
+        scale_x_continuous(limits = c(box[3], box[4])) +
+        scale_fill_gradient(low = 'grey90', high = 'grey10') +
+        scale_color_viridis_c(option = v.pal, direction = v.direction, na.value = 'transparent') +
+        theme_minimal(base_size = base.size) +
+        theme(
+          legend.position = leg.pos,
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.text = element_text(color = 'black')
+        ) -> p
+    }
+  }
+  if (transparent == TRUE) {
+    p +
+    theme(
+      plot.background = element_rect(fill = 'transparent', color = NA),
+      panel.background = element_rect(fill = 'transparent', color = NA),
+      legend.background = element_rect(fill = 'transparent',
+      color = NA)
+    ) -> p
+  }
+  return(p)
 }
 
 # b.ic ----

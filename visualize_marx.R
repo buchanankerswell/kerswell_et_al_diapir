@@ -7,33 +7,46 @@ paths <- list.files('data', pattern = '_marx.RData', full.names = T)
 models <- paths %>% stringr::str_extract('cd.[0-9]+')
 cat('\nFound models:', models, sep = '\n')
 
-# Summarise marker features
-purrr::walk2(models, paths, ~{
+# Detect number of cores
+cores <- parallel::detectCores()
+cat('\nParallel computation with', cores, 'cores ...')
+
+fun <- function(model, path) {
   # Load markers
-  load_marx(.y)
-  marx <- get(paste0(.x, '.marx'))
+  load_marx(path)
+  marx <- get(paste0(model, '.marx'))
   # Marker motion movie
-#   marx %>% filter(tstep %in% seq(20, 30, 1)) %>% marx_motion_mov(.x)
+  marx %>% marx_motion_mov(model)
   # Marker histogram movie
-#   marx %>% marx_boxplot_mov(.x)
+  marx %>% marx_boxplot_mov(model)
   # Marker PT movie
-#   marx %>% marx_PT_mov(.x)
+  marx %>% marx_PT_mov(model)
   # Marker features plot
   ft <- marx %>% marx_ft()
-  ft %>% marx_features_plot(.x)
+  ft %>% marx_features_plot(model)
   # Correlation matrix
-  cat('\nPlotting correlation matrix [', .x, ']', sep = '')
+  cat('\nPlotting correlation matrix [', model, ']', sep = '')
   cm <- GGally::ggpairs(ft)
   ggsave(
     plot = cm,
-    filename = paste0('figs/features/', .x, '_correlations.png'),
+    filename = paste0('figs/features/', model, '_correlations.png'),
     device = 'png',
     type = 'cairo',
     width = 48,
     height = 48,
     units = 'in',
-    dpi = 300
+    dpi = 72
   )
-})
+}
+
+# Parallel computing
+parallel::mcmapply(
+  fun,
+  models,
+  paths,
+  mc.cores = cores,
+  SIMPLIFY = F
+) %>%
+invisible()
 
 cat('\nDone!')

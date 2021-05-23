@@ -1,8 +1,17 @@
+# Load functions and libraries
 source('functions.R')
 
 # File paths (prn binaries)
 prns <- list.files('data/I2VIS', pattern = '.prn', full.names = T)
 mods <- prns %>% stringr::str_extract('cd[a-z]{1}[0-9]{2,3}')
+
+# Models to trace
+models <- unique(mods)
+cat('\nFound binary files for:', models, sep = '\n')
+
+# Detect number of cores
+cores <- parallel::detectCores()
+cat('\nParallel markers tracing with', cores, 'cores\n')
 
 # Compile filepaths
 tibble(
@@ -22,13 +31,7 @@ fun <- function(model) {
     grid = T)
 }
 
-models <- unique(mods)
-cat('\nFound binary files for:', models, sep = '\n')
-
-cores <- parallel::detectCores()
-
-cat('\nParallel markers tracing with', cores, 'cores\n')
-
+# Parallel computing
 parallel::mclapply(models, fun, mc.cores = cores) %>%
 purrr::set_names(models) -> marx
 
@@ -37,3 +40,5 @@ purrr::walk2(marx, models, ~{
   assign(.y, .x)
   save(list = .y, file = paste0('data/', .y, '_marx.RData'))
 })
+
+cat('\nDone!')

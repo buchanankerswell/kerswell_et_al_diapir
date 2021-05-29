@@ -1,4 +1,4 @@
-# Load functions and libraries
+
 source('functions.R')
 
 # Load marker and grid data
@@ -34,13 +34,21 @@ fun <- function(model, path) {
   # Classify markers
   marx.class.df <- marx_classify(marx.df, fts.df)
   # Monte Carlo sampling marx_classify
-  mc <- monte_carlo(marx.df, fts.df, n = 1000)
+  mc <- monte_carlo(marx.df, fts.df, n = 2)
   # Save
-  return(list(
+  assign(paste0(model, '.marx.classified'), list(
     'mc' = mc,
     'marx' = marx.class.df$marx,
     'gm' = marx.class.df$mc
   ))
+  # Save
+  cat('\nSaving classified markers to data/', model, '_marx_classified.RData', sep = '')
+  do.call(
+    save,
+    list(paste0(model, '.marx.classified'),
+         file = paste0('data/', model, '_marx_classified.RData')
+    )
+  )
 }
 
 # Parallel computing
@@ -50,11 +58,6 @@ parallel::mcmapply(
   paths,
   mc.cores = cores,
   SIMPLIFY = F
-) %>%
-purrr::set_names(models) -> marx.classified
-
-# Save
-cat('\nSaving classifiec markers to data/marx_classified.RData')
-save(marx.classified, file = 'data/marx_classified.RData')
+) %>% invisible()
 
 cat('\nDone!')

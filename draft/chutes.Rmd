@@ -1,16 +1,20 @@
 ---
 journal: Geochemistry, Geophysics, Geosystems
 classoption: draft,linenumbers
-title: Chutes and Ladders
+title: 'Chutes and Ladders: metamorphic conditions of exhumed simulated rocks'
 subtitle:
 authors:
 - name: Buchanan C. Kerswell
   affil: 1
 - name: Matthew J. Kohn
   affil: 1
+- name: Taras V. Gerya
+  affil: 2
 affiliations:
 - number: 1
   name: Department of Geosicences, Boise State University, Boise, ID 83725
+- number: 2
+  name: Department of Earth Sciences, ETH-Zurich, Sonneggstrasse 5, Zurich 8092, Switzerland
 corresponding_author:
 - name: Buchanan C. Kerswell
   email: buchanankerswell@u.boisestate.edu
@@ -22,15 +26,15 @@ abstract:
 plain_language_summary:
 output:
   pdf_document:
-    pandoc_args: ['--csl=g3.csl', '--filter=pandoc-crossref', '--lua-filter=multiple-bibliographies.lua']
+    pandoc_args: ['--csl=g3.csl', '--filter=pandoc-crossref']
     citation_package: default
     template: template.tex
   word_document:
-    pandoc_args: ['--csl=g3.csl', '--filter=pandoc-crossref', '--lua-filter=multiple-bibliographies.lua']
+    pandoc_args: ['--csl=g3.csl', '--filter=pandoc-crossref']
     fig_caption: yes
     reference_docx: template.docx
   html_document:
-    pandoc_args: ['--csl=g3.csl', '--filter=pandoc-crossref', '--lua-filter=multiple-bibliographies.lua']
+    pandoc_args: ['--csl=g3.csl', '--filter=pandoc-crossref']
     fig_caption: yes
 csl: g3.csl
 bibliography: ref.bib
@@ -45,6 +49,7 @@ tblPrefix:
 - Table
 - Tables
 header-includes:
+- \usepackage{tabularx}
 - \usepackage{booktabs}
 - \usepackage{soulutf8}
 - \usepackage{setspace}
@@ -56,6 +61,9 @@ header-includes:
 - \usepackage{float}
 - \usepackage{longtable}
 - \def\tightlist{}
+- \usepackage{pdflscape}
+- \newcommand{\blandscape}{\begin{landscape}}
+- \newcommand{\elandscape}{\end{landscape}}
 ---
 
 ```{r echo=FALSE, message=FALSE}
@@ -69,110 +77,178 @@ knitr::opts_chunk$set(
   out.width='95%'
 )
 
-# Load functions and libraries
-library(magrittr)
-library(dplyr)
-library(ggplot2)
-#suppressMessages(source('../functions.R'))
-#suppressMessages(load('../data/'))
-
 # Run R code
-data(mtcars)
-df <- mtcars
 
-df %>%
-summarise(
-  n = n(),
-  mean = mean(mpg),
-  tot.hp = sum(hp),
-  tot.cyl = sum(cyl)
-) -> df.summary
+# Load functions and libraries
+suppressMessages(source('../functions.R'))
 
-df %>%
-ggplot() +
-geom_point(aes(x = mpg, y = hp)) +
-labs(title = 'Cars') +
-theme_classic() -> p
+# Load classified markers
+load('../data/marx_classified.RData')
+load('../data/mods.RData')
 
-ggsave('cars.png', plot = p, width = 5, height = 5, device = 'png', type = 'cairo')
+# Model summary
+purrr::map_df(marx.classified, ~{
+  .x$marx %>%
+  slice(1) %>%
+  ungroup() %>%
+  summarise(n = n())
+}, .id = 'model') -> marx.summary
+
+mods.summary <- mods %>%
+select(model, zc, z1100, age, cv) %>%
+left_join(marx.summary, by = 'model')
+
+# Summarise marker stats by model
+purrr::map_df(marx.classified, ~{
+  .x$mc %>%
+  summarise(
+    mean.rec = mean(recovered),
+    sd.rec = sd(recovered),
+    med.rec = median(recovered),
+    iqr.rec = IQR(recovered),
+    mean.sub = mean(subducted),
+    sd.sub = sd(subducted),
+    med.sub = median(subducted),
+    iqr.sub = IQR(subducted),
+    mean.ratio = mean(ratio),
+    sd.ratio = sd(ratio),
+    med.ratio = median(ratio),
+    iqr.ratio = IQR(ratio),
+    mean.max.P.rec = mean(max.P.rec),
+    sd.max.P.rec = sd(max.P.rec),
+    med.max.P.rec = median(max.P.rec),
+    iqr.max.P.rec = IQR(max.P.rec),
+    mean.max.T.rec = mean(max.T.rec),
+    sd.max.T.rec = sd(max.T.rec),
+    med.max.T.rec = median(max.T.rec),
+    iqr.max.T.rec = IQR(max.T.rec)
+  )
+}, .id = 'model') %>%
+select(
+  model,
+  mean.rec,
+  sd.rec,
+  mean.sub,
+  sd.sub,
+  mean.ratio,
+  sd.ratio,
+  mean.max.P.rec,
+  sd.max.P.rec,
+  mean.max.T.rec,
+  sd.max.T.rec
+) %>%
+mutate(
+  'mean.rec' = round(mean.rec, 0),
+  'sd.rec' = round(sd.rec, 0),
+  'mean.sub' = round(mean.sub, 0),
+  'sd.sub' = round(sd.sub, 0),
+  'mean.ratio' = round(mean.ratio, 2),
+  'sd.ratio' = round(sd.ratio, 2),
+  'mean.max.P.rec' = round(mean.max.P.rec/1e4, 2),
+  'sd.max.P.rec' = round(sd.max.P.rec/1e4, 2),
+  'mean.max.T.rec' = round(mean.max.T.rec - 273, 1),
+  'sd.max.T.rec' = round(sd.max.T.rec, 1)
+) -> stats.summary
+
+marx.summary <- mods.summary %>% left_join(stats.summary, by = 'model')
 
 ```
 
-# Body
+# Introduction
 
-<!--Body with references -->
 
-Heat escaping the solid Earth's surface indicates a dynamically cooling planet. Surface heat flow databases [@pollack1993; @hasterok2008; @lucazeau2019] enable investigation *everything is related, but nearer things are more related* [@krige1951; @matheron1963]. The spatial (dis)continuity of surface heat flow represents the areal extent of geodynamic processes and their interactions. For example, patterns of consistently low surface heat flow outline the areal extent of cratons ([@fig:lucahf]) 
 
-## Figures
 
-<!--Figure -->
 
-<center>
 
-![A cars plot](cars.png){#fig:lucahf width=95%}
+# Methods
 
-</center>
+## Numerical model
 
-## Equations
+## Marker tracing
 
-Like @lucazeau2019, we exclude 4790 poor quality observations (Code 6 = D) from our analysis. We further remove 350 data points without heat flow observations and two without geographic information. Multiple observations at the same location are parsed to avoid singular covariance matrices during Kriging:
+A set of markers, $M = {m_1, m_2, \dots , m_i}$, are initialized randomly in the model domain. Markers are traced by: 1) selecting all markers within a 760 $km$ wide and 11 $km$ deep section extending from $x=500~km$ to approximately the trench, 2) save marker properties and positions, 3) if timestep $\leq \alpha$, 4) update markers. Where $\alpha$ is the number of timesteps for marker tracing.
 
-$$\begin{aligned}
-  f(X_i^q, Y_i^q) &= \\
-  X_i^q > Y_i^q &\rightarrow z_i = x_i \\
-  X_i^q < Y_i^q &\rightarrow z_i = y_i \\
-  X_i^q = Y_i^q &\rightarrow z_i = RAND(x_i, y_i)
-\end{aligned}$$ {#eq:parse}
+Slab rollback eventually leads to mechanical interference between the stiff convergence region centered at $x=500~km$ and trench sediments. Sediments pile up against the barrier as the accretionary wedge deforms against the convergence region. Thickening trench sediments flatten the slab causing intense crustal deformation of the forearc and backarc regions. The abrupt change in dynamics makes marker P-T conditions meaningless after interference begins. The number of timesteps for marker tracing, $\alpha$, is chosen algorithmically by computing the topographic height of the sediment pile against the convergence region. Markers tracing stops when the sediment pile becomes the overall topographic high, usually within one or two timesteps after interference. Marker paths from timestep $\leq \alpha$ are used for classification (@tbl:marx.summary).
 
-where $X_i^q$ and $Y_i^q$ represent the quality of each duplicate observation pair at location $i$, $RAND$ is a random function that selects either the observation $x_i$ or $y_i$, and $z_i$ stores the observation selected by $f(X_i^q, Y_i^q)$. The final dataset used for Kriging has $n=$ 55274 observations after parsing $n=$ 32430 duplicate observation. We use @eq:parse to 
+\blandscape
 
-## Code
-
-You can link to code at [https://doi.org/10.17605/OSF.IO/CA6ZU](https://doi.org/10.17605/OSF.IO/CA6ZU).
-
-~~~
-+proj=robin +lon_0=-155 +lon_wrap=-155 +x_0=0 +y_0=0
-+ellps=WGS84 +datum=WGS84 +units=m +no_defs
-~~~
-
-## Tables
-
-```{r car.summary.table, results = 'asis'}
-# Summarize data
-df.summary %>%
-knitr::kable(
-  caption = 'Car ($mWm^{-2}$) observations {#tbl:cars.summary.table}',
-  format = 'pandoc')
+```{r marx.summary, results='asis'}
+pander::set.alignment('right', row.names = 'left')
+marx.summary %>%
+rename(
+  '$z_{cpl}$\n$[km]$' = zc,
+  '$\\Delta z_{lith}$\n$[km]$' = z1100,
+  '$\\vec{v}_{conv}$\n$[\\frac{km}{Ma}]$' = cv,
+  '$n_{marx}$' = n,
+  '$n_{rec}$' = mean.rec,
+  '$n_{sub}$' = mean.sub,
+  '$\\sigma_{rec}$' = sd.rec,
+  '$\\sigma_{sub}$' = sd.sub,
+  ratio = mean.ratio,
+  'age\n$[Ma]$' = age,
+  '$\\sigma_{ratio}$' = sd.ratio,
+  '$P_{max}$\n$[GPa]$' = mean.max.P.rec,
+  '$\\sigma_{P_{max}}$' = sd.max.P.rec,
+  '$T_{max}$\n$[C]$' = mean.max.T.rec,
+  '$\\sigma_{T_{max}}$' = sd.max.T.rec
+) %>%
+pander::pandoc.table(
+  split.tables = Inf,
+  keep.line.breaks = T,
+  round = c(rep(0, 6), 2, 0, 2, 0, 2, 2, 2, 2, 2),
+  caption = 'Summary of subduction parameters and marker tracing results by numerical experiment {#tbl:marx.summary}',
+  big.mark = ',',
+  missing = '**'
+)
 ```
 
-\clearpage <!--Use clearpage to print all figures above this line using pages as needed-->
+\elandscape
 
-<center>
+## Maker classification
 
-![The total number of cylinders is `r median(df.summary$tot.cyl)` $mWm^{-2}$ and highly skewed right ](cars.png){#fig:car.summary.plot width=65%}
+Our goal is to write a function that takes nondescript marker PT paths as input and classifies each marker as either *subducted* or *recovered*. The function first computes relevant marker features, like maximum pressures and the sum of all pressure changes. A soft clustering algorithm then assigns each marker to an arbitrary number of groups based on the joint probability distributions of marker features. Clustering typically assigns markers to 6-20 groups, so a final decision to assign a group as *subducted* or *recovered* is made by comparing the maximum marker pressure within each group to the maximum pressures of all markers. Groups that had maximum marker pressures well above the median overall marker pressure classify as *subducted*. If no groups had maximum marker pressures above 4 $GPa$, then all groups classify as *recovered*.
 
-</center>
+The main challenge is to find features of marker PT paths which organize the data into groups easily distinguishable by a simple decision. A number of features were computed and tested in combination. We found a simple combination of maximum pressure and the sum of all pressure changes reliably classified markers among numerical models.
 
-# Lists
 
-This study uses
 
-1. Inconsistent patterns
-2. Kriging and similarity
-3. For testing hypotheses
-4. Focused improvements
-5. Improving Kriging
+# Results
+
+
+
+
+
+
+
+# Discussion
+
+
+
+
+
+
+
+
+# Conclusion
+
+
+
+
+
+
+
+
+
+
 
 # Open Research
-
-All data, code, and heat flow interpolations can be found at `https://doi.org/10.17605/OSF.IO/CA6ZU`, the official Open Science Framework data repository. All code is MIT Licensed and free for use and distribution (see license details, @sec:license).
 
 \clearpage
 
 \acknowledgments
 
-We thank D. D for providing the NGHF. This work was supported by the National Science Foundation grant OIA1545903 to M. Kohn, S. Penniston-Dorland, and M. Feineman.
+This work was supported by the National Science Foundation grant OIA1545903 to M. Kohn, S. Penniston-Dorland, and M. Feineman.
 
 # References
 
@@ -182,25 +258,8 @@ We thank D. D for providing the NGHF. This work was supported by the National Sc
 
 \clearpage
 
-# Appendix {#sec:license}
+# Appendix {}
 
-### License {#sec:license}
-
-No license but a table in @tbl:search
-
-|      Parameter      |                 Search Domain               |          Units          |
-|---------------------|:-------------------------------------------:|------------------------:|
-|    Lag Cutoff (c)   |                [$1/3$, $1/15$]              |            NA           |
-|    Lag Window (w)   |                    [1, 5]                   |            NA           |
-|      Model (m)      |            [Spherical, Exponential]         |            NA           |
-|       Sill (s)      |              [1, $1000\sqrt{2}$]            |         $mWm^{-2}$      |
-| Effective Range (a) |                   [1, 1000]                 |            km           |
-|      Nugget (n)     |              [1, $1000\sqrt{2}$]            |         $mWm^{-2}$      |
-|   Local Search (S)  |                  [1, 10000]                 |            km           |
-
-: Parameters and ranges used in the optimization algorithm {#tbl:search}
-
-# Randomness
 
 
 

@@ -7,10 +7,10 @@ sshhh <- function(p){
 
 # Package list
 c('magrittr', 'tidyr', 'readr', 'purrr',
-  'mclust', 'ggforce', 'dplyr',
+  'mclust', 'ggforce', 'dplyr', 'ggrepel',
   'patchwork', 'gridExtra', 'gganimate',
   'ggridges', 'progress', 'metR',
-  'parallel') -> p.list
+  'parallel', 'progress') -> p.list
 
 cat('Loading libraries:', p.list, sep = '\n')
 
@@ -720,7 +720,6 @@ marx_classify <- function(marx.df, fts.df) {
 marx_stats <- function(df) {
   # Stats
   cat('\nCalculating statistics')
-  df <- df %>% ungroup()
   df %>%
   group_by(id) %>%
   slice(1) %>%
@@ -754,15 +753,30 @@ marx_stats <- function(df) {
     mean.T.sub = mean(df$T[which(df$recovered == FALSE)]),
     sd.T.sub = sd(df$T[which(df$recovered == FALSE)]),
     min.T.sub = min(df$T[which(df$recovered == FALSE)])
-  )
+  ) -> s
+  cat('\nCalculating empirical probability distribution')
+  cdf.P <- df %>% slice(1) %>%
+  summarise(maxP = max(P)) %>%
+  arrange(maxP) %>%
+  mutate(cdf = (row_number()-1)/n())
+  cdf.T <- df %>% slice(1) %>%
+  summarise(maxT = max(T)) %>%
+  arrange(maxT) %>%
+  mutate(cdf = (row_number()-1)/n())
+  return(list('stats' = s, 'cdfT' = cdf.T, 'cdfP' = cdf.P))
 }
 
 # Monte carlo sampling of marx_classify()
-monte_carlo <- function(marx.df, fts.df, n = 1000) {
-  purrr::map_df(seq_len(n), ~{
-    d <- marx_classify(marx.df, fts.df)
-    marx_stats(d$marx)
-  }, .id = 'run')
+monte_carlo <- function(marx.df, fts.df, n = 500) {
+  # Progress bar
+  pb <- progress_bar$new(
+    format = 'Monte Carlo Sampling [:bar] :current/:total (:percent)',
+    total = n, clear = FALSE, width = 80)
+  purrr::map(seq_len(n), ~{
+    d <- invisible(marx_classify(marx.df, fts.df))
+    invisible(marx_stats(d$marx))
+    pb$tick()
+  })
 }
 
 # Markers motion movie

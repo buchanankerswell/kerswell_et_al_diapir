@@ -16,14 +16,14 @@ fun <- function(model, path) {
   load_marx(path)
   marx <- get(paste0(model, '.marx'))
   # Marker motion movie
-  marx %>% marx_motion_mov(model)
+#   marx %>% marx_motion_mov(model)
   # Marker histogram movie
-  marx %>% marx_boxplot_mov(model)
+#   marx %>% marx_boxplot_mov(model)
   # Marker PT movie
-  marx %>% marx_PT_mov(model)
+#   marx %>% marx_PT_mov(model)
   # Marker features plot
   ft <- marx %>% marx_ft()
-  ft %>% marx_features_plot(model)
+#   ft %>% marx_features_plot(model)
   # Correlation matrix
   cat('\nPlotting correlation matrix [', model, ']', sep = '')
   cm <- GGally::ggpairs(ft)

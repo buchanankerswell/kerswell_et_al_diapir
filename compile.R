@@ -16,21 +16,31 @@ fun <- function(model, path) {
   # Load markers
   load_marx(path)
   # Take the markers dataframe and ...
-  get(paste0(model, '.marx')) %>%
+  marx.df <- get(paste0(model, '.marx'))
   # Compute features
+  marx.df %>%
   marx_ft(features = c(
-    'tsteps',
-    'above.fourty.kbar',
-    'above.seven.hundred.c',
-    'down.dx'
-    #'rundown.dx',
+    #'above.thirty.kbar',
+    #'above.four.hundred.c',
+    #'runup.dP'
+    #'max.T',
+    'sum.dP',
+    'max.P'
+    #'down.dx'
+    #'rundown.dx'
     #'rundown.dT'
     )
-  ) -> m
-  # Remove markers and grids
-  rm(list = paste0(model, '.marx'), envir = .GlobalEnv)
-  rm(list = paste0(model, '.grid'), envir = .GlobalEnv)
-  return(m)
+  ) -> fts.df
+  # Classify markers
+  marx.class.df <- marx_classify(marx.df, fts.df)
+  # Monte Carlo sampling marx_classify
+  mc <- monte_carlo(marx.df, fts.df, n = 1000)
+  # Save
+  return(list(
+    'mc' = mc,
+    'marx' = marx.class.df$marx,
+    'gm' = marx.class.df$mc
+  ))
 }
 
 # Parallel computing
@@ -41,13 +51,10 @@ parallel::mcmapply(
   mc.cores = cores,
   SIMPLIFY = F
 ) %>%
-purrr::set_names(models) -> marx.features
-
-# Print features
-print(marx.features)
+purrr::set_names(models) -> marx.classified
 
 # Save
-cat('\nSaving marker features to data/marx_features.RData')
-save(marx.features, file = 'data/marx_features.RData')
+cat('\nSaving classifiec markers to data/marx_classified.RData')
+save(marx.classified, file = 'data/marx_classified.RData')
 
 cat('\nDone!')

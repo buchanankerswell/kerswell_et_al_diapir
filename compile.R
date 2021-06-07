@@ -1,10 +1,9 @@
-
 source('functions.R')
 
 # Load marker and grid data
 cat('\nReading RData files from data/')
 paths <- list.files('data', pattern = '_marx.RData', full.names = T)
-models <- paths %>% stringr::str_extract('cd.[0-9]+')
+models <- stringr::str_extract(paths, 'cd.[0-9]+')
 cat('\nFound models:', models, sep = '\n')
 
 # Detect number of cores
@@ -12,29 +11,18 @@ cores <- parallel::detectCores()
 cat('\nParallel computation with', cores, 'cores ...')
 
 # Summarise marker features
-fun <- function(model, path) {
+fun <- function(model, path, n, k) {
   # Load markers
   load_marx(path)
   # Take the markers dataframe and ...
   marx.df <- get(paste0(model, '.marx'))
   # Compute features
-  marx.df %>%
-  marx_ft(features = c(
-    #'above.thirty.kbar',
-    #'above.four.hundred.c',
-    #'runup.dP'
-    #'max.T',
-    'sum.dP',
-    'max.P'
-    #'down.dx'
-    #'rundown.dx'
-    #'rundown.dT'
-    )
-  ) -> fts.df
+  fts.df <- marx.df %>%
+  marx_ft(features = c('sum.dP', 'max.P'))
   # Classify markers
-  marx.class.df <- marx_classify(marx.df, fts.df)
+  marx.class.df <- marx_classify(marx.df, fts.df, k = k)
   # Monte Carlo sampling marx_classify
-  mc <- monte_carlo(marx.df, fts.df, n = 2)
+  mc <- monte_carlo(marx.df, fts.df, n = n, k = k)
   # Save
   assign(paste0(model, '.marx.classified'), list(
     'mc' = mc,
@@ -42,11 +30,11 @@ fun <- function(model, path) {
     'gm' = marx.class.df$mc
   ))
   # Save
-  cat('\nSaving classified markers to data/', model, '_marx_classified.RData', sep = '')
+  cat('\nSaving classified markers to data/', model, '_k', k,  '_marx_classified.RData', sep = '')
   do.call(
     save,
     list(paste0(model, '.marx.classified'),
-         file = paste0('data/', model, '_marx_classified.RData')
+         file = paste0('data/', model, '_k', k, '_marx_classified.RData')
     )
   )
 }
@@ -56,6 +44,8 @@ parallel::mcmapply(
   fun,
   models,
   paths,
+  k = 10,
+  n = 100,
   mc.cores = cores,
   SIMPLIFY = F
 ) %>% invisible()

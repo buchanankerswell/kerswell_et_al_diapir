@@ -80,77 +80,77 @@ knitr::opts_chunk$set(
 # Run R code
 
 # Load functions and libraries
-suppressMessages(source('../functions.R'))
+# suppressMessages(source('../functions.R'))
 
 # Load classified markers
-load('../data/marx_classified.RData')
-load('../data/mods.RData')
+# load('../data/marx_classified.RData')
+# load('../data/mods.RData')
 
 # Model summary
-purrr::map_df(marx.classified, ~{
-  .x$marx %>%
-  slice(1) %>%
-  ungroup() %>%
-  summarise(n = n())
-}, .id = 'model') -> marx.summary
+# purrr::map_df(marx.classified, ~{
+#   .x$marx %>%
+#   slice(1) %>%
+#   ungroup() %>%
+#   summarise(n = n())
+# }, .id = 'model') -> marx.summary
 
-mods.summary <- mods %>%
-select(model, zc, z1100, age, cv) %>%
-left_join(marx.summary, by = 'model')
+# mods.summary <- mods %>%
+# select(model, zc, z1100, age, cv) %>%
+# left_join(marx.summary, by = 'model')
 
 # Summarise marker stats by model
-purrr::map_df(marx.classified, ~{
-  .x$mc %>%
-  summarise(
-    mean.rec = mean(recovered),
-    sd.rec = sd(recovered),
-    med.rec = median(recovered),
-    iqr.rec = IQR(recovered),
-    mean.sub = mean(subducted),
-    sd.sub = sd(subducted),
-    med.sub = median(subducted),
-    iqr.sub = IQR(subducted),
-    mean.ratio = mean(ratio),
-    sd.ratio = sd(ratio),
-    med.ratio = median(ratio),
-    iqr.ratio = IQR(ratio),
-    mean.max.P.rec = mean(max.P.rec),
-    sd.max.P.rec = sd(max.P.rec),
-    med.max.P.rec = median(max.P.rec),
-    iqr.max.P.rec = IQR(max.P.rec),
-    mean.max.T.rec = mean(max.T.rec),
-    sd.max.T.rec = sd(max.T.rec),
-    med.max.T.rec = median(max.T.rec),
-    iqr.max.T.rec = IQR(max.T.rec)
-  )
-}, .id = 'model') %>%
-select(
-  model,
-  mean.rec,
-  sd.rec,
-  mean.sub,
-  sd.sub,
-  mean.ratio,
-  sd.ratio,
-  mean.max.P.rec,
-  sd.max.P.rec,
-  mean.max.T.rec,
-  sd.max.T.rec
-) %>%
-mutate(
-  'mean.rec' = round(mean.rec, 0),
-  'sd.rec' = round(sd.rec, 0),
-  'mean.sub' = round(mean.sub, 0),
-  'sd.sub' = round(sd.sub, 0),
-  'mean.ratio' = round(mean.ratio, 2),
-  'sd.ratio' = round(sd.ratio, 2),
-  'mean.max.P.rec' = round(mean.max.P.rec/1e4, 2),
-  'sd.max.P.rec' = round(sd.max.P.rec/1e4, 2),
-  'mean.max.T.rec' = round(mean.max.T.rec - 273, 1),
-  'sd.max.T.rec' = round(sd.max.T.rec, 1)
-) -> stats.summary
-
-marx.summary <- mods.summary %>% left_join(stats.summary, by = 'model')
+# purrr::map_df(marx.classified, ~{
+#   .x$mc %>%
+#   summarise(
+#     mean.rec = mean(recovered),
+#     sd.rec = sd(recovered),
+#     med.rec = median(recovered),
+#     iqr.rec = IQR(recovered),
+#     mean.sub = mean(subducted),
+#     sd.sub = sd(subducted),
+#     med.sub = median(subducted),
+#     iqr.sub = IQR(subducted),
+#     mean.ratio = mean(ratio),
+#     sd.ratio = sd(ratio),
+#     med.ratio = median(ratio),
+#     iqr.ratio = IQR(ratio),
+#     mean.max.P.rec = mean(max.P.rec),
+#     sd.max.P.rec = sd(max.P.rec),
+#     med.max.P.rec = median(max.P.rec),
+#     iqr.max.P.rec = IQR(max.P.rec),
+#     mean.max.T.rec = mean(max.T.rec),
+#     sd.max.T.rec = sd(max.T.rec),
+#     med.max.T.rec = median(max.T.rec),
+#     iqr.max.T.rec = IQR(max.T.rec)
+#   )
+# }, .id = 'model') %>%
+# select(
+#   model,
+#   mean.rec,
+#   sd.rec,
+#   mean.sub,
+#   sd.sub,
+#   mean.ratio,
+#   sd.ratio,
+#   mean.max.P.rec,
+#   sd.max.P.rec,
+#   mean.max.T.rec,
+#   sd.max.T.rec
+# ) %>%
+# mutate(
+#   'mean.rec' = round(mean.rec, 0),
+#   'sd.rec' = round(sd.rec, 0),
+#   'mean.sub' = round(mean.sub, 0),
+#   'sd.sub' = round(sd.sub, 0),
+#   'mean.ratio' = round(mean.ratio, 2),
+#   'sd.ratio' = round(sd.ratio, 2),
+#   'mean.max.P.rec' = round(mean.max.P.rec/1e4, 2),
+#   'sd.max.P.rec' = round(sd.max.P.rec/1e4, 2),
+#   'mean.max.T.rec' = round(mean.max.T.rec - 273, 1),
+#   'sd.max.T.rec' = round(sd.max.T.rec, 1)
+# ) -> stats.summary
+# 
+# marx.summary <- mods.summary %>% left_join(stats.summary, by = 'model')
 
 ```
 
@@ -169,52 +169,101 @@ marx.summary <- mods.summary %>% left_join(stats.summary, by = 'model')
 
 A set of markers, $M = {m_1, m_2, \dots , m_i}$, are initialized randomly in the model domain. Markers are traced by: 1) selecting all markers within a 760 $km$ wide and 11 $km$ deep section extending from $x=500~km$ to approximately the trench, 2) save marker properties and positions, 3) if timestep $\leq \alpha$, 4) update markers. Where $\alpha$ is the number of timesteps for marker tracing.
 
-Slab rollback eventually leads to mechanical interference between the stiff convergence region centered at $x=500~km$ and trench sediments. Sediments pile up against the barrier as the accretionary wedge deforms against the convergence region. Thickening trench sediments flatten the slab causing intense crustal deformation of the forearc and backarc regions. The abrupt change in dynamics makes marker P-T conditions meaningless after interference begins. The number of timesteps for marker tracing, $\alpha$, is chosen algorithmically by computing the topographic height of the sediment pile against the convergence region. Markers tracing stops when the sediment pile becomes the overall topographic high, usually within one or two timesteps after interference. Marker paths from timestep $\leq \alpha$ are used for classification (@tbl:marx.summary).
-
-\blandscape
-
-```{r marx.summary, results='asis'}
-pander::set.alignment('right', row.names = 'left')
-marx.summary %>%
-rename(
-  '$z_{cpl}$\n$[km]$' = zc,
-  '$\\Delta z_{lith}$\n$[km]$' = z1100,
-  '$\\vec{v}_{conv}$\n$[\\frac{km}{Ma}]$' = cv,
-  '$n_{marx}$' = n,
-  '$n_{rec}$' = mean.rec,
-  '$n_{sub}$' = mean.sub,
-  '$\\sigma_{rec}$' = sd.rec,
-  '$\\sigma_{sub}$' = sd.sub,
-  ratio = mean.ratio,
-  'age\n$[Ma]$' = age,
-  '$\\sigma_{ratio}$' = sd.ratio,
-  '$P_{max}$\n$[GPa]$' = mean.max.P.rec,
-  '$\\sigma_{P_{max}}$' = sd.max.P.rec,
-  '$T_{max}$\n$[C]$' = mean.max.T.rec,
-  '$\\sigma_{T_{max}}$' = sd.max.T.rec
-) %>%
-pander::pandoc.table(
-  split.tables = Inf,
-  keep.line.breaks = T,
-  round = c(rep(0, 6), 2, 0, 2, 0, 2, 2, 2, 2, 2),
-  caption = 'Summary of subduction parameters and marker tracing results by numerical experiment {#tbl:marx.summary}',
-  big.mark = ',',
-  missing = '**'
-)
-```
-
-\elandscape
+Slab rollback eventually leads to mechanical interference between the stiff convergence region centered at $x=500~km$ and trench sediments. Sediments pile up against the barrier as the accretionary wedge deforms against the convergence region. Thickening trench sediments flatten the slab causing intense crustal deformation of the forearc and backarc regions. The abrupt change in dynamics makes marker P-T conditions meaningless after interference begins. The number of timesteps for marker tracing, $\alpha$, is chosen algorithmically by computing the topographic height of the sediment pile against the convergence region. Markers tracing stops when the sediment pile becomes the overall topographic high, usually within one or two timesteps after interference. Marker paths from timestep $\leq \alpha$ are used for classification.
 
 ## Maker classification
 
-Our goal is to write a function that takes nondescript marker PT paths as input and classifies each marker as either *subducted* or *recovered*. The function first computes relevant marker features, like maximum pressures and the sum of all pressure changes. A soft clustering algorithm then assigns each marker to an arbitrary number of groups based on the joint probability distributions of marker features. Clustering typically assigns markers to 6-20 groups, so a final decision to assign a group as *subducted* or *recovered* is made by comparing the maximum marker pressure within each group to the maximum pressures of all markers. Groups that had maximum marker pressures well above the median overall marker pressure classify as *subducted*. If no groups had maximum marker pressures above 4 $GPa$, then all groups classify as *recovered*.
+Tracing marker pressure, temperature, and x-z-position at each timestep is enough to compute characteristics of marker PTt paths. However, only markers recovered from the subducting slab are relevant for comparison to PT estimates of natural rocks. The main challenge, therefore, is to first classify markers as either *subducted* or *recovered* without an inherited class label.
 
-The main challenge is to find features of marker PT paths which organize the data into groups easily distinguishable by a simple decision. A number of features were computed and tested in combination. We found a simple combination of maximum pressure and the sum of all pressure changes reliably classified markers among numerical models.
+At the heart of our marker classification algorithm is a finite Gaussian mixture model (GMM) fit by Expectation-Maximization [EM, @dempster1977]. We derive GMM and EM below. Please note that GMM fit by EM is a general purpose clustering algorithm broadly used in pattern recognition, anomaly detection, and estimating complex probability distribution functions [e.g., @banfield1993; @celeux1995; @figueiredo2002; @fraley2002; @vermeesch2018]. Before deriving the details of marker classification, we hypothesize that features computed from a PTt path may distinguish subducted from recovered markers. If true, clustering algorithms like GMM may reliably classify markers by their dissimilarity along any number of dimensions [e.g., @dy2004], like maximum pressure.
+
+### Gaussian mixture model
+
+Let the traced markers represent a $d$-dimensional array of $n$ random independent variables $x_i \in \mathbb{R}$. Assume markers $x_i$ were drawn from $k$ discrete probability distributions with parameters $\Phi$. The probability distribution of markers $x_i$ can be modeled with a mixture of $k$ components:
+
+$$ p(x_i | \Phi) = \sum_{j=1}^k \pi_j p(x_i | \Theta_j) $$ {#eq:gmix}
+
+where $p(x_i | \Theta_j)$ is the probability of $x_i$ under the $j^{th}$ mixture component and $\pi_j$ is the mixture proportion representing the probability that $x_i$ belongs to the $j^{th}$ component $(\pi_j \geq 0; \sum_{j=1}^k \pi_j = 1)$.
+
+Assuming $\Theta_j$ describes a Gaussian probability distributions with mean $\mu_j$ and covariance $\Sigma_j$, @eq:gmix becomes:
+$$ p(x_i | \Phi) = \sum_{j=1}^k \pi_j \mathcal{N}(x_i | \mu_j, \Sigma_j) $$ {#eq:mix}
+
+where
+
+$$ \mathcal{N}(x_i | \mu_j, \Sigma_j) = \frac{exp\{ -\frac{1}{2}(x_i - \mu_j)(x_i - \mu_j)^T \Sigma_j^{-1}\}}{\sqrt{det(2 \pi \Sigma_j)}} $$ {#eq:gauss}
+
+Estimates for parameters $\mu_j$ and $\Sigma_j$, representing the center and shape of each cluster, are found by maximizing the log of the likelihood function, $L(x_i | \Phi) = \prod_{i=1}^n p(x_i | \Phi)$:
+
+$$ log~p(\Phi | x_i) = log \prod_{i=1}^n p(x_i | \Phi) = \sum_{i=1}^n log \left[ \sum_{j=1}^k \pi_j p(x_i | \Theta_j) \right] $$ {#eq:loglik}
+
+Taking the derivative of @eq:loglik with respect to each parameter, $\pi$, $\mu$, $\Sigma$, setting the equation to zero, and solving gives the Maximum Likelihood Estimators (MLE):
+
+$$ \begin{aligned}
+  \pi_j &= \frac{N_j}{n} \\
+  \mu_j &= \frac{1}{N_j} \sum_{i=1}^n \omega_{ij} x_i \\
+  \Sigma_j &= \frac{1}{N_j} \sum_{i=1}^n \omega_{ij} (x_i - \mu_j)(x_i - \mu_j)^T
+\end{aligned} $$ {#eq:mle}
+
+where $\omega_{ij} (\omega_{ij} \geq 0; \sum_{j=1}^k \omega_{ij} = 1)$ are membership weights representing the probability of an observation $x_i$ belonging to the $j^{th}$ Gaussian, and $N_j = \sum_{i=1}^n \omega_{ij}$ represents the number of observations belonging to the $j^{th}$ Gaussian. Please note that $\omega_{ij}$ is unknown for unlabelled datasets, so MLE cannot be computed with @eq:mle.
+
+### Expectation-Maximization fitting of Gaussian Mixtures
+
+The EM algorithm estimates GMM parameters by initializing $k$ Gaussians with parameters $(\pi_j, \mu_j, \Sigma_j)$, then by iteratively computing membership weights with @eq:posterior (E-step), and updating Gaussian parameters with @eq:mle (M-step) until convergence [@dempster1977].
+
+Let $z_{ij} \in \{1, 2, \dots, k\}$ be a multinomial latent variable with joint distribution $p(x_i,z_i) = p(x_i | z_{ij})p(z_{j})$. $z_{ij}$ represents the unknown (unlabelled) classifications of $x_i$ and takes values of $j = 1, 2, \dots, k$. Membership weights $\omega_{ij}$ are equivalent to the conditional probability $p(z_{ij} | x_i)$, which represents the probability of observation $x_i$ belonging to the $j^{th}$ Gaussian. Using Bayes Theorem, the posterior probability $p(z_{ij} | x_i)$ is:
+
+$$ p(z_{ij} | x_i) = \frac{p(x_i | z_{ij})p(z_{ij})}{p(x_i)} = \frac{\pi_j \mathcal{N}(\mu_j, \Sigma_j)}{\sum_{j=1}^k \pi_j \mathcal{N}(\mu_j, \Sigma_j)} = \omega_{ij} $$ {#eq:posterior}
+
+which can be computed given initial estimates for $k$ sets of Gaussian parameters $\pi_j$, $\mu_j$, $\Sigma_j$ (E-step). With $\omega_{ij}$, new Gaussian estimates can be computed with @eq:mle (M-step).
+
+EM is sensitive to local optima and initialization [@figueiredo2002], so a number of features were computed and tested in combination. Redundant or useless features [@dy2004] were filtered out. We found a two-component mixture of $x_i = \max_{1 \leq t \leq t_{max}P}$ and $y_i = \sum_{t=1}^{t_{max}} \Delta P_t$ reliably classified markers among numerical models. $x_i$ and $y_i$ represent the maximum pressure attained along a marker PTt path and the sum total of all pressure changes along a marker PTt path, respectively.
+
+We use general purpose functions in the `R` package `Mclust` [@scrucca2016] to fit Gaussian mixutre models by EM. 
+
+### Chutes or ladders?
+
+GMM clustering typically classifies markers into 6-20 groups, so a final decision to classify a group as *subducted* or *recovered* is made by comparing the maximum marker pressure within each group to the maximum pressures of all markers. Groups that have maximum marker pressures well above the median overall marker pressure classify as *subducted*. If no groups have maximum marker pressures above 4 $GPa$, then all groups classify as *recovered*.
+
 
 
 
 # Results
 
+(@tbl:marx.summary)
+
+\blandscape
+
+```{r marx.summary, results='asis'}
+# pander::set.alignment('right', row.names = 'left')
+# marx.summary %>%
+# rename(
+#   '$z_{cpl}$\n$[km]$' = zc,
+#   '$\\Delta z_{lith}$\n$[km]$' = z1100,
+#   '$\\vec{v}_{conv}$\n$[\\frac{km}{Ma}]$' = cv,
+#   '$n_{marx}$' = n,
+#   '$n_{rec}$' = mean.rec,
+#   '$n_{sub}$' = mean.sub,
+#   '$\\sigma_{rec}$' = sd.rec,
+#   '$\\sigma_{sub}$' = sd.sub,
+#   ratio = mean.ratio,
+#   'age\n$[Ma]$' = age,
+#   '$\\sigma_{ratio}$' = sd.ratio,
+#   '$P_{max}$\n$[GPa]$' = mean.max.P.rec,
+#   '$\\sigma_{P_{max}}$' = sd.max.P.rec,
+#   '$T_{max}$\n$[C]$' = mean.max.T.rec,
+#   '$\\sigma_{T_{max}}$' = sd.max.T.rec
+# ) %>%
+# pander::pandoc.table(
+#   split.tables = Inf,
+#   keep.line.breaks = T,
+#   round = c(rep(0, 6), 2, 0, 2, 0, 2, 2, 2, 2, 2),
+#   caption = 'Summary of subduction parameters and marker tracing results by numerical experiment {#tbl:marx.summary}',
+#   big.mark = ',',
+#   missing = '**'
+# )
+```
+
+\elandscape
 
 
 

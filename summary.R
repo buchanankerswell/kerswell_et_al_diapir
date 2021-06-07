@@ -1,11 +1,23 @@
 # Load functions and libraries
 source('functions.R')
 
-# Load classified markers
+# Load numerical model parameters
 load('data/mods.RData')
-load('data/marx_classified.RData')
 
-# Model summary
+# Get file paths
+paths <- list.files('data/k6_classd', full.names = T)
+names <- paths %>% stringr::str_extract('cd.[0-9]+')
+marx.files <- list.files('data', pattern = '_marx.RData') %>% stringr::str_extract('cd.[0-9]+')
+cat('\nFound models:', names, sep = '\n')
+
+# Load classified markers
+for (i in paths[names %in% marx.files]) load(i)
+
+# Save as list
+purrr::map(ls()[grep('classified', ls())], ~get(.x)) %>%
+purrr::set_names(names[names %in% marx.files]) -> marx.classified
+
+# Number of markers by model
 purrr::map_df(marx.classified, ~{
   .x$marx %>%
   slice(1) %>%
@@ -19,7 +31,8 @@ left_join(marx.summary, by = 'model')
 
 # Summarise marker stats by model
 purrr::map_df(marx.classified, ~{
-  .x$mc$stats %>%
+  .x$mc %>%
+  purrr::map_df(~purrr::pluck(.x, 'stats'), .id = 'run') %>%
   summarise(
     mean.rec = mean(recovered),
     sd.rec = sd(recovered),
@@ -44,16 +57,11 @@ purrr::map_df(marx.classified, ~{
   )
 }, .id = 'model') -> stats.summary
 
-mods.summary %>% left_join(stats.summary)
+# Combine tables
+d <- mods.summary %>% left_join(stats.summary)
 
-purrr::map_df(
-  marx.classified,
-  ~marx_stats(.x$marx)$cdfP,
-  .id = 'model'
-) -> maxP
-
-maxP %>%
-ggplot(aes(x = maxP, y = cdf, color = model, group = model)) +
-geom_path() +
-labs(x = 'Maximum Pressure [GPa]', y = 'Probability', color = 'Model') +
-theme_classic()
+p <- d %>%
+ungroup() %>%
+select(-model, mean.rec, mean.sub, mean.ratio, mean.max.P.rec, mean.max.T.rec) %>%
+GGally::ggpairs()
+ggsave(plot = p, file = 'figs/corr.png', width = 24, height = 24, dpi = 300, device = 'png', type = 'cairo')

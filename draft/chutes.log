@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.4.7)  29 MAY 2021 10:47
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.4.7)  4 JUN 2021 23:21
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -174,7 +174,10 @@ LaTeX Info: Redefining \cite on input line 694.
 \c@NAT@ctr=\count194
 )
 LaTeX Info: Redefining \BBA on input line 1149.
-) (/usr/local/texlive/2020/texmf-dist/tex/latex/tools/tabularx.sty
+)
+\csllabelwidth=\skip77
+\cslhangindent=\skip78
+(/usr/local/texlive/2020/texmf-dist/tex/latex/tools/tabularx.sty
 Package: tabularx 2020/01/15 v2.11c `tabularx' package (DPC)
 (/usr/local/texlive/2020/texmf-dist/tex/latex/tools/array.sty
 Package: array 2019/08/31 v2.4l Tabular extension package (FMi)
@@ -182,8 +185,8 @@ Package: array 2019/08/31 v2.4l Tabular extension package (FMi)
 \ar@mcellbox=\box50
 \extrarowheight=\dimen151
 \NC@list=\toks24
-\extratabsurround=\skip77
-\backup@length=\skip78
+\extratabsurround=\skip79
+\backup@length=\skip80
 \ar@cellbox=\box51
 )
 \TX@col@width=\dimen152
@@ -336,10 +339,10 @@ Package: uniquecounter 2019/12/15 v1.4 Provide unlimited unique counter (HO)
 Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
 86.
 )
-\Hy@SectionHShift=\skip79
+\Hy@SectionHShift=\skip81
 ) (/usr/local/texlive/2020/texmf-dist/tex/latex/amsmath/amsmath.sty
 Package: amsmath 2020/01/20 v2.17e AMS math features
-\@mathmargin=\skip80
+\@mathmargin=\skip82
 For additional information on amsmath, use the `?' option.
 (/usr/local/texlive/2020/texmf-dist/tex/latex/amsmath/amstext.sty
 Package: amstext 2000/06/29 v2.01 AMS text
@@ -385,8 +388,8 @@ LaTeX Font Info:    Redeclaring font encoding OMS on input line 734.
 \totwidth@=\dimen188
 \lineht@=\dimen189
 \@envbody=\toks29
-\multlinegap=\skip81
-\multlinetaggap=\skip82
+\multlinegap=\skip83
+\multlinetaggap=\skip84
 \mathdisplay@stack=\toks30
 LaTeX Info: Redefining \[ on input line 2859.
 LaTeX Info: Redefining \] on input line 2860.
@@ -406,10 +409,10 @@ Package: float 2001/11/08 v1.3d Float enhancements (AL)
 \@floatcapt=\box55
 ) (/usr/local/texlive/2020/texmf-dist/tex/latex/tools/longtable.sty
 Package: longtable 2020/01/07 v4.13 Multi-page Table package (DPC)
-\LTleft=\skip83
-\LTright=\skip84
-\LTpre=\skip85
-\LTpost=\skip86
+\LTleft=\skip85
+\LTright=\skip86
+\LTpre=\skip87
+\LTpost=\skip88
 \LTchunksize=\count291
 \LTcapwidth=\dimen190
 \LT@head=\box56
@@ -434,22 +437,22 @@ File: l3backend-pdfmode.def 2020-03-12 L3 backend support: PDF mode
 ) (./chutes.aux)
 \openout1 = `chutes.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 86.
-LaTeX Font Info:    ... okay on input line 86.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 86.
-LaTeX Font Info:    ... okay on input line 86.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 86.
-LaTeX Font Info:    ... okay on input line 86.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 86.
-LaTeX Font Info:    ... okay on input line 86.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 86.
-LaTeX Font Info:    ... okay on input line 86.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 86.
-LaTeX Font Info:    ... okay on input line 86.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 86.
-LaTeX Font Info:    ... okay on input line 86.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 86.
-LaTeX Font Info:    ... okay on input line 86.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 111.
+LaTeX Font Info:    ... okay on input line 111.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 111.
+LaTeX Font Info:    ... okay on input line 111.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 111.
+LaTeX Font Info:    ... okay on input line 111.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 111.
+LaTeX Font Info:    ... okay on input line 111.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 111.
+LaTeX Font Info:    ... okay on input line 111.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 111.
+LaTeX Font Info:    ... okay on input line 111.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 111.
+LaTeX Font Info:    ... okay on input line 111.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 111.
+LaTeX Font Info:    ... okay on input line 111.
 (/usr/local/texlive/2020/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count297
@@ -477,7 +480,7 @@ Package trackchanges Warning: TrackChanges is not compatable with the
 (trackchanges)                Use the 'soul' package instead.
 
 ABD: EverySelectfont initializing macros
-LaTeX Info: Redefining \selectfont on input line 86.
+LaTeX Info: Redefining \selectfont on input line 111.
 \c@maskedRefs=\count303
 (/usr/local/texlive/2020/texmf-dist/tex/latex/apacite/english.apc
 File: english.apc 2013/07/21 v6.03 apacite language file
@@ -500,7 +503,7 @@ Package hyperref Warning: Height of page (\paperheight) is invalid (0.0pt),
 
 Package hyperref Warning: Draft mode on.
 
-Package hyperref Info: Link coloring OFF on input line 86.
+Package hyperref Info: Link coloring OFF on input line 111.
 (/usr/local/texlive/2020/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2019/09/16 v2.46 Cross-referencing by name of section
 (/usr/local/texlive/2020/texmf-dist/tex/latex/refcount/refcount.sty
@@ -512,589 +515,539 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 )
 \c@section@level=\count304
 )
-LaTeX Info: Redefining \ref on input line 86.
-LaTeX Info: Redefining \pageref on input line 86.
-LaTeX Info: Redefining \nameref on input line 86.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 129
+LaTeX Info: Redefining \ref on input line 111.
+LaTeX Info: Redefining \pageref on input line 111.
+LaTeX Info: Redefining \nameref on input line 111.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 154
 .
 (/usr/local/texlive/2020/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 129
+LaTeX Font Info:    Trying to load font information for U+msb on input line 154
 .
 (/usr/local/texlive/2020/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [1{/usr/local/texlive/2020/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
 
 LaTeX Font Warning: Font shape `OT1/cmr/m/n' in size <10.5> not available
-(Font)              size <10.95> substituted on input line 209.
+(Font)              size <10.95> substituted on input line 215.
 
 
 LaTeX Font Warning: Font shape `OT1/cmr/bx/n' in size <10.5> not available
-(Font)              size <10.95> substituted on input line 209.
+(Font)              size <10.95> substituted on input line 215.
 
 
-Overfull \hbox (4.61546pt too wide) in paragraph at lines 220--226
+Overfull \hbox (4.61546pt too wide) in paragraph at lines 226--232
 []\OT1/cmr/m/n/10 A set of mark-ers, $\OML/cmm/m/it/10 M \OT1/cmr/m/n/10 = []$,
  are ini-tial-ized ran-domly in the model do- 
  []
 
 
-Overfull \hbox (9.61755pt too wide) in paragraph at lines 220--226
+Overfull \hbox (9.61755pt too wide) in paragraph at lines 226--232
 \OT1/cmr/m/n/10 main. Mark-ers are traced by: 1) se-lect-ing all mark-ers withi
 n a 760 $\OML/cmm/m/it/10 km$ \OT1/cmr/m/n/10 wide and 11 $\OML/cmm/m/it/10 km$
  
  []
 
 
-Overfull \hbox (0.94844pt too wide) in paragraph at lines 220--226
+Overfull \hbox (0.94844pt too wide) in paragraph at lines 226--232
 \OT1/cmr/m/n/10 deep sec-tion ex-tend-ing from $\OML/cmm/m/it/10 x \OT1/cmr/m/n
 /10 = 500 []\OML/cmm/m/it/10 km$ \OT1/cmr/m/n/10 to ap-prox-i-mately the trench
 , 2) save marker 
  []
 
 
-Overfull \hbox (2.0781pt too wide) in paragraph at lines 220--226
+Overfull \hbox (2.0781pt too wide) in paragraph at lines 226--232
 \OT1/cmr/m/n/10 prop-er-ties and po-si-tions, 3) if timestep $\OMS/cmsy/m/n/10 
 ^^T \OML/cmm/m/it/10 $\OT1/cmr/m/n/10 , 4) up-date mark-ers. Where $\OML/cmm/m
 /it/10 $ \OT1/cmr/m/n/10 is the num- 
  []
 
 
-Overfull \hbox (7.96002pt too wide) in paragraph at lines 227--240
+Overfull \hbox (7.96002pt too wide) in paragraph at lines 233--246
 []\OT1/cmr/m/n/10 Slab roll-back even-tu-ally leads to me-chan-i-cal in-ter-fer
 -ence be-tween the stiff con-ver- 
  []
 
 
-Overfull \hbox (2.94835pt too wide) in paragraph at lines 227--240
+Overfull \hbox (2.94835pt too wide) in paragraph at lines 233--246
 \OT1/cmr/m/n/10 gence re-gion cen-tered at $\OML/cmm/m/it/10 x \OT1/cmr/m/n/10 
 = 500 []\OML/cmm/m/it/10 km$ \OT1/cmr/m/n/10 and trench sed-i-ments. Sed-i-ment
 s pile up against 
  []
 
 
-Overfull \hbox (9.40448pt too wide) in paragraph at lines 227--240
+Overfull \hbox (9.40448pt too wide) in paragraph at lines 233--246
 \OT1/cmr/m/n/10 the bar-rier as the ac-cre-tionary wedge de-forms against the c
 on-ver-gence re-gion. Thick-en- 
  []
 
 
-Overfull \hbox (5.87677pt too wide) in paragraph at lines 227--240
+Overfull \hbox (5.87677pt too wide) in paragraph at lines 233--246
 \OT1/cmr/m/n/10 ing trench sed-i-ments flat-ten the slab caus-ing in-tense crus
 tal de-for-ma-tion of the fore-arc 
  []
 
 
-Overfull \hbox (21.46016pt too wide) in paragraph at lines 227--240
+Overfull \hbox (21.46016pt too wide) in paragraph at lines 233--246
 \OT1/cmr/m/n/10 and backarc re-gions. The abrupt change in dy-nam-ics makes mar
 ker P-T con-di-tions mean- 
  []
 
 
-Overfull \hbox (10.17184pt too wide) in paragraph at lines 227--240
+Overfull \hbox (10.17184pt too wide) in paragraph at lines 233--246
 \OT1/cmr/m/n/10 ing-less af-ter in-ter-fer-ence be-gins. The num-ber of timeste
 ps for marker trac-ing, $\OML/cmm/m/it/10 $\OT1/cmr/m/n/10 , is cho- 
  []
 
 
-Overfull \hbox (16.46025pt too wide) in paragraph at lines 227--240
+Overfull \hbox (16.46025pt too wide) in paragraph at lines 233--246
 \OT1/cmr/m/n/10 sen al-go-rith-mi-cally by com-put-ing the to-po-graphic height
  of the sed-i-ment pile against the 
  []
 
 
-Overfull \hbox (3.90446pt too wide) in paragraph at lines 227--240
+Overfull \hbox (3.90446pt too wide) in paragraph at lines 233--246
 \OT1/cmr/m/n/10 con-ver-gence re-gion. Mark-ers trac-ing stops when the sed-i-m
 ent pile be-comes the over-all 
  []
 
 
-Overfull \hbox (6.37682pt too wide) in paragraph at lines 227--240
+Overfull \hbox (6.37682pt too wide) in paragraph at lines 233--246
 \OT1/cmr/m/n/10 to-po-graphic high, usu-ally within one or two timesteps af-ter
  in-ter-fer-ence. Marker paths 
  []
 
 
+Overfull \hbox (12.93228pt too wide) in paragraph at lines 250--256
+[]\OT1/cmr/m/n/10 Tracing marker pres-sure, tem-per-a-ture, and x-z-position at
+ each timestep is enough 
+ []
+
+
+Overfull \hbox (9.9323pt too wide) in paragraph at lines 250--256
+\OT1/cmr/m/n/10 to com-pute char-ac-ter-is-tics of marker PTt paths. How-ever, 
+only mark-ers re-cov-ered from 
+ []
+
+
+Overfull \hbox (5.48792pt too wide) in paragraph at lines 250--256
+\OT1/cmr/m/n/10 the sub-duct-ing slab are rel-e-vant for com-par-i-son to PT es
+-ti-mates of nat-u-ral rocks. The 
+ []
+
+
+Overfull \hbox (22.13145pt too wide) in paragraph at lines 250--256
+\OT1/cmr/m/n/10 main chal-lenge, there-fore, is to first clas-sify mark-ers as 
+ei-ther \OT1/cmr/m/it/10 sub-ducted \OT1/cmr/m/n/10 or \OT1/cmr/m/it/10 re-cov-
+ered \OT1/cmr/m/n/10 with- 
+ []
+
+
+Overfull \hbox (26.30739pt too wide) in paragraph at lines 257--274
+[]\OT1/cmr/m/n/10 At the heart of our marker clas-si-fi-ca-tion al-go-rithm is 
+a fi-nite Gaus-sian mix-ture model 
+ []
+
+
+Overfull \hbox (13.84909pt too wide) in paragraph at lines 257--274
+\OT1/cmr/m/n/10 (GMM) fit by Expectation-Maximization (EM, Demp-ster et al., 19
+77). We de-rive GMM 
+ []
+
+
+Overfull \hbox (4.80731pt too wide) in paragraph at lines 257--274
+\OT1/cmr/m/n/10 and EM be-low. Please note that GMM fit by EM is a gen-eral pur
+-pose clus-ter-ing al-go- 
+ []
+
+
+Overfull \hbox (5.90472pt too wide) in paragraph at lines 257--274
+\OT1/cmr/m/n/10 rithm broadly used in pat-tern recog-ni-tion, anomaly de-tec-ti
+on, and es-ti-mat-ing com-plex 
+ []
+
+
+Overfull \hbox (22.64087pt too wide) in paragraph at lines 257--274
+\OT1/cmr/m/n/10 prob-a-bil-ity dis-tri-bu-tion func-tions (e.g., Ban-field & Ra
+ftery, 1993; Celeux & Go-v-aert, 1995; 
+ []
+
+
+Overfull \hbox (10.48798pt too wide) in paragraph at lines 257--274
+\OT1/cmr/m/n/10 Figueiredo & Jain, 2002; Fra-ley & Raftery, 2002; Ver-meesch, 2
+018). Be-fore de-riv-ing the 
+ []
+
+
+Overfull \hbox (12.32127pt too wide) in paragraph at lines 257--274
+\OT1/cmr/m/n/10 de-tails of marker clas-si-fi-ca-tion, we hy-poth-e-size that f
+ea-tures com-puted from a PTt path 
+ []
+
+
+Overfull \hbox (0.68237pt too wide) in paragraph at lines 257--274
+\OT1/cmr/m/n/10 may dis-tin-guish sub-ducted from re-cov-ered mark-ers. If true
+, clus-ter-ing al-go-rithms like 
+ []
+
+
+Overfull \hbox (3.97409pt too wide) in paragraph at lines 257--274
+\OT1/cmr/m/n/10 GMM may re-li-ably clas-sify mark-ers by their dis-sim-i-lar-it
+y along any num-ber of di-men- 
+ []
+
+
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[2] [3]
-Overfull \hbox (11.73463pt too wide) in paragraph at lines 264--264
- []|\OT1/cmr/m/n/10 model|
+[2]
+Overfull \hbox (6.13948pt too wide) in paragraph at lines 278--283
+[]\OT1/cmr/m/n/10 Let the traced mark-ers rep-re-sent a $\OML/cmm/m/it/10 d$\OT
+1/cmr/m/n/10 -dimensional ar-ray of $\OML/cmm/m/it/10 n$ \OT1/cmr/m/n/10 ran-do
+m in-de-pen-dent 
  []
 
 
-Overfull \hbox (2.09651pt too wide) in paragraph at lines 264--265
- \OT1/cmr/m/n/10 [\OML/cmm/m/it/10 Ma\OT1/cmr/m/n/10 ]$|
+Overfull \hbox (2.09761pt too wide) in paragraph at lines 278--283
+\OT1/cmr/m/n/10 vari-ables $\OML/cmm/m/it/10 x[] \OMS/cmsy/m/n/10 2 \U/msb/m/n/
+10 R$\OT1/cmr/m/n/10 . As-sume mark-ers $\OML/cmm/m/it/10 x[]$ \OT1/cmr/m/n/10 
+were drawn from $\OML/cmm/m/it/10 k$ \OT1/cmr/m/n/10 dis-crete prob-a-bil-ity d
+is-tri-bu- 
  []
 
 
-Overfull \hbox (5.92906pt too wide) in paragraph at lines 266--267
- []|\OT1/cmr/m/n/10 ratio|
+Overfull \hbox (19.00473pt too wide) in paragraph at lines 278--283
+\OT1/cmr/m/n/10 tions with pa-ram-e-ters $^^H$. The prob-a-bil-ity dis-tri-bu-t
+ion of mark-ers $\OML/cmm/m/it/10 x[]$ \OT1/cmr/m/n/10 can be mod-eled with 
  []
 
 
-Overfull \hbox (2.08662pt too wide) in paragraph at lines 267--267
- \OT1/cmr/m/n/10 [\OML/cmm/m/it/10 GPa\OT1/cmr/m/n/10 ]$|
+Overfull \hbox (1.37863pt too wide) in paragraph at lines 286--290
+[]\OT1/cmr/m/n/10 where $\OML/cmm/m/it/10 p\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 x[
+]\OMS/cmsy/m/n/10 j\OT1/cmr/m/n/10 ^^B[])$ is the prob-a-bil-ity of $\OML/cmm/m
+/it/10 x[]$ \OT1/cmr/m/n/10 un-der the $\OML/cmm/m/it/10 j[]$ \OT1/cmr/m/n/10 m
+ix-ture com-po-nent and $\OML/cmm/m/it/10 ^^Y[]$ 
  []
 
 
-Overfull \hbox (11.73463pt too wide) in paragraph at lines 272--272
- []|\OT1/cmr/m/n/10 model|
+Overfull \hbox (2.67554pt too wide) in paragraph at lines 286--290
+\OT1/cmr/m/n/10 is the mix-ture pro-por-tion rep-re-sent-ing the prob-a-bil-ity
+ that $\OML/cmm/m/it/10 x[]$ \OT1/cmr/m/n/10 be-longs to the $\OML/cmm/m/it/10 
+j[]$ \OT1/cmr/m/n/10 com- 
  []
 
 
-Overfull \hbox (2.09651pt too wide) in paragraph at lines 272--273
- \OT1/cmr/m/n/10 [\OML/cmm/m/it/10 Ma\OT1/cmr/m/n/10 ]$|
+Overfull \hbox (10.56548pt too wide) in paragraph at lines 291--294
+[]\OT1/cmr/m/n/10 Assuming $^^B[]$ de-scribes a Gaus-sian prob-a-bil-ity dis-tr
+i-bu-tions with mean $\OML/cmm/m/it/10 ^^V[]$ \OT1/cmr/m/n/10 and co- 
  []
 
 
-Overfull \hbox (5.92906pt too wide) in paragraph at lines 274--275
- []|\OT1/cmr/m/n/10 ratio|
+Overfull \hbox (19.49591pt too wide) in paragraph at lines 300--303
+[]\OT1/cmr/m/n/10 Estimates for pa-ram-e-ters $\OML/cmm/m/it/10 ^^V[]$ \OT1/cmr
+/m/n/10 and $^^F[]$, rep-re-sent-ing the cen-ter and shape of each clus- 
  []
 
 
-Overfull \hbox (2.08662pt too wide) in paragraph at lines 275--275
- \OT1/cmr/m/n/10 [\OML/cmm/m/it/10 GPa\OT1/cmr/m/n/10 ]$|
+Overfull \hbox (12.72919pt too wide) in paragraph at lines 300--303
+\OT1/cmr/m/n/10 ter, are found by max-i-miz-ing the log of the like-li-hood fun
+c-tion, $\OML/cmm/m/it/10 L\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 x[]\OMS/cmsy/m/n/1
+0 j\OT1/cmr/m/n/10 ^^H) = [][] \OML/cmm/m/it/10 p\OT1/cmr/m/n/10 (\OML/cmm/m/it
+/10 x[]\OMS/cmsy/m/n/10 j\OT1/cmr/m/n/10 ^^H)$:  
  []
 
 
-Overfull \hbox (10.34573pt too wide) in paragraph at lines 279--279
- []|\OT1/cmr/m/n/10 cda46|
+Overfull \hbox (5.46121pt too wide) in paragraph at lines 306--309
+[]\OT1/cmr/m/n/10 Taking the deriva-tive of Equa-tion 4 with re-spect to each p
+a-ram-e-ter, $\OML/cmm/m/it/10 ^^Y$\OT1/cmr/m/n/10 , $\OML/cmm/m/it/10 ^^V$\OT1
+/cmr/m/n/10 , $^^F$, set- 
  []
 
 
-Overfull \hbox (10.90129pt too wide) in paragraph at lines 281--281
- []|\OT1/cmr/m/n/10 cdb46|
+Overfull \hbox (16.23805pt too wide) in paragraph at lines 306--309
+\OT1/cmr/m/n/10 ting the equa-tion to zero, and solv-ing gives the Max-i-mum Li
+ke-li-hood Es-ti-ma-tors (MLE):  
  []
 
 
-Overfull \hbox (9.79016pt too wide) in paragraph at lines 283--283
- []|\OT1/cmr/m/n/10 cdc46|
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[3]
+Overfull \hbox (3.60031pt too wide) in paragraph at lines 316--323
+[]\OT1/cmr/m/n/10 where $\OML/cmm/m/it/10 ![]\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 
+![] \OMS/cmsy/m/n/10 ^^U \OT1/cmr/m/n/10 0; [][] \OML/cmm/m/it/10 ![] \OT1/cmr/
+m/n/10 = 1)$ are mem-ber-ship weights rep-re-sent-ing the prob- 
  []
 
 
-Overfull \hbox (10.90129pt too wide) in paragraph at lines 285--285
- []|\OT1/cmr/m/n/10 cdd46|
+Overfull \hbox (9.21774pt too wide) in paragraph at lines 316--323
+\OT1/cmr/m/n/10 sents the num-ber of ob-ser-va-tions be-long-ing to the $\OML/c
+mm/m/it/10 j[]$ \OT1/cmr/m/n/10 Gaus-sian. Please note that $\OML/cmm/m/it/10 !
+[]$ \OT1/cmr/m/n/10 is 
  []
 
 
-Overfull \hbox (9.79016pt too wide) in paragraph at lines 287--287
- []|\OT1/cmr/m/n/10 cde46|
+Overfull \hbox (17.00871pt too wide) in paragraph at lines 328--334
+[]\OT1/cmr/m/n/10 The EM al-go-rithm es-ti-mates GMM pa-ram-e-ters by ini-tial-
+iz-ing $\OML/cmm/m/it/10 k$ \OT1/cmr/m/n/10 Gaus-sians with pa- 
  []
 
 
-Overfull \hbox (8.40129pt too wide) in paragraph at lines 289--289
- []|\OT1/cmr/m/n/10 cdf46|
+Overfull \hbox (18.52095pt too wide) in paragraph at lines 328--334
+\OT1/cmr/m/n/10 ram-e-ters $(\OML/cmm/m/it/10 ^^Y[]; ^^V[]; \OT1/cmr/m/n/10 ^^F
+[])$, then by it-er-a-tively com-put-ing mem-ber-ship weights with Equa-tion 6 
+
  []
 
 
-Overfull \hbox (10.34573pt too wide) in paragraph at lines 291--291
- []|\OT1/cmr/m/n/10 cdg46|
+Overfull \hbox (16.39073pt too wide) in paragraph at lines 328--334
+\OT1/cmr/m/n/10 (E-step), and up-dat-ing Gaus-sian pa-ram-e-ters with Equa-tion
+ 5 (M-step) un-til con-ver-gence 
  []
 
 
-Overfull \hbox (10.90129pt too wide) in paragraph at lines 293--293
- []|\OT1/cmr/m/n/10 cdh46|
+Overfull \hbox (37.25726pt too wide) in paragraph at lines 335--343
+[]\OT1/cmr/m/n/10 Let $\OML/cmm/m/it/10 z[] \OMS/cmsy/m/n/10 2 f\OT1/cmr/m/n/10
+ 1\OML/cmm/m/it/10 ; \OT1/cmr/m/n/10 2\OML/cmm/m/it/10 ; [] ; k\OMS/cmsy/m/n/10
+ g$ \OT1/cmr/m/n/10 be a multi-no-mial la-tent vari-able with joint dis-tri-bu-
+tion $\OML/cmm/m/it/10 p\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 x[]; z[]\OT1/cmr/m/n/
+10 ) = 
  []
 
 
-Overfull \hbox (8.1235pt too wide) in paragraph at lines 295--295
- []|\OT1/cmr/m/n/10 cdi46|
+Overfull \hbox (16.7513pt too wide) in paragraph at lines 335--343
+\OML/cmm/m/it/10 p\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 x[]\OMS/cmsy/m/n/10 j\OML/c
+mm/m/it/10 z[]\OT1/cmr/m/n/10 )\OML/cmm/m/it/10 p\OT1/cmr/m/n/10 (\OML/cmm/m/it
+/10 z[]\OT1/cmr/m/n/10 )$. $\OML/cmm/m/it/10 z[]$ \OT1/cmr/m/n/10 rep-re-sents 
+the un-known (un-la-belled) clas-si-fi-ca-tions of $\OML/cmm/m/it/10 x[]$ \OT1/
+cmr/m/n/10 and takes val- 
  []
 
 
-Overfull \hbox (8.40129pt too wide) in paragraph at lines 297--297
- []|\OT1/cmr/m/n/10 cdj46|
+Overfull \hbox (0.52173pt too wide) in paragraph at lines 335--343
+\OT1/cmr/m/n/10 ues of $\OML/cmm/m/it/10 j \OT1/cmr/m/n/10 = 1\OML/cmm/m/it/10 
+; \OT1/cmr/m/n/10 2\OML/cmm/m/it/10 ; [] ; k$\OT1/cmr/m/n/10 . Mem-ber-ship wei
+ghts $\OML/cmm/m/it/10 ![]$ \OT1/cmr/m/n/10 are equiv-a-lent to the con-di-tion
+al prob- 
  []
 
 
-Overfull \hbox (10.62352pt too wide) in paragraph at lines 299--299
- []|\OT1/cmr/m/n/10 cdk46|
+Overfull \hbox (8.66689pt too wide) in paragraph at lines 335--343
+\OT1/cmr/m/n/10 a-bil-ity $\OML/cmm/m/it/10 p\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 
+z[]\OMS/cmsy/m/n/10 j\OML/cmm/m/it/10 x[]\OT1/cmr/m/n/10 )$, which rep-re-sents
+ the prob-a-bil-ity of ob-ser-va-tion $\OML/cmm/m/it/10 x[]$ \OT1/cmr/m/n/10 be
+-long-ing to the $\OML/cmm/m/it/10 j[]$ 
  []
 
 
-Overfull \hbox (8.1235pt too wide) in paragraph at lines 301--301
- []|\OT1/cmr/m/n/10 cdl46|
+Overfull \hbox (2.68921pt too wide) in paragraph at lines 346--350
+[]\OT1/cmr/m/n/10 which can be com-puted given ini-tial es-ti-mates for $\OML/c
+mm/m/it/10 k$ \OT1/cmr/m/n/10 sets of Gaus-sian pa-ram-e-ters 
  []
 
 
-Overfull \hbox (13.67908pt too wide) in paragraph at lines 303--303
- []|\OT1/cmr/m/n/10 cdm46|
+Overfull \hbox (18.38553pt too wide) in paragraph at lines 346--350
+\OML/cmm/m/it/10 ^^Y[]$\OT1/cmr/m/n/10 , $\OML/cmm/m/it/10 ^^V[]$\OT1/cmr/m/n/1
+0 , $^^F[]$ (E-step). With $\OML/cmm/m/it/10 ![]$\OT1/cmr/m/n/10 , new Gaus-sia
+n es-ti-mates can be com-puted with Equa-tion 5 
  []
 
 
-Overfull \hbox (10.90129pt too wide) in paragraph at lines 305--305
- []|\OT1/cmr/m/n/10 cdn46|
+Overfull \hbox (3.6824pt too wide) in paragraph at lines 351--361
+[]\OT1/cmr/m/n/10 EM is sen-si-tive to lo-cal op-tima and ini-tial-iza-tion (Fi
+gueiredo & Jain, 2002), so a 
  []
 
 
-Overfull \hbox (10.34573pt too wide) in paragraph at lines 307--307
- []|\OT1/cmr/m/n/10 cdo46|
+Overfull \hbox (14.54343pt too wide) in paragraph at lines 351--361
+\OT1/cmr/m/n/10 num-ber of fea-tures were com-puted and tested in com-bi-na-tio
+n. Re-dun-dant or use-less fea- 
  []
 
 
-Overfull \hbox (3.3515pt too wide) in paragraph at lines 307--307
- []|\OT1/cmr/m/n/10 11,660|
+Overfull \hbox (20.47687pt too wide) in paragraph at lines 351--361
+\OT1/cmr/m/n/10 tures (Dy & Brod-ley, 2004) were fil-tered out. We found a two-
+component mix-ture of $\OML/cmm/m/it/10 x[] \OT1/cmr/m/n/10 = 
  []
 
 
-Overfull \hbox (3.1235pt too wide) in paragraph at lines 307--307
- []|\OT1/cmr/m/n/10 1.64|
+Overfull \hbox (1.06842pt too wide) in paragraph at lines 351--361
+[][]$ \OT1/cmr/m/n/10 and $\OML/cmm/m/it/10 y[] \OT1/cmr/m/n/10 = [][] ^^A\OML/
+cmm/m/it/10 P[]$ \OT1/cmr/m/n/10 re-li-ably clas-si-fied mark-ers among nu-mer-
+i-cal mod- 
  []
 
 
-Overfull \hbox (10.90129pt too wide) in paragraph at lines 309--309
- []|\OT1/cmr/m/n/10 cdp46|
+Overfull \hbox (3.48674pt too wide) in paragraph at lines 351--361
+\OT1/cmr/m/n/10 els. $\OML/cmm/m/it/10 x[]$ \OT1/cmr/m/n/10 and $\OML/cmm/m/it/
+10 y[]$ \OT1/cmr/m/n/10 rep-re-sent the max-i-mum pres-sure at-tained along a m
+arker PTt path and 
  []
 
 
-Overfull \hbox (10.34573pt too wide) in paragraph at lines 311--311
- []|\OT1/cmr/m/n/10 cda62|
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[4]
+Overfull \hbox (2.5152pt too wide) in paragraph at lines 362--365
+[]\OT1/cmr/m/n/10 We use gen-eral pur-pose func-tions in the \OT1/cmtt/m/n/10 R
+ \OT1/cmr/m/n/10 pack-age \OT1/cmtt/m/n/10 Mclust \OT1/cmr/m/n/10 (Scrucca et a
+l., 2016) 
  []
 
 
-Overfull \hbox (10.90129pt too wide) in paragraph at lines 313--313
- []|\OT1/cmr/m/n/10 cdb62|
+Overfull \hbox (11.14063pt too wide) in paragraph at lines 369--376
+[]\OT1/cmr/m/n/10 GMM clus-ter-ing typ-i-cally clas-si-fies mark-ers into 6-20 
+groups, so a fi-nal de-ci-sion to 
  []
 
 
-Overfull \hbox (9.79016pt too wide) in paragraph at lines 315--315
- []|\OT1/cmr/m/n/10 cdc62|
+Overfull \hbox (5.29822pt too wide) in paragraph at lines 369--376
+\OT1/cmr/m/n/10 clas-sify a group as \OT1/cmr/m/it/10 sub-ducted \OT1/cmr/m/n/1
+0 or \OT1/cmr/m/it/10 re-cov-ered \OT1/cmr/m/n/10 is made by com-par-ing the ma
+x-i-mum marker 
  []
 
 
-Overfull \hbox (10.90129pt too wide) in paragraph at lines 317--317
- []|\OT1/cmr/m/n/10 cdd62|
+Overfull \hbox (10.25177pt too wide) in paragraph at lines 369--376
+\OT1/cmr/m/n/10 pres-sure within each group to the max-i-mum pres-sures of all 
+mark-ers. Groups that have 
  []
 
 
-Overfull \hbox (9.79016pt too wide) in paragraph at lines 319--319
- []|\OT1/cmr/m/n/10 cde62|
+Overfull \hbox (20.39882pt too wide) in paragraph at lines 369--376
+\OT1/cmr/m/n/10 max-i-mum marker pres-sures well above the me-dian over-all mar
+ker pres-sure clas-sify as \OT1/cmr/m/it/10 sub- 
  []
 
 
-Overfull \hbox (8.40129pt too wide) in paragraph at lines 321--321
- []|\OT1/cmr/m/n/10 cdf62|
+Overfull \hbox (16.40613pt too wide) in paragraph at lines 369--376
+\OT1/cmr/m/it/10 ducted\OT1/cmr/m/n/10 . If no groups have max-i-mum marker pre
+s-sures above 4 $\OML/cmm/m/it/10 GPa$\OT1/cmr/m/n/10 , then all groups clas- 
  []
 
 
-Overfull \hbox (10.34573pt too wide) in paragraph at lines 323--323
- []|\OT1/cmr/m/n/10 cdg62|
- []
+LaTeX Warning: Reference `tbl:marx.summary' on page 5 undefined on input line 3
+80.
 
+[5] [6
 
-Overfull \hbox (10.90129pt too wide) in paragraph at lines 325--325
- []|\OT1/cmr/m/n/10 cdh62|
- []
-
-
-Overfull \hbox (8.1235pt too wide) in paragraph at lines 327--327
- []|\OT1/cmr/m/n/10 cdi62|
- []
-
-
-Overfull \hbox (3.3515pt too wide) in paragraph at lines 327--327
- []|\OT1/cmr/m/n/10 18,775|
- []
-
-
-Overfull \hbox (8.40129pt too wide) in paragraph at lines 329--329
- []|\OT1/cmr/m/n/10 cdj62|
- []
-
-
-Overfull \hbox (10.62352pt too wide) in paragraph at lines 331--331
- []|\OT1/cmr/m/n/10 cdk62|
- []
-
-
-Overfull \hbox (8.1235pt too wide) in paragraph at lines 333--333
- []|\OT1/cmr/m/n/10 cdl62|
- []
-
-
-Overfull \hbox (13.67908pt too wide) in paragraph at lines 335--335
- []|\OT1/cmr/m/n/10 cdm62|
- []
-
-
-Overfull \hbox (10.90129pt too wide) in paragraph at lines 337--337
- []|\OT1/cmr/m/n/10 cdn62|
- []
-
-
-Overfull \hbox (10.34573pt too wide) in paragraph at lines 339--339
- []|\OT1/cmr/m/n/10 cdo62|
- []
-
-
-Overfull \hbox (10.90129pt too wide) in paragraph at lines 341--341
- []|\OT1/cmr/m/n/10 cdp62|
- []
-
-
-Overfull \hbox (10.34573pt too wide) in paragraph at lines 343--343
- []|\OT1/cmr/m/n/10 cda78|
- []
-
-
-Overfull \hbox (10.90129pt too wide) in paragraph at lines 345--345
- []|\OT1/cmr/m/n/10 cdb78|
- []
-
-
-Overfull \hbox (9.79016pt too wide) in paragraph at lines 347--347
- []|\OT1/cmr/m/n/10 cdc78|
- []
-
-
-Overfull \hbox (10.90129pt too wide) in paragraph at lines 349--349
- []|\OT1/cmr/m/n/10 cdd78|
- []
-
-
-Overfull \hbox (9.79016pt too wide) in paragraph at lines 351--351
- []|\OT1/cmr/m/n/10 cde78|
- []
-
-
-Overfull \hbox (8.40129pt too wide) in paragraph at lines 353--353
- []|\OT1/cmr/m/n/10 cdf78|
- []
-
-
-Overfull \hbox (3.3515pt too wide) in paragraph at lines 353--353
- []|\OT1/cmr/m/n/10 10,448|
- []
-
-
-Overfull \hbox (3.1235pt too wide) in paragraph at lines 353--353
- []|\OT1/cmr/m/n/10 0.82|
- []
-
-
-Overfull \hbox (10.34573pt too wide) in paragraph at lines 355--355
- []|\OT1/cmr/m/n/10 cdg78|
- []
-
-
-Overfull \hbox (10.90129pt too wide) in paragraph at lines 357--357
- []|\OT1/cmr/m/n/10 cdh78|
- []
-
-
-Overfull \hbox (271.01251pt too wide) has occurred while \output is active
-[]
- []
-
-
-Overfull \hbox (271.01251pt too wide) has occurred while \output is active
-[]
- []
-
-[4
 
 ]
-Overfull \hbox (8.1235pt too wide) in paragraph at lines 359--359
- []|\OT1/cmr/m/n/10 cdi78|
- []
-
-
-Overfull \hbox (8.40129pt too wide) in paragraph at lines 361--361
- []|\OT1/cmr/m/n/10 cdj78|
- []
-
-
-Overfull \hbox (10.62352pt too wide) in paragraph at lines 363--363
- []|\OT1/cmr/m/n/10 cdk78|
- []
-
-
-Overfull \hbox (8.1235pt too wide) in paragraph at lines 365--365
- []|\OT1/cmr/m/n/10 cdl78|
- []
-
-
-Overfull \hbox (13.67908pt too wide) in paragraph at lines 367--367
- []|\OT1/cmr/m/n/10 cdm78|
- []
-
-
-Overfull \hbox (10.90129pt too wide) in paragraph at lines 369--369
- []|\OT1/cmr/m/n/10 cdn78|
- []
-
-
-Overfull \hbox (10.34573pt too wide) in paragraph at lines 371--371
- []|\OT1/cmr/m/n/10 cdo78|
- []
-
-
-Overfull \hbox (10.90129pt too wide) in paragraph at lines 373--373
- []|\OT1/cmr/m/n/10 cdp78|
- []
-
-
-Overfull \hbox (10.34573pt too wide) in paragraph at lines 375--375
- []|\OT1/cmr/m/n/10 cda94|
- []
-
-
-Overfull \hbox (10.90129pt too wide) in paragraph at lines 377--377
- []|\OT1/cmr/m/n/10 cdb94|
- []
-
-
-Overfull \hbox (9.79016pt too wide) in paragraph at lines 379--379
- []|\OT1/cmr/m/n/10 cdc94|
- []
-
-
-Overfull \hbox (10.90129pt too wide) in paragraph at lines 381--381
- []|\OT1/cmr/m/n/10 cdd94|
- []
-
-
-Overfull \hbox (3.3515pt too wide) in paragraph at lines 381--381
- []|\OT1/cmr/m/n/10 12,302|
- []
-
-
-Overfull \hbox (3.1235pt too wide) in paragraph at lines 381--382
- []|\OT1/cmr/m/n/10 1.66|
- []
-
-
-Overfull \hbox (9.79016pt too wide) in paragraph at lines 383--383
- []|\OT1/cmr/m/n/10 cde94|
- []
-
-
-Overfull \hbox (8.40129pt too wide) in paragraph at lines 385--385
- []|\OT1/cmr/m/n/10 cdf94|
- []
-
-
-Overfull \hbox (10.34573pt too wide) in paragraph at lines 387--387
- []|\OT1/cmr/m/n/10 cdg94|
- []
-
-
-Overfull \hbox (10.90129pt too wide) in paragraph at lines 389--389
- []|\OT1/cmr/m/n/10 cdh94|
- []
-
-
-Overfull \hbox (8.1235pt too wide) in paragraph at lines 391--391
- []|\OT1/cmr/m/n/10 cdi94|
- []
-
-
-Overfull \hbox (8.40129pt too wide) in paragraph at lines 393--393
- []|\OT1/cmr/m/n/10 cdj94|
- []
-
-
-Overfull \hbox (10.62352pt too wide) in paragraph at lines 395--395
- []|\OT1/cmr/m/n/10 cdk94|
- []
-
-
-Overfull \hbox (8.1235pt too wide) in paragraph at lines 397--397
- []|\OT1/cmr/m/n/10 cdl94|
- []
-
-
-Overfull \hbox (271.01251pt too wide) has occurred while \output is active
-[]
- []
-
-
-Overfull \hbox (271.01251pt too wide) has occurred while \output is active
-[]
- []
-
-[5]
-Overfull \hbox (13.67908pt too wide) in paragraph at lines 399--399
- []|\OT1/cmr/m/n/10 cdm94|
- []
-
-
-Overfull \hbox (10.90129pt too wide) in paragraph at lines 401--401
- []|\OT1/cmr/m/n/10 cdn94|
- []
-
-
-Overfull \hbox (10.34573pt too wide) in paragraph at lines 403--403
- []|\OT1/cmr/m/n/10 cdo94|
- []
-
-
-Overfull \hbox (10.90129pt too wide) in paragraph at lines 405--405
- []|\OT1/cmr/m/n/10 cdp94|
- []
-
-
-Overfull \hbox (271.01251pt too wide) has occurred while \output is active
-[]
- []
-
-
-Overfull \hbox (271.01251pt too wide) has occurred while \output is active
-[]
- []
-
-[6]
-Overfull \hbox (271.01251pt too wide) has occurred while \output is active
-[]
- []
-
-
-Overfull \hbox (271.01251pt too wide) has occurred while \output is active
-[]
- []
-
-[7] [8
-
-]
-Overfull \hbox (4.23793pt too wide) in paragraph at lines 431--433
+Overfull \hbox (4.23793pt too wide) in paragraph at lines 399--401
 []\OT1/cmr/m/n/10 This work was sup-ported by the Na-tional Sci-ence Foun-da-ti
 on grant OIA1545903 
  []
 
-[9
+[7
 
 ]
+Overfull \hbox (4.79352pt too wide) in paragraph at lines 417--420
+[]\OT1/cmr/m/n/10 Banfield, J. D., & Raftery, A. E. (1993). Model-based gaus-si
+an and non-gaussian clus- 
+ []
+
+
+Overfull \hbox (30.94843pt too wide) in paragraph at lines 421--424
+[]\OT1/cmr/m/n/10 Celeux, G., & Go-v-aert, G. (1995). Gaus-sian par-si-mo-nious
+ clus-ter-ing mod-els. \OT1/cmr/m/it/10 Pat-tern Recog- 
+ []
+
+
+Overfull \hbox (16.65471pt too wide) in paragraph at lines 425--430
+[]\OT1/cmr/m/n/10 Dempster, A. P., Laird, N. M., & Ru-bin, D. B. (1977). Max-i-
+mum like-li-hood from in-com- 
+ []
+
+
+Overfull \hbox (5.69711pt too wide) in paragraph at lines 425--430
+\OT1/cmr/m/n/10 plete data via the EM al-go-rithm. \OT1/cmr/m/it/10 Jour-nal of
+ the Royal Sta-tis-ti-cal So-ci-ety: Se-ries B 
+ []
+
+
+Overfull \hbox (2.77382pt too wide) in paragraph at lines 431--435
+[]\OT1/cmr/m/n/10 Dy, J. G., & Brod-ley, C. E. (2004). Fea-ture se-lec-tion for
+ un-su-per-vised learn-ing. \OT1/cmr/m/it/10 Jour- 
+ []
+
+
+Overfull \hbox (19.23804pt too wide) in paragraph at lines 436--440
+[]\OT1/cmr/m/n/10 Figueiredo, M. A. T., & Jain, A. K. (2002). Un-su-per-vised l
+earn-ing of fi-nite mix-ture mod- 
+ []
+
+
+Overfull \hbox (4.36868pt too wide) in paragraph at lines 436--440
+\OT1/cmr/m/n/10 els. \OT1/cmr/m/it/10 IEEE Trans-ac-tions on Pat-tern Anal-y-si
+s and Ma-chine In-tel-li-gence\OT1/cmr/m/n/10 , \OT1/cmr/m/it/10 24\OT1/cmr/m/n
+/10 (3), 381-- 
+ []
+
+
+Overfull \hbox (6.76575pt too wide) in paragraph at lines 441--445
+[]\OT1/cmr/m/n/10 Fraley, C., & Raftery, A. E. (2002). Model-based clus-ter-ing
+, dis-crim-i-nant anal-y-sis, and 
+ []
+
+
+Overfull \hbox (2.60829pt too wide) in paragraph at lines 441--445
+\OT1/cmr/m/n/10 den-sity es-ti-ma-tion. \OT1/cmr/m/it/10 Jour-nal of the Amer-i
+-can Sta-tis-ti-cal As-so-ci-a-tion\OT1/cmr/m/n/10 , \OT1/cmr/m/it/10 97\OT1/cm
+r/m/n/10 (458), 611-- 
+ []
+
+
+Overfull \hbox (17.7657pt too wide) in paragraph at lines 446--450
+[]\OT1/cmr/m/n/10 Scrucca, L., Fop, M., Mur-phy, T. B., & Raftery, A. E. (2016)
+. Mclust 5: Clus-ter-ing, clas- 
+ []
+
+
+Overfull \hbox (8.43748pt too wide) in paragraph at lines 446--450
+\OT1/cmr/m/n/10 si-fi-ca-tion and den-sity es-ti-ma-tion us-ing gaus-sian fi-ni
+te mix-ture mod-els. \OT1/cmr/m/it/10 The R Jour- 
+ []
+
+
+Overfull \hbox (9.89584pt too wide) in paragraph at lines 451--454
+[]\OT1/cmr/m/n/10 Vermeesch, P. (2018). Iso-plotR: A free and open tool-box for
+ geochronol-ogy. \OT1/cmr/m/it/10 Geo-science 
+ []
+
 No file chutes.bbl.
 
-Package caption Warning: Unused \captionsetup[figure] on input line 75.
+Package caption Warning: Unused \captionsetup[figure] on input line 100.
 See the caption package documentation for explanation.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 449.
-[10
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 460.
+[8
 
 ]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 449.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 460.
 (./chutes.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 449.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 449.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 460.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 460.
 
 LaTeX Font Warning: Size substitutions with differences
 (Font)              up to 0.45pt have occurred.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 449.
+
+LaTeX Warning: There were undefined references.
+
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 460.
  ) 
 Here is how much of TeX's memory you used:
- 9436 strings out of 480608
- 141763 string characters out of 5903631
- 491434 words of memory out of 5000000
- 25124 multiletter control sequences out of 15000+600000
- 541602 words of font info for 61 fonts, out of 8000000 for 9000
+ 9454 strings out of 480608
+ 142016 string characters out of 5903631
+ 420764 words of memory out of 5000000
+ 25140 multiletter control sequences out of 15000+600000
+ 542307 words of font info for 63 fonts, out of 8000000 for 9000
  1147 hyphenation exceptions out of 8191
- 46i,9n,49p,252b,458s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 46i,8n,42p,285b,442s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
 ></usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
+</usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmbxti10.pfb
+></usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb>
 </usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><
 /usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></u
 sr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr
@@ -1106,13 +1059,16 @@ ive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/texlive
 /2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmss8.pfb></usr/local/texlive/2
 020/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/20
 20/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/local/texlive/2020
-/texmf-dist/fonts/type1/public/amsfonts/cm/cmti9.pfb></usr/local/texlive/2020/t
-exmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive/2020/te
-xmf-dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb>
-Output written on chutes.pdf (10 pages, 190556 bytes).
+/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/2020/t
+exmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2020/te
+xmf-dist/fonts/type1/public/amsfonts/cm/cmti9.pfb></usr/local/texlive/2020/texm
+f-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive/2020/texmf
+-dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb></usr/local/texlive/2020/texmf-d
+ist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
+Output written on chutes.pdf (8 pages, 242339 bytes).
 PDF statistics:
- 101 PDF objects out of 1000 (max. 8388607)
- 72 compressed objects within 1 object stream
+ 115 PDF objects out of 1000 (max. 8388607)
+ 83 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 

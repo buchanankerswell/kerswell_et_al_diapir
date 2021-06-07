@@ -9,7 +9,7 @@ sshhh <- function(p){
 c('magrittr', 'tidyr', 'readr', 'purrr',
   'mclust', 'ggforce', 'dplyr', 'ggrepel',
   'patchwork', 'gridExtra', 'gganimate',
-  'ggridges', 'progress', 'metR',
+  'ggridges', 'progress', 'viridis', 'metR',
   'parallel', 'progress') -> p.list
 
 cat('Loading libraries:', p.list, sep = '\n')
@@ -484,13 +484,17 @@ load_marx <- function(path) {
     tibble(x = gx, ep = ep[ep != 0][-1]) -> df
     # Find where trench interferes with convergence region
     if(df$x[which.min(df$ep)] >= 500000) {
-      return(TRUE)
-    } else {
       return(FALSE)
+    } else {
+      return(TRUE)
     }
   }) -> interf
   # Add attribute representing the timestep of interference
-  cut <- min(which(interf == FALSE))
+  if(all(interf == FALSE)) {
+    cut <- length(interf)
+  } else {
+    cut <- min(which(interf == TRUE))
+  }
   attr(marx, 'tcut') <- cut
   cat(
     '\nInterference with convergence region at [', mod, ']:',
@@ -664,7 +668,7 @@ marx_ft <- function(df, features = 'all') {
 }
 
 # Gaussian mixture modelling (Scrucca et al., 2016) to classify recovered rocks
-marx_classify <- function(marx.df, fts.df) {
+marx_classify <- function(marx.df, fts.df, k = 2) {
   # Crop markers > interference timecut
   tcut <- attr(marx.df, 'tcut')
   m <- marx.df %>% slice(1:tcut)
@@ -673,38 +677,55 @@ marx_classify <- function(marx.df, fts.df) {
   # Fit Eigenvalue decomposition models and select best using BIC
   cat('\nSelecting best Gaussian mixture model by BIC\n')
   fts.df %>% ungroup() %>% select(-id) -> X
-  mc.bic <- mclustBIC(X, G = seq_len(20))
-  print(summary(mc.bic))
+  # Try clustering
+  mc.bic <- try(mclustBIC(X, G = seq_len(k)))
+  # If clustering doesn't converge or throws error
+  if(class(mc.bic) == 'try-error') {
+    # Keep trying i times
+    i <- 1 # Counter
+    imax <- 20
+    while(class(mc.bic) == 'try-error' && i <= imax) {
+      if(i < imax) {
+        mc.bic <- try(mclustBIC(X, G = seq_len(k)))
+        i <- i + 1
+      } else {
+        stop('Clustering could not converge')
+      }
+    }
+  }
+  #print(summary(mc.bic))
   # GMM clustering using model picked by BIC
   mc <- Mclust(X, x = mc.bic, verbose = T)
-  print(summary(mc))
+  #print(summary(mc))
+  # Make class id df
   class.df <- tibble(id = ids, class = mc$classification)
   # Join classification to markers data
   marx.class.df <- m %>% left_join(class.df, by = 'id') %>% replace(is.na(.), 0)
-  # Discriminate recovered rocks by max P
   # Max pressure for all markers
-  maxP <- marx.class.df %>%
+  mft <- marx.class.df %>%
   filter(class != 0) %>%
-  summarise(maxP = max(P))
-  # Summarise max pressure by class
-  d <- marx.class.df %>%
-  group_by(class) %>%
-  summarise(HP = max(P) > 4e4, LP = max(P) < (median(maxP$maxP) + 3/4*IQR(maxP$maxP)))
-  # If all max pressures less than 40kbar
-  if(all(d$HP == FALSE)) {
-    # All classes recovered
-    recovered.class <- d$class
-  } else {
-    # Assign LP rocks as recovered
-    recovered.class <- d$class[which(d$LP == TRUE)]
-  }
+  summarise(maxP = max(P), sumdP = sum(diff(P)))
+  # Get parameter centroids
+  centroids <- t(mc$parameters$mean) %>% as_tibble() %>% mutate(class = 1:n(), .before = 'sum.dP')
+  # Calculate lower bounds for features
+  lowerB <- X %>% summarise(across(everything(), ~{median(.x) - IQR(.x)}))
+  # Classify group as recovered if maxP or sumdP centroid is below lower bound
+  d <- centroids[centroids$sum.dP <= lowerB$sum.dP | centroids$max.P <= lowerB$max.P,]
   # Add recovered class
   recovered.df <- class.df %>%
-  mutate(recovered = ifelse(class %in% recovered.class, TRUE, FALSE))
+  mutate(recovered = ifelse(class %in% d$class, TRUE, FALSE))
   # Join with marker data
   df <- marx.class.df %>%
   left_join(recovered.df, by = c('id', 'class')) %>%
   replace(is.na(.), FALSE)
+  # Summarise maximum pressures
+  mP.class <- df %>% group_by(id, class) %>% summarise(maxP = max(P), sumdP = sum(diff(P)), .groups = 'keep')
+#   mP.class %>% ggplot(aes(x = maxP, y = sumdP, color = as.factor(class))) + geom_point() + geom_vline(xintercept = median(mP.class$maxP)) + geom_vline(xintercept = median(mP.class$maxP) - IQR(mP.class$maxP)) + geom_hline(yintercept = median(mP.class$sumdP)) + geom_hline(yintercept = median(mP.class$sumdP) - IQR(mP.class$sumdP))
+  mP <- df %>% group_by(id, recovered) %>% summarise(maxP = max(P), .groups = 'keep')
+  # Change recovered to FALSE if recovered was TRUE and marker maxP was >= 50kbar
+  misclassed.marx <- which(mP$maxP >= (median(mP$maxP) + IQR(mP$maxP)) & mP$recovered == TRUE)
+  df$recovered[df$id %in% misclassed.marx] <- FALSE
+  # Print results
   cat('\nRecovered classes:')
   df %>% slice(1) %>% group_by(class) %>% select(class, recovered) %>% table() %>% print()
   # Join classification (subducted or recovered) to markers data
@@ -755,11 +776,13 @@ marx_stats <- function(df) {
     min.T.sub = min(df$T[which(df$recovered == FALSE)])
   ) -> s
   cat('\nCalculating empirical probability distribution')
-  cdf.P <- df %>% slice(1) %>%
+  cdf.P <- df %>%
+  filter(recovered == TRUE) %>%
   summarise(maxP = max(P)) %>%
   arrange(maxP) %>%
   mutate(cdf = (row_number()-1)/n())
-  cdf.T <- df %>% slice(1) %>%
+  cdf.T <- df %>%
+  filter(recovered == TRUE) %>%
   summarise(maxT = max(T)) %>%
   arrange(maxT) %>%
   mutate(cdf = (row_number()-1)/n())
@@ -767,15 +790,15 @@ marx_stats <- function(df) {
 }
 
 # Monte carlo sampling of marx_classify()
-monte_carlo <- function(marx.df, fts.df, n = 500) {
+monte_carlo <- function(marx.df, fts.df, n = 100, k = 2) {
   # Progress bar
   pb <- progress_bar$new(
     format = 'Monte Carlo Sampling [:bar] :current/:total (:percent)',
     total = n, clear = FALSE, width = 80)
   purrr::map(seq_len(n), ~{
-    d <- invisible(marx_classify(marx.df, fts.df))
-    invisible(marx_stats(d$marx))
     pb$tick()
+    marx_classify(marx.df, fts.df, k = k)$marx %>%
+    marx_stats()
   })
 }
 
@@ -800,7 +823,7 @@ marx_motion_mov <- function(df, name, class = FALSE, recovered = FALSE) {
   scale_y_reverse() +
   coord_fixed() +
   scale_color_brewer(palette = 'Paired', breaks = as.character(seq_len(max(df$class)))) +
-  theme_classic() +
+  theme_minimal() +
   theme(
     legend.position = 'bottom'
   ) +
@@ -825,7 +848,7 @@ marx_motion_mov <- function(df, name, class = FALSE, recovered = FALSE) {
   scale_y_reverse() +
   coord_fixed() +
   scale_color_manual(values = c('TRUE' = 'black', 'FALSE' = 'grey50')) +
-  theme_classic() +
+  theme_minimal() +
   theme(
     legend.position = 'bottom'
   ) +
@@ -852,7 +875,7 @@ marx_motion_mov <- function(df, name, class = FALSE, recovered = FALSE) {
     values = unique(c.map$color)[as.factor(c.map$type) %>% unique() %>% order()],
     breaks = unique(c.map$type)[as.factor(c.map$type) %>% unique() %>% order()],
     na.value = 'white') +
-  theme_classic() +
+  theme_minimal() +
   theme(
     legend.position = 'bottom'
   ) +
@@ -1053,271 +1076,254 @@ marx_features_plot <- function(df, name) {
   )
 }
 
+# Draw grids
 draw_grid <- function(
-  nodes = NULL,
+  node,
+  model,
+  marx = NULL,
+  class = c('type', 'class', 'recovered'),
   time,
   box = c(up = -18, down = 200, left = 0, right = 2000),
   arrows = FALSE,
-  leg.pos = "right",
+  leg.pos = 'right',
+  leg.dir = 'vertical',
+  leg.dir.rec = 'vertical',
   base.size = 11,
-  p.type = c("stress", "strain", "density", "temperature", "viscosity", "stream"),
-  v.pal = "magma",
+  p.type = c('density', 'temperature', 'viscosity', 'stream'),
+  bk.alpha = 0.6,
+  mk.alpha = 1,
+  mk.size = 0.3,
+  rec.col = 'white',
+  sub.col = 'black',
+  v.pal = 'magma',
   v.direction = 1,
   transparent = TRUE) {
-  n <- nodes
-  if (p.type == "temperature") {
-    if (!is.null(n)) {
-      p <- n %>%
-      ggplot() +
-      geom_contour_fill(
-        aes(x = x/1000, y = z/1000, z = tk - 273),
-        size = 0.1,
-        color = NA,
-        breaks = c(0, seq(100, 1900, 200))) +
-      geom_text_contour(
-        aes(x = x/1000, y = z/1000, z = tk - 273),
-        stroke = 0.2,
-        size = 3,
-        breaks = c(0, seq(100, 1900, 200))) +
-      labs(x = "km",
-           y = "km",
-           fill = bquote(degree * C),
-           title = paste0("Temperature  ",
-           time, " Ma")) +
-      coord_equal(expand = F) +
-      scale_y_reverse(limits = c(box[2], box[1])) +
-      scale_x_continuous(limits = c(box[3], box[4])) +
-      scale_fill_viridis_c(option = v.pal, direction = v.direction, na.value = "transparent") +
-      theme_minimal(base_size = base.size) +
-      theme(legend.position = leg.pos, axis.text = element_text(color = "black"))
-      if(arrows == TRUE){
+  # Get time cutoff
+  tcut <- time
+  if(p.type == 'density') {
+    node %>%
+    ggplot() +
+    geom_contour_fill(aes(x = x/1000, y = z/1000, z = ro), alpha = bk.alpha) +
+    geom_contour(
+      aes(x = x/1000, y = z/1000, z = tk - 273),
+      color = 'white',
+      breaks = c(0, seq(100, 1900, 200)),
+      size = 0.3) +
+    geom_text_contour(
+      aes(x = x/1000, y = z/1000, z = tk - 273),
+      stroke = 0.2,
+      size = 3,
+      breaks = c(0, seq(100, 1900, 200))) +
+    labs(
+      title = paste0('Density [', model, '] ', tcut, ' Ma'),
+      x = 'Distance [km]',
+      y = 'Depth [km]',
+      fill = bquote(kgm^-3)) +
+    guides(fill = guide_colorbar(direction = leg.dir, title.vjust = 1)) +
+    scale_fill_viridis(option = v.pal, direction = v.direction) +
+    scale_y_reverse() +
+    coord_equal(
+      expand = F,
+      ylim = c(box[2], box[1]),
+      xlim = c(box[3], box[4])) +
+    theme_minimal(base_size = base.size) +
+    theme(
+      panel.grid = element_blank(),
+      legend.position = leg.pos
+    ) -> p
+  } else if(p.type =='temperature') {
+    node %>%
+    ggplot() +
+    geom_contour_fill(aes(x = x/1000, y = z/1000, z = tk - 273), alpha = bk.alpha) +
+    geom_contour(
+      aes(x = x/1000, y = z/1000, z = tk - 273),
+      color = 'white',
+      breaks = c(0, seq(100, 1900, 200)),
+      size = 0.3) +
+    geom_text_contour(
+      aes(x = x/1000, y = z/1000, z = tk - 273),
+      stroke = 0.2,
+      size = 3,
+      breaks = c(0, seq(100, 1900, 200))) +
+    labs(
+      title = paste0('Temperature [', model, '] ', tcut, ' Ma'),
+      x = 'Distance [km]',
+      y = 'Depth [km]',
+      fill = bquote(degree*C)) +
+    guides(fill = guide_colorbar(direction = leg.dir, title.vjust = 1)) +
+    scale_fill_viridis(option = v.pal, direction = v.direction) +
+    scale_y_reverse() +
+    coord_equal(
+      expand = F,
+      ylim = c(box[2], box[1]),
+      xlim = c(box[3], box[4])) +
+    theme_minimal(base_size = base.size) +
+    theme(
+      panel.grid = element_blank(),
+      legend.position = leg.pos
+    ) -> p
+  } else if(p.type =='viscosity') {
+    node %>%
+    ggplot() +
+    geom_contour_fill(aes(x = x/1000, y = z/1000, z = log10(nu)), alpha = bk.alpha) +
+    geom_contour(
+      aes(x = x/1000, y = z/1000, z = tk - 273),
+      color = 'white',
+      breaks = c(0, seq(100, 1900, 200)),
+      size = 0.3) +
+    geom_text_contour(
+      aes(x = x/1000, y = z/1000, z = tk - 273),
+      stroke = 0.2,
+      size = 3,
+      breaks = c(0, seq(100, 1900, 200))) +
+    labs(
+      title = paste0('Log Viscosity [', model, '] ', tcut, ' Ma'),
+      x = 'Distance [km]',
+      y = 'Depth [km]',
+      fill = 'Log[Pa s]') +
+    guides(fill = guide_colorbar(direction = leg.dir, title.vjust = 1)) +
+    scale_fill_viridis(option = v.pal, direction = v.direction) +
+    scale_y_reverse() +
+    coord_equal(
+      expand = F,
+      ylim = c(box[2], box[1]),
+      xlim = c(box[3], box[4])) +
+    theme_minimal(base_size = base.size) +
+    theme(
+      panel.grid = element_blank(),
+      legend.position = leg.pos
+    ) -> p
+  } else if(p.type =='stream') {
+    node %>%
+    ggplot() +
+    geom_streamline(
+      aes(x = x / 1000, y = z / 1000, dx = vx, dy = (-vz),
+          color = sqrt(..dx.. ^ 2 + ..dy.. ^ 2) * 31540000 * 100,
+          alpha = ..step..),
+      S = 5,
+      dt = 31540000 * 1000 / 5,
+      arrow = NULL,
+      L = 10,
+      res = 1,
+      skip = 5,
+      lineend = "round",
+      size = 0.3) +
+    geom_contour(
+      aes(x = x / 1000, y = z / 1000, z = tk - 273),
+      size = 0.3,
+      color = 'black',
+      na.rm = T,
+      breaks = c(0, seq(100, 1900, 200))) +
+    geom_text_contour(
+      aes(x = x / 1000, y = z / 1000, z = tk - 273),
+      stroke = 0.2,
+      size = 3,
+      breaks = c(0, seq(100, 1900, 200))) +
+    labs(
+      x = 'Distance [km]',
+      y = 'Depth [km]',
+      fill = bquote(degree*C),
+      color = bquote(cm~yr^-1),
+      title = paste0('Streams  [', model, '] ', tcut, ' Ma')) +
+    guides(alpha = F, color = guide_colorbar(direction = leg.dir, title.vjust = 1), fill = F) +
+    scale_y_reverse() +
+    coord_equal(
+      expand = F,
+      ylim = c(box[2], box[1]),
+      xlim = c(box[3], box[4])) +
+    scale_color_viridis_c(option = v.pal, limits = c(0, 10), na.value = 'transparent') +
+    theme_minimal(base_size = base.size) +
+    theme(
+      legend.position = leg.pos,
+      panel.grid = element_blank(),
+      panel.background = element_rect(color = NA, fill = rgb(0, 0, 0, 0.3))
+    ) -> p
+  }
+  if(!is.null(marx)) {
+    if(p.type != 'stream') {
+      if(class == 'type') {
         p <- p +
-        geom_arrow(
-          aes(x = x/1000, y = z/1000, dx = vx, dy = (-vz)),
-          skip = 5,
-          alpha = 0.3,
-          show.legend = F) +
-        geom_text_contour(
-         aes(x = x/1000, y = z/1000, z = tk - 273),
-         stroke = 0.2,
-         size = 3,
-         breaks = c(0, seq(100, 1900,200)))
-      }
-    }
-  } else if (p.type == "stress") {
-    if (!is.null(n)) {
-      p <- n %>%
-      ggplot() +
-      geom_contour_fill(
-        aes(x = x/1000, y = z/1000, z = tk - 273),
-        size = 0.1,
-        color = NA,
-        breaks = c(0, seq(100, 1900, 200))) +
-      geom_text_contour(
-        aes(x = x/1000, y = z/1000, z = tk - 273),
-        stroke = 0.2,
-        size = 3,
-        breaks = c(0, seq(100, 1900, 200))) +
-      labs(x = "km",
-           y = "km",
-           fill = bquote(degree * C),
-           title = paste0("Temperature  ",
-           time, " Ma")) +
-      coord_equal(expand = F) +
-      scale_y_reverse(limits = c(box[2], box[1])) +
-      scale_x_continuous(limits = c(box[3], box[4])) +
-      scale_fill_viridis_c(option = v.pal, direction = v.direction, na.value = "transparent") +
-      theme_minimal(base_size = base.size) +
-      theme(legend.position = leg.pos, axis.text = element_text(color = "black"))
-      if(arrows == TRUE){
+        geom_point(
+          data = marx %>% filter(tstep == tcut),
+          aes(x = x/1000, y = z/1000, color = as.factor(type)),
+          alpha = mk.alpha,
+          size = mk.size) +
+        scale_color_manual(
+          values = unique(c.map$color)[as.factor(c.map$type) %>% unique() %>% order()],
+          breaks = unique(c.map$type)[as.factor(c.map$type) %>% unique() %>% order()],
+          na.value = 'white') +
+        labs(color = 'Rock type') +
+        guides(color = guide_legend(direction = leg.dir.rec, override.aes = list(alpha = 1, size = 2)))
+      } else if(class == 'class') {
         p <- p +
-        geom_arrow(
-          aes(x = x/1000, y = z/1000, dx = vx, dy = (-vz)),
-          skip = 5,
-          alpha = 0.3,
-          show.legend = F) +
-        geom_text_contour(
-         aes(x = x/1000, y = z/1000, z = tk - 273),
-         stroke = 0.2,
-         size = 3,
-         breaks = c(0, seq(100, 1900,200)))
-      }
-    }
-  } else if (p.type == "strain") {
-    if (!is.null(n)) {
-      p <- n %>%
-      ggplot() +
-      geom_contour_fill(
-        aes(x = x/1000, y = z/1000, z = tk - 273),
-        size = 0.1,
-        color = NA,
-        breaks = c(0, seq(100, 1900, 200))) +
-      geom_text_contour(
-        aes(x = x/1000, y = z/1000, z = tk - 273),
-        stroke = 0.2,
-        size = 3,
-        breaks = c(0, seq(100, 1900, 200))) +
-      labs(x = "km",
-           y = "km",
-           fill = bquote(degree * C),
-           title = paste0("Temperature  ",
-           time, " Ma")) +
-      coord_equal(expand = F) +
-      scale_y_reverse(limits = c(box[2], box[1])) +
-      scale_x_continuous(limits = c(box[3], box[4])) +
-      scale_fill_viridis_c(option = v.pal, direction = v.direction, na.value = "transparent") +
-      theme_minimal(base_size = base.size) +
-      theme(legend.position = leg.pos, axis.text = element_text(color = "black"))
-      if(arrows == TRUE){
+        geom_point(
+          data = marx %>% filter(tstep == tcut),
+          aes(x = x/1000, y = z/1000, color = as.factor(class)),
+          alpha = mk.alpha,
+          size = mk.size) +
+        labs(color = 'Class') +
+        guides(color = guide_legend(direction = leg.dir.rec, nrow = 4, override.aes = list(alpha = 1, size = 2)))
+      } else if(class == 'recovered') {
         p <- p +
-        geom_arrow(
-          aes(x = x/1000, y = z/1000, dx = vx, dy = (-vz)),
-          skip = 5,
-          alpha = 0.3,
-          show.legend = F) +
-        geom_text_contour(
-         aes(x = x/1000, y = z/1000, z = tk - 273),
-         stroke = 0.2,
-         size = 3,
-         breaks = c(0, seq(100, 1900,200)))
+        geom_point(
+          data = marx %>% filter(tstep == tcut),
+          aes(x = x/1000, y = z/1000, color = as.factor(recovered)),
+          alpha = mk.alpha,
+          size = mk.size) +
+        labs(color = 'Recovered') +
+        scale_color_manual(values = c('TRUE' = rec.col, 'FALSE' = sub.col)) +
+        guides(color = guide_legend(direction = leg.dir.rec, override.aes = list(alpha = 1, size = 2))) +
+        theme(legend.key = element_rect(fill = rgb(0.5, 0.5, 0.5, 0.5), color = NA))
       }
-    }
-  } else if (p.type == "density") {
-    if (!is.null(n)) {
-      p <- n %>%
-      ggplot() +
-      geom_contour_fill(
-        aes(x = x/1000, y = z/1000, z = tk - 273),
-        size = 0.1,
-        color = NA,
-        breaks = c(0, seq(100, 1900, 200))) +
-      geom_text_contour(
-        aes(x = x/1000, y = z/1000, z = tk - 273),
-        stroke = 0.2,
-        size = 3,
-        breaks = c(0, seq(100, 1900, 200))) +
-      labs(x = "km",
-           y = "km",
-           fill = bquote(degree * C),
-           title = paste0("Temperature  ",
-           time, " Ma")) +
-      coord_equal(expand = F) +
-      scale_y_reverse(limits = c(box[2], box[1])) +
-      scale_x_continuous(limits = c(box[3], box[4])) +
-      scale_fill_viridis_c(option = v.pal, direction = v.direction, na.value = "transparent") +
-      theme_minimal(base_size = base.size) +
-      theme(legend.position = leg.pos, axis.text = element_text(color = "black"))
-      if(arrows == TRUE){
+    } else {
+      if(class == 'type') {
         p <- p +
-        geom_arrow(
-          aes(x = x/1000, y = z/1000, dx = vx, dy = (-vz)),
-          skip = 5,
-          alpha = 0.3,
-          show.legend = F) +
-        geom_text_contour(
-         aes(x = x/1000, y = z/1000, z = tk - 273),
-         stroke = 0.2,
-         size = 3,
-         breaks = c(0, seq(100, 1900,200)))
-      }
-    }
-  } else if (p.type == "viscosity") {
-    if (!is.null(n)) {
-      p <- n %>%
-      ggplot() +
-      geom_contour_fill(
-        aes(x = x/1000, y = z/1000, z = log10(nu)),
-        size = 0.1,
-        color = NA,
-        breaks = c(0, seq(100, 1900, 200))) +
-      geom_text_contour(
-        aes(x = x/1000, y = z/1000, z = tk - 273),
-        stroke = 0.2,
-        size = 3,
-        breaks = c(0, seq(100, 1900, 200))) +
-      labs(x = "km",
-           y = "km",
-           fill = bquote(Pa*s),
-           title = paste0("Log Viscosity  ",
-           time, " Ma")) +
-      coord_equal(expand = F) +
-      scale_y_reverse(limits = c(box[2], box[1])) +
-      scale_x_continuous(limits = c(box[3], box[4])) +
-      scale_fill_viridis_c(option = v.pal, direction = v.direction, na.value = "transparent") +
-      theme_minimal(base_size = base.size) +
-      theme(legend.position = leg.pos, axis.text = element_text(color = "black"))
-      if(arrows == TRUE){
+        geom_point(
+          data = marx %>% filter(tstep == tcut),
+          aes(x = x/1000, y = z/1000, shape = as.factor(type)),
+          alpha = mk.alpha,
+          size = mk.size) +
+        labs(shape = 'Rock type') +
+        guides(shape = guide_legend(direction = leg.dir.rec, override.aes = list(alpha = 1, size = 2)))
+      } else if(class == 'class') {
         p <- p +
-        geom_arrow(
-          aes(x = x/1000, y = z/1000, dx = vx, dy = (-vz)),
-          skip = 5,
-          alpha = 0.3,
-          show.legend = F) +
-        geom_text_contour(
-         aes(x = x/1000, y = z/1000, z = tk - 273),
-         stroke = 0.2,
-         size = 3,
-         breaks = c(0, seq(100, 1900,200)))
+        geom_point(
+          data = marx %>% filter(tstep == tcut),
+          alpha = mk.alpha,
+          aes(x = x/1000, y = z/1000, shape = as.factor(class)),
+          size = mk.size) +
+        labs(shape = 'Class') +
+        guides(shape = guide_legend(direction = leg.dir.rec, nrow = 4, override.aes = list(alpha = 1, size = 2)))
+      } else if(class == 'recovered') {
+        p <- p +
+        geom_point(
+          data = marx %>% filter(tstep == tcut),
+          aes(x = x/1000, y = z/1000, fill = as.factor(recovered)),
+          shape = 21,
+          color = 'transparent',
+          size = mk.size) +
+        labs(fill = 'Recovered') +
+        scale_fill_manual(values = c('TRUE' = rec.col, 'FALSE' = sub.col)) +
+        guides(fill = guide_legend(direction = leg.dir.rec, override.aes = list(alpha = 1, size = 2, color = NA))) +
+        theme(legend.key = element_rect(fill = rgb(0.5, 0.5, 0.5, 0.5), color = NA))
       }
-    }
-  } else if (p.type == "stream") {
-    if (!is.null(n)) {
-      p <- n %>%
-        ggplot() +
-        geom_contour_fill(
-          aes(x = x / 1000, y = z / 1000, z = tk - 273),
-          size = 0.1,
-          color = 'white',
-          alpha = 0.5,
-          breaks = c(0, seq(100, 1900, 200)),
-          show.legend = F) +
-        geom_streamline(
-          aes(x = x / 1000,
-              y = z / 1000,
-              dx = vx,
-              dy = (-vz),
-              color = sqrt(..dx.. ^ 2 + ..dy.. ^ 2) * 31540000 * 100,
-              alpha = ..step..),
-          S = 5,
-          dt = 31540000 * 1000 / 5,
-          arrow = NULL,
-          L = 10,
-          res = 1,
-          skip = 5,
-          lineend = "round",
-          size = 0.3) +
-        geom_contour(
-          aes(x = x / 1000, y = z / 1000, z = tk - 273),
-          size = 0.15,
-          color = "white",
-          na.rm = T,
-          breaks = c(0, seq(100, 1900, 200))) +
-        geom_text_contour(
-          aes(x = x / 1000, y = z / 1000, z = tk - 273),
-          stroke = 0.2,
-          size = 3,
-          breaks = c(0, seq(100, 1900, 200))) +
-        labs(
-          x = "km",
-          y = "km",
-          color = bquote(cm ~ yr ^ -1),
-          title = paste0("Streams  ", time, " Ma")) +
-        guides(alpha = F, fill = F) +
-        coord_equal(expand = F) +
-        scale_y_reverse(limits = c(box[2], box[1])) +
-        scale_x_continuous(limits = c(box[3], box[4])) +
-        scale_fill_gradient(low = "grey90", high = "grey10") +
-        scale_color_viridis_c(option = v.pal,
-                              direction = v.direction,
-                              na.value = "transparent") +
-        theme_minimal(base_size = base.size) +
-        theme(legend.position = leg.pos, panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.text = element_text(color = "black"))
     }
   }
+  if(arrows == TRUE){
+    p <- p +
+    geom_arrow(
+      aes(x = x/1000, y = z/1000, dx = vx, dy = (-vz)),
+      skip = 5,
+      alpha = 0.3,
+      show.legend = F)
+  }
   if (transparent == TRUE) {
-    p <- p + theme(plot.background = element_rect(fill = "transparent", color = NA),
-      panel.background = element_rect(fill = "transparent", color = NA), legend.background = element_rect(fill = "transparent",
-        color = NA))
+    p <- p +
+    theme(
+      plot.background = element_rect(fill = "transparent", color = NA),
+      panel.background = element_rect(fill = "transparent", color = NA),
+      legend.background = element_rect(fill = "transparent",
+      color = NA))
   }
   return(p)
 }

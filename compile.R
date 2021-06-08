@@ -2,7 +2,7 @@ source('functions.R')
 
 # Load marker and grid data
 cat('\nReading RData files from data/')
-paths <- list.files('data', pattern = '_marx.RData', full.names = T)
+paths <- list.files('data', pattern = '_marx.RData', full.names = T)[1:32]
 models <- stringr::str_extract(paths, 'cd.[0-9]+')
 cat('\nFound models:', models, sep = '\n')
 
@@ -44,8 +44,8 @@ parallel::mcmapply(
   fun,
   models,
   paths,
-  k = 10,
-  n = 100,
+  k = 6,
+  n = 2,
   mc.cores = cores,
   SIMPLIFY = F
 ) %>% invisible()

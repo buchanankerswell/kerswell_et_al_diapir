@@ -165,19 +165,23 @@ knitr::opts_chunk$set(
 
 ## Numerical model
 
+A set of markers, $x_i = {x_1, x_2, \dots , x_i}$, are initialized randomly in the model domain.
+
 ## Marker tracing
 
-A set of markers, $M = {m_1, m_2, \dots , m_i}$, are initialized randomly in the model domain. Markers are traced by: 1) selecting all markers within a 760 $km$ wide and 11 $km$ deep section extending from $x=500~km$ to approximately the trench, 2) save marker properties and positions, 3) if timestep $\leq \alpha$, 4) update markers. Where $\alpha$ is the number of timesteps for marker tracing.
+Markers are traced for within a 760 $km$ wide and 11 $km$ deep section extending from the trench to 500 $km$ from the left boundary ([@fig:setup]). Slab rollback eventually leads to mechanical interference between trench sediments and the stationary convergence region centered at 500 $km$ from the left boundary. The fixed, high-viscosity, convergence region acts as a barrier to the incoming sediments, deforming the accretionary wedge into a rapidly thickening pile. The abrupt change in accretionary wedge geometry flattens the slab causing intense crustal deformation of the forearc and backarc regions. We consider the dynamics after interference begins unrepresentative of natural bouyancy-driven slab motion. Marker PTt paths are, therefore, increasingly meaningless after mechanical interference begins.
 
-Slab rollback eventually leads to mechanical interference between the stiff convergence region centered at $x=500~km$ and trench sediments. Sediments pile up against the barrier as the accretionary wedge deforms against the convergence region. Thickening trench sediments flatten the slab causing intense crustal deformation of the forearc and backarc regions. The abrupt change in dynamics makes marker P-T conditions meaningless after interference begins. The number of timesteps for marker tracing, $\alpha$, is chosen algorithmically by computing the topographic height of the sediment pile against the convergence region. Markers tracing stops when the sediment pile becomes the overall topographic high, usually within one or two timesteps after interference. Marker paths from timestep $\leq \alpha$ are used for classification.
+The number of timesteps for marker tracing $t$ is chosen automatically for each model by computing the topographic surface profile for each timestep. Markers PTt paths are cut when the sediment pile deforming against the barrier becomes the overall topographic high, usually within one or two timesteps after interference.
 
 ## Maker classification
 
-Tracing marker pressure, temperature, and x-z-position at each timestep is enough to compute characteristics of marker PTt paths. However, only markers recovered from the subducting slab are relevant for comparison to PT estimates of natural rocks. The main challenge, therefore, is to first classify markers as either *subducted* or *recovered* without an inherited class label.
+Tracing marker pressure, temperature, and x-z-position at each timestep is enough to compute characteristics of marker PTt paths, like maximum pressure ([@fig:cdfp]). However, only markers recovered from the subducting slab are relevant for comparison to PT estimates of natural rocks. The main challenge, therefore, is to first classify markers as either *subducted* or *recovered* without an inherited class label.
 
-At the heart of our marker classification algorithm is a finite Gaussian mixture model (GMM) fit by Expectation-Maximization [EM, @dempster1977]. We derive GMM and EM below. Please note that GMM fit by EM is a general purpose clustering algorithm broadly used in pattern recognition, anomaly detection, and estimating complex probability distribution functions [e.g., @banfield1993; @celeux1995; @figueiredo2002; @fraley2002; @vermeesch2018]. Before deriving the details of marker classification, we hypothesize that features computed from a PTt path may distinguish subducted from recovered markers. If true, clustering algorithms like GMM may reliably classify markers by their dissimilarity along any number of dimensions [e.g., @dy2004], like maximum pressure.
+At the heart of our marker classification algorithm is a finite Gaussian mixture model (GMM) fit by Expectation-Maximization [EM, @dempster1977]. Please note that GMM fit by EM is a general purpose clustering algorithm broadly used in pattern recognition, anomaly detection, and estimating complex probability distribution functions [e.g., @banfield1993; @celeux1995; @figueiredo2002; @fraley2002; @vermeesch2018]. We derive GMM in @sec:gmm and EM in @sec:em.
 
-### Gaussian mixture model
+Before deriving the details of marker classification, we hypothesize that features computed from a PTt path, like maximum pressure, may distinguish subducted markers from recovered markers. If true, clustering algorithms like GMM may reliably classify markers by their dissimilarity along any number of dimensions computed from marker PTt paths [e.g., @dy2004].
+
+### Gaussian mixture model {#sec:gmm}
 
 Let the traced markers represent a $d$-dimensional array of $n$ random independent variables $x_i \in \mathbb{R}$. Assume markers $x_i$ were drawn from $k$ discrete probability distributions with parameters $\Phi$. The probability distribution of markers $x_i$ can be modeled with a mixture of $k$ components:
 
@@ -186,6 +190,7 @@ $$ p(x_i | \Phi) = \sum_{j=1}^k \pi_j p(x_i | \Theta_j) $$ {#eq:gmix}
 where $p(x_i | \Theta_j)$ is the probability of $x_i$ under the $j^{th}$ mixture component and $\pi_j$ is the mixture proportion representing the probability that $x_i$ belongs to the $j^{th}$ component $(\pi_j \geq 0; \sum_{j=1}^k \pi_j = 1)$.
 
 Assuming $\Theta_j$ describes a Gaussian probability distributions with mean $\mu_j$ and covariance $\Sigma_j$, @eq:gmix becomes:
+
 $$ p(x_i | \Phi) = \sum_{j=1}^k \pi_j \mathcal{N}(x_i | \mu_j, \Sigma_j) $$ {#eq:mix}
 
 where
@@ -196,7 +201,7 @@ Estimates for parameters $\mu_j$ and $\Sigma_j$, representing the center and sha
 
 $$ log~p(\Phi | x_i) = log \prod_{i=1}^n p(x_i | \Phi) = \sum_{i=1}^n log \left[ \sum_{j=1}^k \pi_j p(x_i | \Theta_j) \right] $$ {#eq:loglik}
 
-Taking the derivative of @eq:loglik with respect to each parameter, $\pi$, $\mu$, $\Sigma$, setting the equation to zero, and solving gives the Maximum Likelihood Estimators (MLE):
+Taking the derivative of @eq:loglik with respect to each parameter, $\pi$, $\mu$, $\Sigma$, setting the equation to zero, and solving for each parameter gives the Maximum Likelihood Estimators (MLE):
 
 $$ \begin{aligned}
   \pi_j &= \frac{N_j}{n} \\
@@ -204,28 +209,36 @@ $$ \begin{aligned}
   \Sigma_j &= \frac{1}{N_j} \sum_{i=1}^n \omega_{ij} (x_i - \mu_j)(x_i - \mu_j)^T
 \end{aligned} $$ {#eq:mle}
 
-where $\omega_{ij} (\omega_{ij} \geq 0; \sum_{j=1}^k \omega_{ij} = 1)$ are membership weights representing the probability of an observation $x_i$ belonging to the $j^{th}$ Gaussian, and $N_j = \sum_{i=1}^n \omega_{ij}$ represents the number of observations belonging to the $j^{th}$ Gaussian. Please note that $\omega_{ij}$ is unknown for unlabelled datasets, so MLE cannot be computed with @eq:mle.
+where $\omega_{ij}$ ($\omega_{ij} \geq 0; \sum_{j=1}^k \omega_{ij} = 1$) are membership weights representing the probability of an observation $x_i$ belonging to the $j^{th}$ Gaussian, and $N_j = \sum_{i=1}^n \omega_{ij}$ represents the number of observations belonging to the $j^{th}$ Gaussian. Please note that $\omega_{ij}$ is unknown for unlabelled datasets, so MLE cannot be computed with @eq:mle. We derive the solution to this problem in @sec:em.
 
-### Expectation-Maximization fitting of Gaussian Mixtures
+We use general purpose functions in the `R` package `Mclust` [@scrucca2016] to fit Gaussian mixutre models. After @banfield1993, covariance $\Sigma_j$ matrices are parameterized to be flexible in their shape, volume, and orientation [@scrucca2016]:
+
+$$ \Sigma_j = \lambda_j D_j A_j D_j^T $$ {#eq:eigen}
+
+where $D_j$ is the orthogonal eigenvector matrix, $A_j$ and $\lambda_j$ are diagonal matrices of values proportional to the eigenvalues. This implementation allows fixing one, two, or three geometric elements of the covariance matrix among groups. That is, the volume $\lambda_j$, shape $A_j$, and orientation $D_j$ of Gaussian clusters can change or be fixed among all $k$ clusters [e.g., @celeux1995; @fraley2002]. The parameterization of @eq:eigen is chosen by measuring Bayesian Information Criterion [BIC, @schwarz1978] for all general parameterizations of $\Sigma_j$.
+
+### Expectation-Maximization fitting of Gaussian Mixtures {#sec:em}
 
 The EM algorithm estimates GMM parameters by initializing $k$ Gaussians with parameters $(\pi_j, \mu_j, \Sigma_j)$, then by iteratively computing membership weights with @eq:posterior (E-step), and updating Gaussian parameters with @eq:mle (M-step) until convergence [@dempster1977].
 
-Let $z_{ij} \in \{1, 2, \dots, k\}$ be a multinomial latent variable with joint distribution $p(x_i,z_i) = p(x_i | z_{ij})p(z_{j})$. $z_{ij}$ represents the unknown (unlabelled) classifications of $x_i$ and takes values of $j = 1, 2, \dots, k$. Membership weights $\omega_{ij}$ are equivalent to the conditional probability $p(z_{ij} | x_i)$, which represents the probability of observation $x_i$ belonging to the $j^{th}$ Gaussian. Using Bayes Theorem, the posterior probability $p(z_{ij} | x_i)$ is:
+Let $z_{ij} \in \{1, 2, \dots, k\}$ be a multinomial latent variable with joint distribution $p(x_i,z_i) = p(x_i | z_{ij})p(z_{j})$. $z_{ij}$ represents the unknown (unlabelled) classifications of $x_i$ and takes values of $j = 1, 2, \dots, k$. Membership weights $\omega_{ij}$ are equivalent to the conditional probability $p(z_{ij} | x_i)$, which represents the probability of observation $x_i$ belonging to the $j^{th}$ Gaussian. Using Bayes Theorem, the posterior probability:
 
 $$ p(z_{ij} | x_i) = \frac{p(x_i | z_{ij})p(z_{ij})}{p(x_i)} = \frac{\pi_j \mathcal{N}(\mu_j, \Sigma_j)}{\sum_{j=1}^k \pi_j \mathcal{N}(\mu_j, \Sigma_j)} = \omega_{ij} $$ {#eq:posterior}
 
-which can be computed given initial estimates for $k$ sets of Gaussian parameters $\pi_j$, $\mu_j$, $\Sigma_j$ (E-step). With $\omega_{ij}$, new Gaussian estimates can be computed with @eq:mle (M-step).
+can be computed given initial estimates for $k$ sets of Gaussian parameters $\pi_j$, $\mu_j$, $\Sigma_j$ (E-step). With $\omega_{ij}$, new Gaussian estimates can be computed with @eq:mle (M-step).
 
-EM is sensitive to local optima and initialization [@figueiredo2002], so a number of features were computed and tested in combination. Redundant or useless features [@dy2004] were filtered out. We found a two-component mixture of $x_i = \max_{1 \leq t \leq t_{max}P}$ and $y_i = \sum_{t=1}^{t_{max}} \Delta P_t$ reliably classified markers among numerical models. $x_i$ and $y_i$ represent the maximum pressure attained along a marker PTt path and the sum total of all pressure changes along a marker PTt path, respectively.
+EM is sensitive to local optima and initialization [@figueiredo2002], so a number of features were computed and tested in combination. Redundant or useless features [e.g., @dy2004] were filtered out. We settled on a two-component mixture of:
 
-We use general purpose functions in the `R` package `Mclust` [@scrucca2016] to fit Gaussian mixutre models by EM. 
+$$\begin{aligned}
+  x_i^{mP} &= \max_{1 \leq t \leq t}P \\
+  x_i^{sdP} &= \sum_{1}^{t} dP
+\end{aligned}$$ {#eq:bivar}
+
+where $x_i^{mP}$ and $x_i^{sdP}$ represent the maximum pressure attained along a marker PTt path and the sum total of all pressure changes along a marker PTt path, respectively. The bivariate mixture model represented by @eq:mix and @eq:bivar is fit with $k = 6$ Gaussian clusters using EM [@eq:posterior; @eq:mle]. The results of this step are arbitrary class labels $y_i \in {1, \dots, k}$ representing group assignment of markers $x_i$ to one of $k$ clusters. The next step is to determine which clusters and markers represent recovered or subducted markers.
 
 ### Chutes or ladders?
 
-GMM clustering typically classifies markers into 6-20 groups, so a final decision to classify a group as *subducted* or *recovered* is made by comparing the maximum marker pressure within each group to the maximum pressures of all markers. Groups that have maximum marker pressures well above the median overall marker pressure classify as *subducted*. If no groups have maximum marker pressures above 4 $GPa$, then all groups classify as *recovered*.
-
-
-
+GMM clustering classifies markers into 6 groups, so a final decision to classify a group as *subducted* or *recovered* is made by comparing each group's centroid ([$\mu_j$, @eq:mle]) to the overall distribution of markers along $x_i$. Groups with centroids $\mu_j$ well above the median of $x_i$ classify as *subducted* ([@fig:example]). The exact threshold is defined as three-quarters of inter quartile range below the median.
 
 # Results
 
@@ -272,7 +285,7 @@ GMM clustering typically classifies markers into 6-20 groups, so a final decisio
 
 # Discussion
 
-
+## Diapirs
 
 
 

@@ -5,25 +5,27 @@ source('functions.R')
 pd15 <- readr::read_delim('data/PD15.tsv', delim = '\t', col_types = 'cddcccd')
 pd15 <- pd15[1:nrow(pd15)-1,]
 
+tibble(T = sort(pd15$temperature)) %>%
+mutate(cdf = (row_number()-1)/n()) -> pd15T
+
 # Load marker and grid data
 cat('\nReading RData files from data/')
 paths <- list.files('data/k6_classd', pattern = '.RData', full.names = T)
 models <- paths %>% stringr::str_extract('cd.[0-9]+')
 
-cat('\nFound classified markers for:', models, sep = '\n')
+#cat('\nFound classified markers for:', models, sep = '\n')
 
-path <- paths[23]
-model <- models[23]
+paths <- paths[61:64]
+models <- models[61:64]
 
 # Detect number of cores
 cores <- parallel::detectCores()
-cat('\nParallel computation with', 1, 'cores ...')
+cat('\nParallel computation with', cores, 'cores ...')
 
 fun <- function(model, path) {
   # Load markers and grids
   load_marx(paste0('/Volumes/hd/nmods/kerswell_et_al_marx/data/', model, '_marx.RData'))
   load(path)
-  # Loading
   # Marker data
   marx <- get(paste0(model, '.marx.classified'))$marx
   # Classification info
@@ -57,7 +59,7 @@ fun <- function(model, path) {
   geom_histogram(bins = 100) +
   labs(
     title = paste0('Sum of all dP [', model, ']'),
-    x = bquote(sum(dP, 1, t)~'[GPa]'),
+    x = bquote(sum(dP, '', '')~'[GPa]'),
     y = 'Frequency',
     fill = 'Recovered'
   ) +
@@ -81,7 +83,7 @@ fun <- function(model, path) {
   geom_histogram(bins = 100) +
   labs(
     title = paste0('Sum of all dP [', model, ']'),
-    x = bquote(sum(dP, 1, t)~'[GPa]'),
+    x = bquote(sum(dP, '', '')~'[GPa]'),
     y = 'Frequency',
     fill = 'Class'
   ) +
@@ -205,12 +207,14 @@ fun <- function(model, path) {
   p <- maxT %>%
   group_by(run) %>%
   ggplot(aes(x = maxT - 273, y = cdf)) +
-  geom_path(aes(group = run)) +
+  geom_path(aes(linetype = 'Markers', group = run), show.legend = F) +
+  geom_path(data = pd15T, aes(x = T, y = cdf, linetype = 'PD15')) +
   labs(
     title = paste0('Cumulative probability of max T [', model, ']'),
     x = 'Maximum T [C]',
     y = 'Probability'
   ) +
+  scale_linetype_manual(name = NULL, values = c('PD15' = 'dotted', 'Markers' = 'solid')) +
   theme_classic()
   ggsave(
     paste0('figs/', model, '_cdfT.png'),
@@ -321,15 +325,15 @@ fun <- function(model, path) {
   )
 }
 
-purrr::map2(models, paths, fun)
+#purrr::map2(models, paths, fun)
 
 # Parallel computing
-# parallel::mcmapply(
-#   fun,
-#   models,
-#   paths,
-#   mc.cores = 1,
-#   SIMPLIFY = F
-# ) %>% invisible()
+parallel::mcmapply(
+  fun,
+  models,
+  paths,
+  mc.cores = cores,
+  SIMPLIFY = F
+)
 
 cat('\nDone!')

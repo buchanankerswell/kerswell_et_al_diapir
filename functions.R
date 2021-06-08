@@ -708,7 +708,7 @@ marx_classify <- function(marx.df, fts.df, k = 2) {
   # Get parameter centroids
   centroids <- t(mc$parameters$mean) %>% as_tibble() %>% mutate(class = 1:n(), .before = 'sum.dP')
   # Calculate lower bounds for features
-  lowerB <- X %>% summarise(across(everything(), ~{median(.x) - IQR(.x)}))
+  lowerB <- X %>% summarise(across(everything(), ~{median(.x) - 3/4*IQR(.x)}))
   # Classify group as recovered if maxP or sumdP centroid is below lower bound
   d <- centroids[centroids$sum.dP <= lowerB$sum.dP | centroids$max.P <= lowerB$max.P,]
   # Add recovered class
@@ -1081,7 +1081,7 @@ draw_grid <- function(
   node,
   model,
   marx = NULL,
-  class = c('type', 'class', 'recovered'),
+  class = c('type', 'class', 'recovered', 'none'),
   time,
   box = c(up = -18, down = 200, left = 0, right = 2000),
   arrows = FALSE,
@@ -1089,7 +1089,7 @@ draw_grid <- function(
   leg.dir = 'vertical',
   leg.dir.rec = 'vertical',
   base.size = 11,
-  p.type = c('density', 'temperature', 'viscosity', 'stream'),
+  p.type = c('blank', 'temperature', 'viscosity', 'stream'),
   bk.alpha = 0.6,
   mk.alpha = 1,
   mk.size = 0.3,
@@ -1100,13 +1100,12 @@ draw_grid <- function(
   transparent = TRUE) {
   # Get time cutoff
   tcut <- time
-  if(p.type == 'density') {
+  if(p.type == 'blank') {
     node %>%
     ggplot() +
-    geom_contour_fill(aes(x = x/1000, y = z/1000, z = ro), alpha = bk.alpha) +
     geom_contour(
       aes(x = x/1000, y = z/1000, z = tk - 273),
-      color = 'white',
+      color = 'black',
       breaks = c(0, seq(100, 1900, 200)),
       size = 0.3) +
     geom_text_contour(
@@ -1115,10 +1114,9 @@ draw_grid <- function(
       size = 3,
       breaks = c(0, seq(100, 1900, 200))) +
     labs(
-      title = paste0('Density [', model, '] ', tcut, ' Ma'),
+      title = paste0('Markers [', model, '] ', tcut, ' Ma'),
       x = 'Distance [km]',
-      y = 'Depth [km]',
-      fill = bquote(kgm^-3)) +
+      y = 'Depth [km]') +
     guides(fill = guide_colorbar(direction = leg.dir, title.vjust = 1)) +
     scale_fill_viridis(option = v.pal, direction = v.direction) +
     scale_y_reverse() +
@@ -1274,6 +1272,14 @@ draw_grid <- function(
         scale_color_manual(values = c('TRUE' = rec.col, 'FALSE' = sub.col)) +
         guides(color = guide_legend(direction = leg.dir.rec, override.aes = list(alpha = 1, size = 2))) +
         theme(legend.key = element_rect(fill = rgb(0.5, 0.5, 0.5, 0.5), color = NA))
+      } else if(class == 'none') {
+        p <- p +
+        geom_point(
+          data = marx %>% filter(tstep == tcut),
+          aes(x = x/1000, y = z/1000),
+          alpha = mk.alpha,
+          size = mk.size) +
+        guides(color = guide_legend(direction = leg.dir.rec, nrow = 4, override.aes = list(alpha = 1, size = 2)))
       }
     } else {
       if(class == 'type') {
@@ -1306,6 +1312,14 @@ draw_grid <- function(
         scale_fill_manual(values = c('TRUE' = rec.col, 'FALSE' = sub.col)) +
         guides(fill = guide_legend(direction = leg.dir.rec, override.aes = list(alpha = 1, size = 2, color = NA))) +
         theme(legend.key = element_rect(fill = rgb(0.5, 0.5, 0.5, 0.5), color = NA))
+      } else if(class == 'none') {
+        p <- p +
+        geom_point(
+          data = marx %>% filter(tstep == tcut),
+          aes(x = x/1000, y = z/1000),
+          alpha = mk.alpha,
+          size = mk.size) +
+        guides(color = guide_legend(direction = leg.dir.rec, nrow = 4, override.aes = list(alpha = 1, size = 2)))
       }
     }
   }

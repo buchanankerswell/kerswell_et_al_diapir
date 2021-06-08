@@ -1,6 +1,6 @@
 # To add
-- figure of maxP and sumdP densities
+- init plot (cdf78)
+- PD15 cdf curves
 - maxP curve from Agard
 
 # To maybe add
-- PT paths plots (?)

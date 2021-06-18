@@ -12,12 +12,12 @@ c('magrittr', 'tidyr', 'readr', 'purrr',
   'ggridges', 'progress', 'viridis', 'metR',
   'parallel', 'progress') -> p.list
 
-cat('Loading libraries:', p.list, sep = '\n')
+#cat('Loading libraries:', p.list, sep = '\n')
 
 # auto-load quietly
 sapply(p.list, sshhh)
 
-cat('Loading functions\n')
+#cat('Loading functions\n')
 
 # Read binary (.prn) files and trace markers
 trace_marx <- function(
@@ -719,12 +719,11 @@ marx_classify <- function(marx.df, fts.df, k = 2) {
   left_join(recovered.df, by = c('id', 'class')) %>%
   replace(is.na(.), FALSE)
   # Summarise maximum pressures
-  mP.class <- df %>% group_by(id, class) %>% summarise(maxP = max(P), sumdP = sum(diff(P)), .groups = 'keep')
-#   mP.class %>% ggplot(aes(x = maxP, y = sumdP, color = as.factor(class))) + geom_point() + geom_vline(xintercept = median(mP.class$maxP)) + geom_vline(xintercept = median(mP.class$maxP) - IQR(mP.class$maxP)) + geom_hline(yintercept = median(mP.class$sumdP)) + geom_hline(yintercept = median(mP.class$sumdP) - IQR(mP.class$sumdP))
-  mP <- df %>% group_by(id, recovered) %>% summarise(maxP = max(P), .groups = 'keep')
-  # Change recovered to FALSE if recovered was TRUE and marker maxP was >= 50kbar
-  misclassed.marx <- which(mP$maxP >= (median(mP$maxP) + IQR(mP$maxP)) & mP$recovered == TRUE)
-  df$recovered[df$id %in% misclassed.marx] <- FALSE
+  #mP.class <- df %>% group_by(id, class) %>% summarise(maxP = max(P), sumdP = sum(diff(P)), .groups = 'keep')
+  #mP <- df %>% group_by(id, recovered) %>% summarise(maxP = max(P), .groups = 'keep')
+  # Change recovered to FALSE if recovered was TRUE and marker maxP was >= meadian + IQR
+  #misclassed.marx <- which(mP$maxP >= median(mP$maxP) & mP$recovered == TRUE)
+  #df$recovered[df$id %in% misclassed.marx] <- FALSE
   # Print results
   cat('\nRecovered classes:')
   df %>% slice(1) %>% group_by(class) %>% select(class, recovered) %>% table() %>% print()
@@ -1091,8 +1090,13 @@ draw_grid <- function(
   base.size = 11,
   p.type = c('blank', 'temperature', 'viscosity', 'stream'),
   bk.alpha = 0.6,
+  bk.col = rgb(1, 1, 1, 1),
   mk.alpha = 1,
   mk.size = 0.3,
+  iso.alpha = 1,
+  iso.col = 'white',
+  iso.skip = 0,
+  stm.alpha = 1,
   rec.col = 'white',
   sub.col = 'black',
   v.pal = 'magma',
@@ -1107,11 +1111,13 @@ draw_grid <- function(
       aes(x = x/1000, y = z/1000, z = tk - 273),
       color = 'black',
       breaks = c(0, seq(100, 1900, 200)),
-      size = 0.3) +
+      size = 0.3,
+      alpha = iso.alpha) +
     geom_text_contour(
       aes(x = x/1000, y = z/1000, z = tk - 273),
       stroke = 0.2,
       size = 3,
+      skip = iso.skip,
       breaks = c(0, seq(100, 1900, 200))) +
     labs(
       title = paste0('Markers [', model, '] ', tcut, ' Ma'),
@@ -1135,13 +1141,15 @@ draw_grid <- function(
     geom_contour_fill(aes(x = x/1000, y = z/1000, z = tk - 273), alpha = bk.alpha) +
     geom_contour(
       aes(x = x/1000, y = z/1000, z = tk - 273),
-      color = 'white',
+      color = iso.col,
       breaks = c(0, seq(100, 1900, 200)),
-      size = 0.3) +
+      size = 0.3,
+      alpha = iso.alpha) +
     geom_text_contour(
       aes(x = x/1000, y = z/1000, z = tk - 273),
       stroke = 0.2,
       size = 3,
+      skip = iso.skip,
       breaks = c(0, seq(100, 1900, 200))) +
     labs(
       title = paste0('Temperature [', model, '] ', tcut, ' Ma'),
@@ -1166,13 +1174,15 @@ draw_grid <- function(
     geom_contour_fill(aes(x = x/1000, y = z/1000, z = log10(nu)), alpha = bk.alpha) +
     geom_contour(
       aes(x = x/1000, y = z/1000, z = tk - 273),
-      color = 'white',
+      color = iso.col,
       breaks = c(0, seq(100, 1900, 200)),
-      size = 0.3) +
+      size = 0.3,
+      alpha = iso.alpha) +
     geom_text_contour(
       aes(x = x/1000, y = z/1000, z = tk - 273),
       stroke = 0.2,
       size = 3,
+      skip = iso.skip,
       breaks = c(0, seq(100, 1900, 200))) +
     labs(
       title = paste0('Log Viscosity [', model, '] ', tcut, ' Ma'),
@@ -1196,8 +1206,8 @@ draw_grid <- function(
     ggplot() +
     geom_streamline(
       aes(x = x / 1000, y = z / 1000, dx = vx, dy = (-vz),
-          color = sqrt(..dx.. ^ 2 + ..dy.. ^ 2) * 31540000 * 100,
-          alpha = ..step..),
+          color = sqrt(..dx.. ^ 2 + ..dy.. ^ 2) * 31540000 * 100),
+      alpha = stm.alpha,
       S = 5,
       dt = 31540000 * 1000 / 5,
       arrow = NULL,
@@ -1209,19 +1219,21 @@ draw_grid <- function(
     geom_contour(
       aes(x = x / 1000, y = z / 1000, z = tk - 273),
       size = 0.3,
-      color = 'black',
+      color = iso.col,
       na.rm = T,
-      breaks = c(0, seq(100, 1900, 200))) +
+      breaks = c(0, seq(100, 1900, 200)),
+      alpha = iso.alpha) +
     geom_text_contour(
       aes(x = x / 1000, y = z / 1000, z = tk - 273),
       stroke = 0.2,
       size = 3,
+      skip = iso.skip,
       breaks = c(0, seq(100, 1900, 200))) +
     labs(
       x = 'Distance [km]',
       y = 'Depth [km]',
       fill = bquote(degree*C),
-      color = bquote(cm~yr^-1),
+      color = bquote('['*cm~yr^-1*']'),
       title = paste0('Streams  [', model, '] ', tcut, ' Ma')) +
     guides(alpha = F, color = guide_colorbar(direction = leg.dir, title.vjust = 1), fill = F) +
     scale_y_reverse() +
@@ -1234,7 +1246,7 @@ draw_grid <- function(
     theme(
       legend.position = leg.pos,
       panel.grid = element_blank(),
-      panel.background = element_rect(color = NA, fill = rgb(0, 0, 0, 0.3))
+      panel.background = element_rect(color = NA, fill = bk.col)
     ) -> p
   }
   if(!is.null(marx)) {
@@ -1244,6 +1256,7 @@ draw_grid <- function(
         geom_point(
           data = marx %>% filter(tstep == tcut),
           aes(x = x/1000, y = z/1000, color = as.factor(type)),
+          shape = 15,
           alpha = mk.alpha,
           size = mk.size) +
         scale_color_manual(
@@ -1258,6 +1271,7 @@ draw_grid <- function(
           data = marx %>% filter(tstep == tcut),
           aes(x = x/1000, y = z/1000, color = as.factor(class)),
           alpha = mk.alpha,
+          shape = 15,
           size = mk.size) +
         labs(color = 'Class') +
         guides(color = guide_legend(direction = leg.dir.rec, nrow = 4, override.aes = list(alpha = 1, size = 2)))
@@ -1266,6 +1280,7 @@ draw_grid <- function(
         geom_point(
           data = marx %>% filter(tstep == tcut),
           aes(x = x/1000, y = z/1000, color = as.factor(recovered)),
+          shape = 15,
           alpha = mk.alpha,
           size = mk.size) +
         labs(color = 'Recovered') +
@@ -1277,6 +1292,7 @@ draw_grid <- function(
         geom_point(
           data = marx %>% filter(tstep == tcut),
           aes(x = x/1000, y = z/1000),
+          shape = 15,
           alpha = mk.alpha,
           size = mk.size) +
         guides(color = guide_legend(direction = leg.dir.rec, nrow = 4, override.aes = list(alpha = 1, size = 2)))
@@ -1287,6 +1303,7 @@ draw_grid <- function(
         geom_point(
           data = marx %>% filter(tstep == tcut),
           aes(x = x/1000, y = z/1000, shape = as.factor(type)),
+          shape = 15,
           alpha = mk.alpha,
           size = mk.size) +
         labs(shape = 'Rock type') +
@@ -1297,6 +1314,7 @@ draw_grid <- function(
           data = marx %>% filter(tstep == tcut),
           alpha = mk.alpha,
           aes(x = x/1000, y = z/1000, shape = as.factor(class)),
+          shape = 15,
           size = mk.size) +
         labs(shape = 'Class') +
         guides(shape = guide_legend(direction = leg.dir.rec, nrow = 4, override.aes = list(alpha = 1, size = 2)))
@@ -1305,7 +1323,7 @@ draw_grid <- function(
         geom_point(
           data = marx %>% filter(tstep == tcut),
           aes(x = x/1000, y = z/1000, fill = as.factor(recovered)),
-          shape = 21,
+          shape = 22,
           color = 'transparent',
           size = mk.size) +
         labs(fill = 'Recovered') +
@@ -1318,6 +1336,7 @@ draw_grid <- function(
           data = marx %>% filter(tstep == tcut),
           aes(x = x/1000, y = z/1000),
           alpha = mk.alpha,
+          shape = 15,
           size = mk.size) +
         guides(color = guide_legend(direction = leg.dir.rec, nrow = 4, override.aes = list(alpha = 1, size = 2)))
       }

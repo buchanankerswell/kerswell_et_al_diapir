@@ -10,13 +10,16 @@ mutate(cdf = (row_number()-1)/n()) -> pd15T
 
 # Load marker and grid data
 cat('\nReading RData files from data/')
-paths <- list.files('data/k6_classd', pattern = '.RData', full.names = T)
+paths <- list.files('data/k6', pattern = '.RData', full.names = T)
 models <- paths %>% stringr::str_extract('cd.[0-9]+')
 
 #cat('\nFound classified markers for:', models, sep = '\n')
 
 paths <- paths[61:64]
 models <- models[61:64]
+
+# path <- paths[5]
+# model <- models[5]
 
 # Detect number of cores
 cores <- parallel::detectCores()
@@ -41,119 +44,121 @@ fun <- function(model, path) {
   get(paste0(model, '.marx.classified'))$mc %>%
   purrr::map_df(~.x$cdfT, .id = 'run') -> maxT
   # Visualize GMM results
-  png(
-    file = paste0('figs/', model, '_class.png'),
-    type = 'cairo',
-    res = 300,
-    width = 5,
-    height = 5,
-    units = 'in'
-  )
-  plot(m, what = 'classification')
-  dev.off()
+#   png(
+#     file = paste0('figs/', model, '_class.png'),
+#     type = 'cairo',
+#     res = 300,
+#     width = 5,
+#     height = 5,
+#     units = 'in'
+#   )
+#   plot(m, what = 'classification')
+#   dev.off()
+  cat('\nDrawing classification results [', model, ']', sep = '')
   # Sum of pressure changes recovered
-  p1 <- marx %>%
+  tibble(
+    class = seq_len(length(m$parameters$mean[1,])),
+    sumdP = m$parameters$mean[1,],
+    maxP = m$parameters$mean[2,]
+  ) -> cent
+  d1 <- marx %>%
   group_by(id, recovered) %>%
-  summarise(sumdP = sum(diff(P)), .groups = 'keep') %>%
-  ggplot(aes(x = sumdP/1e4, fill = recovered)) +
-  geom_histogram(bins = 100) +
+  summarise(sumdP = sum(diff(P)), .groups = 'keep')
+  d2 <- marx %>%
+  group_by(id, class) %>%
+  summarise(sumdP = sum(diff(P)), .groups = 'keep')
+  d3 <- marx %>%
+  group_by(id, recovered) %>%
+  summarise(maxP = max(P), .groups = 'keep')
+  d4 <- marx %>%
+  group_by(id, class) %>%
+  summarise(maxP = max(P), .groups = 'keep')
+  p1 <-  d1 %>%
+  ggplot(aes(x = sumdP/1e4)) +
+  geom_histogram(aes(fill = recovered), bins = 100) +
   labs(
-    title = paste0('Sum of all dP [', model, ']'),
-    x = bquote(sum(dP, '', '')~'[GPa]'),
+    x = bquote('sumdP'~'[GPa]'),
     y = 'Frequency',
     fill = 'Recovered'
   ) +
-  scale_fill_grey(start = 0, end = 0.6) +
-  theme_classic()
-  ggsave(
-    paste0('figs/', model, '_sumdP.png'),
-    plot = p1,
-    device = 'png',
-    type = 'cairo',
-    width = 5,
-    height = 5,
-    dpi = 300
-  )
+  scale_fill_grey(start = 0.6, end = 0) +
+  theme_classic(base_size = 8)
   # Sum of pressure changes classes
-  p2 <- marx %>%
-  group_by(id, class) %>%
-  summarise(sumdP = sum(diff(P)), .groups = 'keep') %>%
-  ggplot(aes(x = sumdP/1e4, fill = as.factor(class))) +
-  scale_fill_manual(values = wesanderson::wes_palette('IsleofDogs1')) +
-  geom_histogram(bins = 100) +
+  p2 <- d2 %>%
+  ggplot(aes(x = sumdP/1e4)) +
+  geom_histogram(aes(fill = as.factor(class)), bins = 100) +
+  geom_rug(data = cent, aes(x = sumdP/1e4, color = as.factor(class)), show.legend = F) +
+  geom_segment(
+    aes(
+      linetype = 'centroid threshold',
+      x = (median(d2$sumdP) - 3/4*IQR(d2$sumdP))/1e4,
+      xend = (median(d2$sumdP) - 3/4*IQR(d2$sumdP))/1e4,
+      y = -Inf,
+      yend = Inf),
+    alpha = 0.5) +
   labs(
-    title = paste0('Sum of all dP [', model, ']'),
-    x = bquote(sum(dP, '', '')~'[GPa]'),
+    x = bquote('sumdP'~'[GPa]'),
     y = 'Frequency',
-    fill = 'Class'
+    fill = 'Class',
+    linetype = NULL
   ) +
-  theme_classic()
-  ggsave(
-    paste0('figs/', model, '_sumdP_class.png'),
-    plot = p2,
-    device = 'png',
-    type = 'cairo',
-    width = 5,
-    height = 5,
-    dpi = 300
-  )
+  scale_linetype_manual(values = c('reclassify threshold' = 'dotted', 'centroid threshold' = 'solid')) +
+  scale_color_manual(values = wesanderson::wes_palette(10, name = 'IsleofDogs1', type = 'continuous')) +
+  scale_fill_manual(values = wesanderson::wes_palette(10, name = 'IsleofDogs1', type = 'continuous')) +
+  theme_classic(base_size = 8)
   # Max pressure recovered
-  p3 <- marx %>%
-  group_by(id, recovered) %>%
-  summarise(maxP = max(P), .groups = 'keep') %>%
-  ggplot(aes(x = maxP/1e4, fill = recovered)) +
-  geom_histogram(bins = 100) +
+  p3 <- d3 %>%
+  ggplot(aes(x = maxP/1e4)) +
+  geom_histogram(aes(fill = recovered), bins = 100) +
+  geom_segment(
+    aes(
+      linetype = 'reclassify threshold',
+      x = (median(d3$maxP))/1e4,
+      xend = (median(d3$maxP))/1e4,
+      y = -Inf,
+      yend = Inf),
+    alpha = 0.5) +
   labs(
-    title = paste0('Max P [', model, ']'),
-    x = 'Max P [GPa]',
+    x = bquote('maxP [GPa]'),
     y = 'Frequency',
-    fill = 'Recovered'
+    fill = 'Recovered',
+    linetype = NULL
   ) +
-  scale_fill_grey(start = 0, end = 0.6) +
-  theme_classic()
-  ggsave(
-    paste0('figs/', model, '_maxP.png'),
-    plot = p3,
-    device = 'png',
-    type = 'cairo',
-    width = 5,
-    height = 5,
-    dpi = 300
-  )
+  scale_linetype_manual(values = c('reclassify threshold' = 'dotted', 'centroid threshold' = 'solid')) +
+  scale_fill_grey(start = 0.6, end = 0) +
+  theme_classic(base_size = 8)
   # Max pressure class
-  p4 <- marx %>%
-  group_by(id, class) %>%
-  summarise(maxP = max(P), .groups = 'keep') %>%
-  ggplot(aes(x = maxP/1e4, fill = as.factor(class))) +
-  geom_histogram(bins = 100) +
-  scale_fill_manual(values = wesanderson::wes_palette('IsleofDogs1')) +
+  p4 <- d4 %>%
+  ggplot(aes(x = maxP/1e4)) +
+  geom_histogram(aes(fill = as.factor(class)), bins = 100) +
+  geom_rug(data = cent, aes(x = maxP/1e4, color = as.factor(class)), show.legend = F) +
+  geom_segment(
+    aes(
+      linetype = 'centroid threshold',
+      x = (median(d4$maxP) - 3/4*IQR(d4$maxP))/1e4,
+      xend = (median(d4$maxP) - 3/4*IQR(d4$maxP))/1e4,
+      y = -Inf,
+      yend = Inf),
+    alpha = 0.5) +
+  scale_linetype_manual(values = c('reclassify threshold' = 'dotted', 'centroid threshold' = 'solid')) +
+  scale_color_manual(values = wesanderson::wes_palette(10, name = 'IsleofDogs1', type = 'continuous')) +
+  scale_fill_manual(values = wesanderson::wes_palette(10, name = 'IsleofDogs1', type = 'continuous')) +
   labs(
-    title = paste0('Max P [', model, ']'),
-    x = 'Max P [GPa]',
+    x = bquote('maxP [GPa]'),
     y = 'Frequency',
-    fill = 'Class'
+    fill = 'Class',
+    linetype = NULL
   ) +
-  theme_classic()
-  ggsave(
-    paste0('figs/', model, '_maxP_class.png'),
-    plot = p4,
-    device = 'png',
-    type = 'cairo',
-    width = 5,
-    height = 5,
-    dpi = 300
-  )
+  theme_classic(base_size = 8)
   # Composite 1D classification
   p <- (
-    p1 +
+    p4 +
     theme(
-      plot.title = element_blank(),
       axis.text.x = element_blank(),
       axis.ticks.x = element_blank(),
       axis.title.x = element_blank()) +
-    p3 +
+    p2 +
     theme(
-      plot.title = element_blank(),
       axis.text.x = element_blank(),
       axis.ticks.x = element_blank(),
       axis.title.x = element_blank(),
@@ -162,126 +167,109 @@ fun <- function(model, path) {
       axis.title.y = element_blank())
   ) /
   (
-    p2 + theme(plot.title = element_blank()) +
-    p4 +
+    p3 +
+    p1 +
     theme(
-      plot.title = element_blank(),
       axis.text.y = element_blank(),
       axis.ticks.y = element_blank(),
       axis.title.y = element_blank())
   ) +
   plot_layout(guides = 'collect') +
-  plot_annotation(title = paste0('Marker classification [', model, ']'), tag_levels = 'a')
+  plot_annotation(tag_levels = 'a')
+  cat('\nSaving classification plot [', model, ']', sep = '')
   ggsave(
     paste0('figs/', model, '_class_comp.png'),
     plot = p,
     device = 'png',
     type = 'cairo',
-    width = 6,
+    width = 7,
     height = 5,
     dpi = 300
   )
   # Marker maxP CDF
-  p <- maxP %>%
+  p1 <- maxP %>%
   group_by(run) %>%
   ggplot(aes(x = maxP/1e4, y = cdf)) +
   geom_path(aes(linetype = 'Markers', group = run), show.legend = F) +
   geom_path(data = pd15, aes(x = pressure, y = cumulative, linetype = 'PD15')) +
   scale_linetype_manual(name = NULL, values = c('PD15' = 'dotted', 'Markers' = 'solid')) +
   labs(
-    title = paste0('Cumulative probability of max P [', model, ']'),
     x = 'Maximum P [GPa]',
     y = 'Probability'
   ) +
-  theme_classic()
-  ggsave(
-    paste0('figs/', model, '_cdfP.png'),
-    plot = p,
-    device = 'png',
-    type = 'cairo',
-    width = 5,
-    height = 5,
-    dpi = 300
-  )
-  # Marker maxT CDF
-  p <- maxT %>%
+  theme_classic(base_size = 8)
+# Marker maxT CDF
+  p2 <- maxT %>%
   group_by(run) %>%
   ggplot(aes(x = maxT - 273, y = cdf)) +
   geom_path(aes(linetype = 'Markers', group = run), show.legend = F) +
   geom_path(data = pd15T, aes(x = T, y = cdf, linetype = 'PD15')) +
   labs(
-    title = paste0('Cumulative probability of max T [', model, ']'),
     x = 'Maximum T [C]',
     y = 'Probability'
   ) +
   scale_linetype_manual(name = NULL, values = c('PD15' = 'dotted', 'Markers' = 'solid')) +
-  theme_classic()
-  ggsave(
-    paste0('figs/', model, '_cdfT.png'),
-    plot = p,
-    device = 'png',
-    type = 'cairo',
-    width = 5,
-    height = 5,
-    dpi = 300
-  )
-  # Viscosity
-  p <- grid %>%
+  theme_classic(base_size = 8)
+# Viscosity
+  p3 <- grid %>%
   draw_grid(
     model = model,
     marx = marx,
     class = 'recovered',
     box = c(up = -18, down = 200, left = 500, right = 1800),
     time = tcut,
-    bk.alpha = 0.9,
-    mk.alpha = 0.5,
-    mk.size = 0.2,
+    bk.alpha = 0.7,
+    mk.alpha = 1,
+    mk.size = 0.25,
     leg.dir = 'horizontal',
     leg.dir.rec = 'horizontal',
     sub.col = 'deeppink',
-    rec.col = 'white',
+    rec.col = 'black',
     leg.pos = 'bottom',
     p.type = 'viscosity',
     v.pal = 'viridis',
+    base.size = 8,
     transparent = F)
+  p <- p3 / (p1 + (p2 +
+    theme(
+      axis.text.y = element_blank(),
+      axis.title.y = element_blank(),
+      axis.ticks.y = element_blank()
+  ))) +
+  plot_annotation(tag_levels = 'a') +
+  plot_layout(heights = c(1, 1.8), guides = 'collect') &
+  theme(legend.position = 'bottom')
   ggsave(
-    paste0('figs/', model, '_viscosity_profile.png'),
+    paste0('figs/', model, '_comp.png'),
     plot = p,
     device = 'png',
     type = 'cairo',
     width = 7,
-    height = 3,
+    height = 5,
     dpi = 300
   )
-  # Draw cross section at timecut
+# Draw cross section at timecut
   p1 <- grid %>%
   draw_grid(
     model = model,
     marx = marx,
-    class = 'recovered',
-    time = tcut,
-    box = c(up = -18, down = 200, left = 500, right = 1800),
-    bk.alpha = 0.9,
-    mk.size = 0.6,
+    mk.size = 0.25,
+    rec.col = 'black',
     sub.col = 'deeppink',
-    rec.col = 'white',
-    leg.pos = 'bottom',
-    leg.dir = 'horizontal',
-    p.type = 'stream',
-    v.pal = 'viridis',
-    transparent = F)
-  p2 <- grid %>%
-  draw_grid(
-    model = model,
     class = 'recovered',
     time = tcut,
     box = c(up = -18, down = 200, left = 500, right = 1800),
-    mk.alpha = 1,
-    bk.alpha = 0.9,
+    bk.alpha = 1,
+    bk.col = rgb(0, 0, 0, 0.1),
     leg.pos = 'bottom',
     leg.dir = 'horizontal',
-    p.type = 'temperature',
-    v.pal = 'magma',
+    leg.dir.rec = 'horizontal',
+    p.type = 'stream',
+    iso.alpha = 0.6,
+    iso.col = 'black',
+    stm.alpha = 0.2,
+    v.pal = 'viridis',
+    base.size = 8,
     transparent = F)
   p3 <- grid %>%
   draw_grid(
@@ -289,14 +277,15 @@ fun <- function(model, path) {
     class = 'recovered',
     time = tcut,
     box = c(up = -18, down = 200, left = 500, right = 1800),
-    bk.alpha = 0.9,
+    bk.alpha = 1,
     leg.pos = 'bottom',
     leg.dir = 'horizontal',
     p.type = 'viscosity',
+    iso.alpha = 0.6,
     v.pal = 'viridis',
+    base.size = 8,
     transparent = F)
   (p1 + theme(axis.title.x = element_blank())) /
-  (p2  + theme(axis.title.x = element_blank())) /
   p3 + plot_layout(guides = 'collect') &
   theme(legend.position = 'bottom') -> p
   ggsave(
@@ -304,8 +293,8 @@ fun <- function(model, path) {
     plot = p,
     device = 'png',
     type = 'cairo',
-    width = 7.5,
-    height = 7,
+    width = 7,
+    height = 4,
     dpi = 300
   )
   # Marker motion movie

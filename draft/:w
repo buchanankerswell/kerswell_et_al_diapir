@@ -157,29 +157,39 @@ d <- mods.summary %>% left_join(stats.summary, by = 'model')
 
 # Methods
 
+## Numerical model
+
 This study presents a dataset of Lagrangian markers (described below) from the numerical experiments of @kerswell2020. The numerical experiments simulate 64 oceanic-continental subduction systems with variable oceanic plate age, convergence velocity, and upper plate (continental) lithospheric thickness. The range of oceanic plate ages and convergence velocities broadly represent the modern global subduction system [@syracuse2006; @wada2009]. Initial conditions were modified from previous studies of active margins [@sizova2010; @gorczyk2007]. The code, `I2VIS`, models visco-plastic flow of geologic materials by solving three conservative equations of mass, energy, and momentum on a fully-staggered finite difference grid with a *marker-in-cell* technique [@gerya2003; @harlow1965]. Further details about the initial setup and boundary conditions, rheologic model, metamorphic (de)hydration reactions, are in @kerswell2020. Details about the marker-in-cell technique are in @gerya2003 and @gerya2019.
 
 In this section we first define Lagrangian markers (now referred to as markers) and briefly elaborate on their usefulness in understanding fluid flow---including geodynamic problems like subduction. We then detail the maths and decisions involved in our marker classification algorithm, which we use to classify `r format(round(sum(marx.summary$n)), big.mark = ',')` markers from 64 numerical experiments of @kerswell2020 as either subducted or recovered based on characteristics of their PTt paths.
 
-## Lagrangian markers
+### Lagrangian markers
 
-Markers are mathematical objects representing discrete parcels of fluid flowing in a continuum [@harlow1962; @harlow1964]. Imagine tracking millions of parcels of air as they collectively move around an air foil. Each marker would experience a different flow path and pressure history relative to its neighbors. For example, some parcels of air may spin off and cause turbulence, while others move orderly with their neighbors around the foil. In this analogy, knowing which parcels experience turbulence, perhaps based on some characteristic of a parcel's flow path, is useful information for aerodynamic testing.
+Markers are mathematical objects representing discrete parcels of fluid flowing in a continuum [@harlow1962; @harlow1964]. Imagine tracking millions of parcels of air as they collectively move around an air foil. Each marker would experience a different flow path and pressure history relative to its neighbor parcels. For example, some parcels of air may spin off and cause turbulence, while others move orderly with their neighbors around the foil. In this analogy, knowing which parcels experience turbulence, perhaps based on some characteristic of a parcel's flow path, is useful information for aerodynamic testing.
 
-The analogy above highlights the representative advantage of markers. That is, markers save the physical state of the continuum at each timestep, thereby saving a historical record of physical changes from the perspective of the fluid [@harlow1962]. "Tracing" markers (saving marker states through time) is useful for understanding subduction dynamics like tracing air parcels is useful for understanding aerodynamics. But it is necessary to first accept implicit simplifications and uncertainties (known and unknown) about the geologic continuum. Uncertainties are especially rich in the petrologic model governing phase changes [@ito1971; @schmidt1998] and its effects on the highly non-linear rheologic model relating stress and strain by empirical flow laws [@hilairet2007; @ranalli1995; @karato1993; @turcotte2002]. See @kerswell2020 for details. Nonetheless, insofar as subducting crustal rocks on earth behave like markers deforming in an incompressible visco-plastic fluid [as parameterized by @gerya2019; @kerswell2020; @gerya2003], principled comparisons between marker PTt paths and the rock record [Figure 1, @agard2018; @penniston2015] may be made.
+The analogy above highlights the representative advantage of markers. That is, markers save the physical state of the continuum at each timestep, thereby storing a history of physical changes from the perspective of the fluid [@harlow1962]. "Tracing" markers (saving marker states through time) is useful for understanding subduction dynamics like tracing air parcels is useful for understanding aerodynamics. But it is necessary to first accept implicit simplifications and uncertainties (known and unknown) about the geologic continuum. Uncertainties are especially rich in the petrologic model governing phase changes [@ito1971; @schmidt1998] and its effects on the highly non-linear rheologic model relating stress and strain by empirical flow laws [@hilairet2007; @ranalli1995; @karato1993; @turcotte2002]. Nonetheless, insofar as subducting crustal rocks on earth behave like markers deforming in an incompressible visco-plastic fluid [as parameterized by @gerya2019; @kerswell2020; @gerya2003], principled comparisons between marker PTt paths and the rock record [Figure 1, @agard2018; @penniston2015] may be made.
 
 Markers also have a distinct numerical advantage. Unlike air parcels flowing in a relatively homogeneous atmosphere (air foil aside), markers are deforming in a partly layered, partly chaotic, visco-plastic continuum representing the interface between the top of subducting oceanic crust and the mantle it sinks into (often called the subduction interface). Current models of the subduction interface epitomize a geologic continuum with complex geometry, sharp thermal, chemical, and strain gradients, strong advection (high Peclét number), and abundant fluid flow [@agard2016; @agard2018; @bebout2002; @bebout2007; @gerya2003; @syracuse2010; @penniston2015]. Solving the momentum and temperature equations on a finite-difference grid becomes unstable in such cases. Markers greatly improve solution accuracy and stability by interpolating and updating thermal, chemical, and velocity fields during each timestep [@gerya2003; @gerya2019; @moresi2003].
+
+## Marker tracing
+
+A set of markers, $x_i = \{x_1, x_2, \dots , x_n\}$, are initialized randomly within the fixed grid. On average, `r format(round(mean(marx.summary$n)), big.mark = ',')` markers to be traced are selected from within a 760 $km$ wide and 8 $km$ deep section of oceanic crust and seafloor sediments ([@fig:init]). Tracing then proceeds for a number of timesteps $t = \{1, 2, \dots, t_{dur}\}$. The total marker tracing duration $t_{dur}$ must vary among models because of the following observable phenomenon.
+
+Spontaneous sinking motion of the oceanic plate, as opposed to a fixed subduction rate [e.g., @syracuse2010; @wada2009], induces right-to-left plate motions as the sinking oceanic plate (the *slab*) provides a leftward horizontal force (known as *slab rollback*). Slab rollback eventually leads to mechanical interference (collision) between trench sediments and the stationary convergence region centered at 500 $km$ from the left boundary ([@fig:init]). The fixed, high-viscosity, convergence region acts as a barrier to the incoming sediments, deforming the accretionary wedge into a rapidly thickening pile. The sudden change in accretionary wedge geometry flattens the slab, causing intense mantle circulation and crustal deformation in the forearc and backarc regions. We consider the dynamics after interference begins unrepresentative of natural bouyancy-driven slab motion. Therefore, marker PTt paths are also increasingly meaningless after mechanical interference begins.
+
+A tracing duration $t_{dur}$ must therefore be chosen for each model that immediately precedes mechanical interference. Models with rapid subduction rates, for example, interfere with the convergence region sooner than models with slower subduction rates. We define $t_{dur}$ automatically for each model by computing the topographic surface profile for each timestep. Tracing stops when the sediment pile deforming against the convergence region becomes the overall topographic high, usually within one or two timesteps after interference. Markers PTt paths from different models, therefore, represent approximately the same amount of total convergence in $km$, but different subduction durations.
+
+![Initial conditions for marker tracing. Markers are selected from a 760 $km$ wide and 8 $km$ deep section representing 7 $km$ of mafic oceanic crust (rock type 7 & 8) and 1 $km$ of seafloor sediments (rock type 3 & 4). Two convergence regions far from the trench initiate and maintain subduction. On average, `r format(round(mean(marx.summary$n)), big.mark = ',')` markers are traced for each model. Numerical modelling details are in @kerswell2020.](../figs/cdf78_init.png){#fig:init}
 
 \clearpage
 
 ## Maker classification
 
-On average, `r format(round(mean(marx.summary$n)), big.mark = ',')` markers are selected from within a 760 $km$ wide and 8 $km$ deep section of oceanic crust and seafloor sediments ([@fig:init]). Tracing then proceeds for a number of timesteps $t = \{1, 2, \dots, t_{dur}\}$, where $t_{dur}$ depends on the subduction rate (see @sec:tdur). From this set of markers, $x_i = \{x_1, x_2, \dots , x_n\}$ . Only markers *recovered* from the subducting slab are relevant for comparison to PT estimates of natural rocks. The main challenge, therefore, is to first classify markers as either *subducted* or *recovered* without an inherited class label.
-
-![Initial conditions for marker tracing. Markers are selected from a 760 $km$ wide and 8 $km$ deep section representing 7 $km$ of mafic oceanic crust (rock type 7 & 8) and 1 $km$ of seafloor sediments (rock type 3 & 4). Two convergence regions far from the trench initiate and maintain subduction. On average, `r format(round(mean(marx.summary$n)), big.mark = ',')` markers are traced for each model. Numerical modelling details are in @kerswell2020.](../figs/cdf78_init.png){#fig:init}
+Tracing marker pressure, temperature, and x-z-position at each timestep is enough to compute characteristics of marker PTt paths, like maximum pressure and temperature (e.g., [@fig:cdf]). However, only markers recovered from the subducting slab are relevant for comparison to PT estimates of natural rocks. The main challenge, therefore, is to first classify markers as either *subducted* or *recovered* without an inherited class label.
 
 At the heart of our marker classification algorithm is a finite Gaussian mixture model (GMM) fit by Expectation-Maximization [EM, @dempster1977]. Please note that GMM fit by EM is a general purpose clustering algorithm broadly used in pattern recognition, anomaly detection, and estimating complex probability distribution functions [e.g., @banfield1993; @celeux1995; @figueiredo2002; @fraley2002; @vermeesch2018]. We derive GMM in @sec:gmm and EM in @sec:em.
 
-Before deriving the details of marker classification, we hypothesize that subducted and recovered markers may be distinguished by their PTt paths. If true, clustering algorithms like GMM may reliably classify markers by (dis)similarity along any number of dimensions computed from marker PTt paths [e.g., @dy2004].
+Before deriving the details of marker classification, we hypothesize that features computed from a PTt path, like maximum pressure, may distinguish subducted markers from recovered markers. If true, clustering algorithms like GMM may reliably classify markers by their dissimilarity along any number of dimensions computed from marker PTt paths [e.g., @dy2004].
 
 ### Gaussian mixture model {#sec:gmm}
 
@@ -197,53 +207,50 @@ where
 
 $$ \mathcal{N}(x_i | \mu_j, \Sigma_j) = \frac{exp\{ -\frac{1}{2}(x_i - \mu_j)(x_i - \mu_j)^T \Sigma_j^{-1}\}}{\sqrt{det(2 \pi \Sigma_j)}} $$ {#eq:gauss}
 
-The parameters $\mu_j$ and $\Sigma_j$, representing the center and shape of each cluster, are estimated by maximizing the log of the likelihood function, $L(x_i | \Phi) = \prod_{i=1}^n p(x_i | \Phi)$:
+Estimates for parameters $\mu_j$ and $\Sigma_j$, representing the center and shape of each cluster, are found by maximizing the log of the likelihood function, $L(x_i | \Phi) = \prod_{i=1}^n p(x_i | \Phi)$:
 
-$$ log~L(x_i | \Phi) = log \prod_{i=1}^n p(x_i | \Phi) = \sum_{i=1}^n log \left[ \sum_{j=1}^k \pi_j p(x_i | \Theta_j) \right] $$ {#eq:loglik}
+$$ log~p(\Phi | x_i) = log \prod_{i=1}^n p(x_i | \Phi) = \sum_{i=1}^n log \left[ \sum_{j=1}^k \pi_j p(x_i | \Theta_j) \right] $$ {#eq:loglik}
 
 Taking the derivative of @eq:loglik with respect to each parameter, $\pi$, $\mu$, $\Sigma$, setting the equation to zero, and solving for each parameter gives the Maximum Likelihood Estimators (MLE):
 
 $$ \begin{aligned}
-  N_j &= \sum_{i=1}^n \omega_{ij} \\
   \pi_j &= \frac{N_j}{n} \\
   \mu_j &= \frac{1}{N_j} \sum_{i=1}^n \omega_{ij} x_i \\
   \Sigma_j &= \frac{1}{N_j} \sum_{i=1}^n \omega_{ij} (x_i - \mu_j)(x_i - \mu_j)^T
 \end{aligned} $$ {#eq:mle}
 
-where $\omega_{ij}$ ($\omega_{ij} \geq 0; \sum_{j=1}^k \omega_{ij} = 1$) are membership weights representing the probability of an observation $x_i$ belonging to the $j^{th}$ Gaussian and $N_j$ represents the number of observations belonging to the $j^{th}$ Gaussian. Please note that $\omega_{ij}$ is unknown for unlabelled datasets, like the unclassified markers, so MLE cannot be computed with @eq:mle. The solution to this problem in derived in @sec:em.
+where $\omega_{ij}$ ($\omega_{ij} \geq 0; \sum_{j=1}^k \omega_{ij} = 1$) are membership weights representing the probability of an observation $x_i$ belonging to the $j^{th}$ Gaussian, and $N_j = \sum_{i=1}^n \omega_{ij}$ represents the number of observations belonging to the $j^{th}$ Gaussian. Please note that $\omega_{ij}$ is unknown for unlabelled datasets, so MLE cannot be computed with @eq:mle. We derive the solution to this problem in @sec:em.
 
-General purpose functions in the `R` package `Mclust` [@scrucca2016] are used to fit Gaussian mixutre models. After @banfield1993, covariance matrices $\Sigma$ in `Mclust` are parameterized to be flexible in their shape, volume, and orientation [@scrucca2016]:
+We use general purpose functions in the `R` package `Mclust` [@scrucca2016] to fit Gaussian mixutre models. After @banfield1993, covariance $\Sigma_j$ matrices are parameterized to be flexible in their shape, volume, and orientation [@scrucca2016]:
 
 $$ \Sigma_j = \lambda_j D_j A_j D_j^T $$ {#eq:eigen}
 
-where $D_j$ is the orthogonal eigenvector matrix, $A_j$ and $\lambda_j$ are diagonal matrices of values proportional to the eigenvalues. This implementation allows fixing one, two, or three geometric elements of the covariance matrices. That is, the volume $\lambda_j$, shape $A_j$, and orientation $D_j$ of Gaussian clusters can change or be fixed among all $k$ clusters [e.g., @celeux1995; @fraley2002]. Fourteen parameterizations of @eq:eigen are tried, representing different geometric combinations of the covariance matrices $\Sigma$ [see @scrucca2016] and the Bayesian Information Criterion [BIC, @schwarz1978] is computed. The best parameterization for @eq:eigen is chosen by BIC.
+where $D_j$ is the orthogonal eigenvector matrix, $A_j$ and $\lambda_j$ are diagonal matrices of values proportional to the eigenvalues. This implementation allows fixing one, two, or three geometric elements of the covariance matrix among groups. That is, the volume $\lambda_j$, shape $A_j$, and orientation $D_j$ of Gaussian clusters can change or be fixed among all $k$ clusters [e.g., @celeux1995; @fraley2002]. The parameterization of @eq:eigen is chosen by measuring Bayesian Information Criterion [BIC, @schwarz1978] for all general parameterizations of $\Sigma_j$.
 
 ### Expectation-Maximization fitting of Gaussian Mixtures {#sec:em}
 
-The EM algorithm estimates GMM parameters by initializing $k$ Gaussians with parameters $(\pi_j, \mu_j, \Sigma_j)$, then iteratively computing membership weights with @eq:posterior (E-step) and updating Gaussian parameters with @eq:mle (M-step) until convergence [@dempster1977].
+The EM algorithm estimates GMM parameters by initializing $k$ Gaussians with parameters $(\pi_j, \mu_j, \Sigma_j)$, then by iteratively computing membership weights with @eq:posterior (E-step), and updating Gaussian parameters with @eq:mle (M-step) until convergence [@dempster1977].
 
-The *expectation* (E-)step involves a "latent" multinomial variable $z_{ij} \in \{1, 2, \dots, k\}$ representing the unknown classifications of $x_i$ with a joint distribution $p(x_i,z_{ij}) = p(x_i | z_{ij})p(z_{j})$. Membership weights $\omega_{ij}$ are equivalent to the conditional probability $p(z_{ij} | x_i)$, which represents the probability of observation $x_i$ belonging to the $j^{th}$ Gaussian. Given initial guesses for $k$ sets of Gaussian parameters $\pi_j$, $\mu_j$, $\Sigma_j$, membership weights are computed using Bayes Theorem (E-step):
+Let $z_{ij} \in \{1, 2, \dots, k\}$ be a multinomial latent variable with joint distribution $p(x_i,z_i) = p(x_i | z_{ij})p(z_{j})$. $z_{ij}$ represents the unknown (unlabelled) classifications of $x_i$ and takes values of $j = 1, 2, \dots, k$. Membership weights $\omega_{ij}$ are equivalent to the conditional probability $p(z_{ij} | x_i)$, which represents the probability of observation $x_i$ belonging to the $j^{th}$ Gaussian. Using Bayes Theorem, the posterior probability:
 
 $$ p(z_{ij} | x_i) = \frac{p(x_i | z_{ij})p(z_{ij})}{p(x_i)} = \frac{\pi_j \mathcal{N}(\mu_j, \Sigma_j)}{\sum_{j=1}^k \pi_j \mathcal{N}(\mu_j, \Sigma_j)} = \omega_{ij} $$ {#eq:posterior}
 
-and new Gaussian estimates are computed with $\omega_{ij}$ ([@eq:mle]) during the *maximization* (M-)step.
+can be computed given initial estimates for $k$ sets of Gaussian parameters $\pi_j$, $\mu_j$, $\Sigma_j$ (E-step). With $\omega_{ij}$, new Gaussian estimates can be computed with @eq:mle (M-step).
 
-### Feature selection
-
-EM is sensitive to local optima and initialization [@figueiredo2002], so a number of features were computed from marker PTt paths and tested in combination. Redundant or useless features [e.g., @dy2004] were filtered out. We settled on two features:
+EM is sensitive to local optima and initialization [@figueiredo2002], so a number of features were computed and tested in combination. Redundant or useless features [e.g., @dy2004] were filtered out. We settled on a two-component mixture of:
 
 $$\begin{aligned}
-  maxP \leftarrow \max_{1 \leq t \leq t}P \\
-  sumdP \leftarrow \sum_{1}^{t_{dur}} dP
+  x_i^{mP} &= \max_{1 \leq t \leq t}P \\
+  x_i^{sdP} &= \sum_{1}^{t} dP
 \end{aligned}$$ {#eq:bivar}
 
-where $maxP$ and $sumdP$ represent the maximum pressure attained each marker's PTt path and the sum total of all pressure changes along each marker's PTt path, respectively. Up to six Gaussian components are fit to the bivariate mixture model described by @eq:mix and @eq:bivar using EM ([@eq:posterior; @eq:mle]). This clustering step gives markers $x_i$ class labels $z_i \in \{1, \dots, k\}$ representing assignment to one of $k$ clusters. Next, we describe our decisions in determining which clusters (if any) represent recovered markers.
+where $x_i^{mP}$ and $x_i^{sdP}$ represent the maximum pressure attained along a marker PTt path and the sum total of all pressure changes along a marker PTt path, respectively. The bivariate mixture model represented by @eq:mix and @eq:bivar is fit with $k = 6$ Gaussian clusters using EM [@eq:posterior; @eq:mle]. The results of this step are arbitrary class labels $y_i \in {1, \dots, k}$ representing group assignment of markers $x_i$ to one of $k$ clusters. The next step is to determine which clusters and markers represent recovered or subducted markers.
 
-### Subducted or recovered?
+### Chutes or ladders?
 
-Two final decisions are made to classify a cluster as containing either all *subducted* or *recovered* markers. First, each clusters centroid ($\mu_j$, [@eq:mle]) is compared to the overall distribution of $maxP$ and $sumdP$. Clusters with centroids $\mu_j$ below the median minus three-quarters of an interquartile range, in either $maxP$ or $sumdP$ dimensions, classify as *recovered*. Second, markers classified as *recovered* in the previous step with maximum pressures above the median $maxP$ are considered misclassified and get reclassified as *subducted* ([@fig:class]).
+GMM clustering classifies markers into 6 groups, so a final decision to classify a group as *subducted* or *recovered* is made by comparing each group's centroid ([$\mu_j$, @eq:mle]) to the overall distribution of markers along $x_i$. Groups with centroids $\mu_j$ well above the median of $x_i$ classify as *subducted* ([@fig:class]). The exact threshold is defined as three-quarters of inter quartile range below the median.
 
-![Classification results for model cdf78. GMM clusters `r format(round(marx.summary$n[marx.summary$model == 'cdf78']), big.mark = ',')` markers into six classes according to each marker's maximum pressure (a) and sum of all pressure changes along its PTt path (b). If a class' centroid (mean) is below either centroid threshold in (a) or (b), it is classified as recovered (c, d). If a marker gets classified as recovered, but is above the maximum pressure threshold in (a), it is reclassified as subducted (c, d).](../figs/k6/cdf78_class_comp.png){#fig:class}
+![](../figs/k6/cdf78_class_comp.png){#fig:class}
 
 \clearpage
 
@@ -317,11 +324,6 @@ This work was supported by the National Science Foundation grant OIA1545903 to M
 
 # Appendix {}
 
-## Marker tracing duration {#sec:tdur}
-
-Spontaneous sinking motion of the oceanic plate, as opposed to a fixed subduction rate [e.g., @syracuse2010; @wada2009], induces right-to-left plate motions as the sinking oceanic plate (the *slab*) provides a leftward horizontal force (known as *slab rollback*). Slab rollback eventually leads to mechanical interference (collision) between trench sediments and the stationary convergence region centered at 500 $km$ from the left boundary ([@fig:init]). The fixed, high-viscosity, convergence region acts as a barrier to the incoming sediments, deforming the accretionary wedge into a rapidly thickening pile. The sudden change in accretionary wedge geometry flattens the slab, causing intense mantle circulation and crustal deformation in the forearc and backarc regions. We consider the dynamics after interference begins unrepresentative of natural bouyancy-driven slab motion. Therefore, marker PTt paths are also increasingly meaningless after mechanical interference begins.
-
-A tracing duration $t_{dur}$ must therefore be chosen for each model that immediately precedes mechanical interference. Models with rapid subduction rates, for example, interfere with the convergence region sooner than models with slower subduction rates. We define $t_{dur}$ automatically for each model by computing the topographic surface profile for each timestep. Tracing stops when the sediment pile deforming against the convergence region becomes the overall topographic high, usually within one or two timesteps after interference. Markers PTt paths from different models, therefore, represent approximately the same amount of total convergence in $km$, but different subduction durations.
 
 
 

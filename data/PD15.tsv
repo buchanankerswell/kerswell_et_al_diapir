@@ -1,0 +1,356 @@
+reference	temperature	pressure	country	region	data.group	cumulative
+Brandon and Calderwood, 1990	190	0.3	USA	Olympic Peninsula	CircumPacific	0.003
+Aoki et al., 2008	255	0.425	Japan	Shimanto	CircumPacific	0.006
+Fagereng and Cooper, 2010	300	0.5	New Zealand	Otago Schist	CircumPacific	0.008
+Grove and Bebout, 1995	250	0.5	USA	Catalina Schist	CircumPacific	0.011
+Dachs and Proyer, 2001	400	0.5	Austria	Tauern Window, Grossglockner	Alps	0.014
+Ramirez-Sanchez et al. 2005	350	0.52	Chile	Chonos Metamorphic Complex	CircumPacific	0.017
+Willner et al. 2000	265	0.525	Chile	Chonos Archipelago	CircumPacific	0.02
+Trommsdorf, 2000	450	0.55	Switzerland/Italy	Ligurian Alps	Alps	0.023
+Topuz et al., 2006	200	0.55	Turkey	Tavsanli Zone	T-I-G	0.025
+Abbott et al., 2003	328	0.565	Jamaica	Blue Mountain inlier	CircumAtlantic	0.028
+Ave Lallemant, 1997	525	0.6	Venezuela	Araya Peninsula	CircumAtlantic	0.031
+Escuder-Viruete et al. 2011	300	0.6	Dominican Republic	Samana Peninsula	CircumAtlantic	0.034
+Smith et al., 1999	450	0.6	Venezuela	Villa de Cura	CircumAtlantic	0.037
+Korikovsky and Karamata, 2011	345	0.6	Serbia	Fruska Gora Serbia Blueschist	Alps	0.04
+Nakajima et al. 1990	300	0.6	China	Aksu	Cont_Asia	0.042
+Nakajima et al. 1990	350	0.6	China	Aksu	Cont_Asia	0.045
+Patrick, 1995	370	0.65	USA	Brooks Range Central Belt	CircumPacific	0.048
+Tsujimori and Liou, 2007	280	0.65	Japan	Renge Metamorphic Rocks, Chugoku Mountains	CircumPacific	0.051
+Smith et al., 1999	337.5	0.65	Venezuela	Villa de Cura	CircumAtlantic	0.054
+Schermer, 1990	275	0.65	Greece	Mt Olympus	T-I-G	0.056
+Torabi, 2011	375	0.65	Iran	Anarak region	T-I-G	0.059
+Willner et al., 2001	320	0.7	Chile	Bahia Mansa	CircumPacific	0.062
+Hoinkes et al., 1999	350	0.7	Switzerland/Austria/Italy	Reichnitz Window blueschist	Alps	0.065
+Topuz et al., 2008	320	0.72	Turkey	Thrace	T-I-G	0.068
+Vitale Brovarone and Agard 2013	340	0.75	New Caledonia	Diahot Terrane	CircumPacific	0.071
+Escuder-Viruete et al. 2011	320	0.75	Dominican Republic	Samana Peninsula	CircumAtlantic	0.073
+Goncalves et al., 2000	320	0.75	Dominican Republic	Samana Peninsula	CircumAtlantic	0.076
+Harlow et al., 2011	250	0.75	Guatemala	La Ensenada	CircumAtlantic	0.079
+Clarke et al., 1997	400	0.8	New Caledonia	Pam Peninsula	CircumPacific	0.082
+Mori et al., 2007	440	0.8	Japan	Nishisonogi	CircumPacific	0.085
+Terabayashi et al, 1996	250	0.8	USA	Pacheco  Pass, Franciscan\	CircumPacific	0.088
+Faryad, 1995	360	0.8	Slovakia	Carpathians	Alps	0.09
+Zhang et al. 2009	335	0.8	China	Qilian Mountains	Cont_Asia	0.093
+Zhang et al. 2009	360	0.8	China	Qilian Mountains	Cont_Asia	0.096
+Topuz et al., 2008	290	0.8	Turkey	Thrace	T-I-G	0.099
+Willner 2005	400	0.815	Chile	Coastal Cordillera	CircumPacific	0.102
+Miyazaki et al., 2013	377	0.85	Japan	Nagasaki Metamorphic Complex	CircumPacific	0.105
+Tsujimori and Liou, 2005	275	0.85	Japan	Osayama	CircumPacific	0.107
+Song et al., 2009	300	0.85	China	Qilian Mountains	Cont_Asia	0.11
+Zhang et al. 2009	345	0.875	China	Qilian Mountains	Cont_Asia	0.113
+Grove and Bebout, 1995	275	0.9	USA	Catalina Schist	CircumPacific	0.116
+Inui and Toriumi, 2002	520	0.9	Japan	Sambagawa, Shikoku	CircumPacific	0.119
+Willner et al. 2000	465	0.9	Chile	Chonos Archipelago	CircumPacific	0.121
+Harlow et al., 2011	350	0.9	Guatemala	North of Motagua fault	CircumAtlantic	0.124
+Faryad, 1995	380	0.9	Slovakia	Carpathians	Alps	0.127
+Reddy et al., 1999	375	0.9	Italy	Combin zone	Alps	0.13
+Baziotis et al. 2009	370	0.9	Greece	Lavrion	T-I-G	0.133
+Torabi and Arai, 2013	350	0.9	Iran	Anarak region	T-I-G	0.136
+Jacobson, 1995	556	0.915	USA	Rand Schist	CircumPacific	0.138
+Tricart and Schwartz, 2006	350	0.95	France	southern Queyras	Alps	0.141
+Tricart and Schwartz, 2006	400	0.95	France	southern Queyras	Alps	0.144
+Candan et al., 2005	300	0.95	Turkey	Afyon zone, Western Anatolia	T-I-G	0.147
+Banno et al. 2000	270	1	USA	Ward Creek, Franciscan	CircumPacific	0.15
+Fitzherbert et al. 2003	400	1	New Caledonia	Pam Peninsula	CircumPacific	0.153
+Chew et al., 2003	360	1	Ireland	NW Mayo inlier	CircumAtlantic	0.155
+Draper and Barros, 1994	550	1	Cuba	Escambray	CircumAtlantic	0.158
+Escuder-Viruete et al. 2011	375	1	Dominican Republic	Samana Peninsula	CircumAtlantic	0.161
+Joyce, 1991	455	1	Dominican Republic	Samana Peninsula	CircumAtlantic	0.164
+Hoinkes et al., 1999	350	1	Switzerland/Austria/Italy	Reckner/Hippold nappes	Alps	0.167
+Nussbaum et al., 1998	425	1	Switzerland	Suretta nappe	Alps	0.169
+Tenczer and Stüwe, 2003	500	1	Austria/Slovenia	Koralpe, Eastern Alps	Alps	0.172
+Tenczer and Stüwe, 2003	600	1	Austria/Slovenia	Koralpe, Eastern Alps	Alps	0.175
+Tricart and Schwartz, 2006	425	1	France	southern Queyras, unit III	Alps	0.178
+Ao and Bhowmik, 2014	325	1	India	Nagaland	Cont_Asia	0.181
+Zhang et al., 1997	510	1	Kazakhstan	Kokchetav Massif	Cont_Asia	0.184
+Zhou et al., 2009	385	1	China	Heilongjiang Complex	Cont_Asia	0.186
+Droop et al., 2005	310	1	Turkey	Altinekin complex, Konya	T-I-G	0.189
+Willner 2005	367.5	1.01	Chile	Coastal Cordillera	CircumPacific	0.192
+Angiboust et al. 2014	490	1.03	Switzerland/Italy	Dent Blanche, Tsate Complex	Alps	0.195
+Patrick, 1995	402.5	1.05	USA	Brooks Range Schist Belt	CircumPacific	0.198
+Krebs et al., 2011	375	1.05	Dominican Republic	Rio San Juan	CircumAtlantic	0.201
+Beyssac et al. 2008	490	1.1	Taiwan	Tananao complex	CircumPacific	0.203
+Grove and Bebout, 1995	450	1.1	USA	Catalina Schist	CircumPacific	0.206
+Grove and Bebout, 1995	550	1.1	USA	Catalina Schist	CircumPacific	0.209
+Faryad, 1995	430	1.1	Slovakia	Carpathians	Alps	0.212
+Agard et al. 2006	525	1.1	Iran	Zagros	T-I-G	0.215
+Okay et al., 2002	450	1.1	Turkey	NW Turkey	T-I-G	0.218
+Whitney et al., 2008	520	1.1	Turkey	Menderes massif	T-I-G	0.22
+Marroni et al. 2009	234.5	1.125	Guatemala	Motagua Fault Zone	CircumAtlantic	0.223
+Wilner et al., 2004	415	1.15	Chile	Diego de Almagro	CircumPacific	0.226
+Garcia-Casco et al., 2006	556	1.15	Cuba	Western Cuba	CircumAtlantic	0.229
+Bousquet et al., 2002	375	1.15	Switzerland/France	Engadine Window	Alps	0.232
+Faryad, 1995	420	1.15	Slovakia	Carpathians	Alps	0.234
+Zulbati, 2008	565	1.15	Switzerland	Adula nappe (northern)	Alps	0.237
+Ao and Bhowmik, 2014	340	1.15	India	Nagaland	Cont_Asia	0.24
+Oberhänsli et al., 2013	510	1.15	Turkey	Bitlis massif	T-I-G	0.243
+Grove and Bebout, 1995	650	1.2	USA	Catalina Schist	CircumPacific	0.246
+Tsujimori and Liou, 2005	515	1.2	Japan	Osayama	CircumPacific	0.249
+Willner et al., 2004	425	1.2	Chile	Los Pabilos, Coastal Cordillera	CircumPacific	0.251
+Escuder-Viruete and Perez-Estaun, 2013	420	1.2	Dominican Republic	Rio San Juan	CircumAtlantic	0.254
+Harlow et al., 2011	350	1.2	Guatemala	La Ceiba	CircumAtlantic	0.257
+Stöckhert et al., 1995	550	1.2	Venezuela	Isla Margarita	CircumAtlantic	0.26
+Bousquet et al., 2002	360	1.2	Switzerland/France	Engadine Window	Alps	0.263
+Schwartz et al. 2000	450	1.2	Italy	Monviso, Viso Mozzo/Passo Gallarino	Alps	0.266
+Davis and Whitney, 2006	380	1.2	Turkey	Sivrihisar Massif	T-I-G	0.268
+Katzir et al., 2000	450	1.2	Greece	Evia	T-I-G	0.271
+Oberhänsli et al., 2010	375	1.2	Turkey	Bitlis massif	T-I-G	0.274
+Plunder et al., 2013	300	1.2	Turkey	Tavsanli Zone	T-I-G	0.277
+Rimmele et al., 2005	420	1.2	Turkey	Menderes/Lycian	T-I-G	0.28
+Rimmele et al., 2005	350	1.2	Turkey	Menderes/Lycian	T-I-G	0.282
+Rolland et al., 2009	550	1.2	Armenia	Amassia-Stepanavan Suture	T-I-G	0.285
+Willner 2005	415	1.215	Chile	Coastal Cordillera	CircumPacific	0.288
+Wilner et al., 2004	510	1.22	Chile	Diego de Almagro	CircumPacific	0.291
+Hyppolito et al., 2014	532	1.24	Chile	Punta Sirena	CircumPacific	0.294
+Cartwright and Barnicoat, 2002	450	1.25	Switzerland/Italy	Taschalp Region	Alps	0.297
+Hoinkes et al., 1999	425	1.25	Switzerland/Austria/Italy	Tauern Window blueschist	Alps	0.299
+Tricart and Schwartz, 2006	437.5	1.25	France	southern Queyras, unit IV	Alps	0.302
+Ota et al., 2002	555	1.25	Russia	Altai	Cont_Asia	0.305
+Rimmele et al., 2005	410	1.25	Turkey	Menderes/Lycian	T-I-G	0.308
+Rimmele et al., 2005	375	1.25	Turkey	Menderes/Lycian	T-I-G	0.311
+Clarke et al., 1997	570	1.26	New Caledonia	Pam Peninsula	CircumPacific	0.314
+Escuder-Viruete et al. 2011	450	1.3	Dominican Republic	Samana Peninsula	CircumAtlantic	0.316
+Goncalves et al., 2000	450	1.3	Dominican Republic	Samana Peninsula	CircumAtlantic	0.319
+Krebs et al., 2011	550	1.3	Dominican Republic	Rio San Juan	CircumAtlantic	0.322
+Stanek et al. 2006	615	1.3	Cuba	Sancti Spiritus dome	CircumAtlantic	0.325
+Bousquet et al., 2002	400	1.3	Switzerland/France	Grisons Window	Alps	0.328
+Brouwer et al., 2002	525	1.3	Italy	Gran Paradiso	Alps	0.331
+Zhang et al., 1997	525	1.3	Kazakhstan	Kokchetav Massif	Cont_Asia	0.333
+Rimmele et al., 2005	485	1.3	Turkey	Menderes/Lycian	T-I-G	0.336
+Tortorici et al., 2012	350	1.3	Greece	Crete	T-I-G	0.339
+Rimmele et al., 2005	400	1.35	Turkey	Menderes/Lycian	T-I-G	0.342
+Willner et al., 2004	682	1.375	Chile	Los Pabilos, Coastal Cordillera	CircumPacific	0.345
+Potel et al. 2006	410	1.4	New Caledonia	Koumac and Diahot Terranes	CircumPacific	0.347
+Markl and Bucher, 1997	540	1.4	Norway	Lofoten	CircumAtlantic	0.35
+Bousquet et al., 2002	400	1.4	Switzerland/France	Grisons Window	Alps	0.353
+Tenczer and Stüwe, 2003	700	1.4	Austria/Slovenia	Koralpe, Eastern Alps	Alps	0.356
+Fitzherbert et al. 2003	475	1.45	New Caledonia	Pam Peninsula	CircumPacific	0.359
+Neubauer et al., 1999	710	1.45	Austria	Sieggraben, Carpathians	Alps	0.362
+Fitzherbert et al. 2003	565	1.5	New Caledonia	Pam Peninsula	CircumPacific	0.364
+John et al. 2010	600	1.5	Ecuador	Raspas Complex	CircumPacific	0.367
+Krogh et al. 1994	550	1.5	USA	Jenner, Franciscan	CircumPacific	0.37
+Perchuk et al., 1999	700	1.5	USA	Faro eclogite, Yukon-Tanana terrane	CircumPacific	0.373
+Garcia-Casco et al., 2006	657	1.5	Cuba	Escambray	CircumAtlantic	0.376
+Garcia-Casco et al., 2008	750	1.5	Cuba	Sierra del Convento Melange	CircumAtlantic	0.379
+Krebs et al., 2008	445	1.5	Dominican Republic	Rio San Juan	CircumAtlantic	0.381
+Krebs et al., 2011	545	1.5	Dominican Republic	Rio San Juan	CircumAtlantic	0.384
+Markl and Bucher, 1997	680	1.5	Norway	Lofoten	CircumAtlantic	0.387
+Agard et al., 2000	375	1.5	France/Italy	Schistes Lustres	Alps	0.39
+Ganne et al., 2003	500	1.5	France/Italy	Brianconnais, Ambin Dome	Alps	0.393
+Tenczer and Stüwe, 2003	700	1.5	Austria/Slovenia	Koralpe, Eastern Alps	Alps	0.395
+Tenczer and Stüwe, 2003	700	1.5	Austria/Slovenia	Koralpe, Eastern Alps	Alps	0.398
+Keiter et al. 2004	500	1.5	Greece	Syros	T-I-G	0.401
+Rosenbaum et al. 2002	450	1.5	Greece	Syros	T-I-G	0.404
+Rosenbaum et al. 2002	470	1.5	Greece	Sifnos	T-I-G	0.407
+Spear et al. 2006	470	1.5	Greece	Sifnos	T-I-G	0.41
+Agard et al., 2005	390	1.55	Norway	Svalbard	CircumAtlantic	0.412
+Hoinkes et al., 1999	700	1.55	Switzerland/Austria/Italy	Koralpe, Eastern Alps	Alps	0.415
+Davis and Whitney, 2006	490	1.55	Turkey	Sivrihisar Massif	T-I-G	0.418
+Schumacher et al. 2008	500	1.55	Greece	Syros	T-I-G	0.421
+Vitale Brovarone and Agard 2013	450	1.6	New Caledonia	Diahot Terrane	CircumPacific	0.424
+Engvik and Andersen, 2000	680	1.6	Norway	Western Gneiss Region	CircumAtlantic	0.427
+Kosminska et al., 2014	480	1.6	Norway	Svalbard	CircumAtlantic	0.429
+Schneider et al., 2004	600	1.6	Cuba	Escambray	CircumAtlantic	0.432
+Zack et al., 2004	360	1.6	Dominican Republic	Samana Peninsula	CircumAtlantic	0.435
+Oberhänsli et al., 2007	420	1.6	Iran	Sorkhan	T-I-G	0.438
+Okrusch and Broecker, 1990	475	1.6	Greece	Syros	T-I-G	0.441
+Cuthbert et al., 2000	525	1.65	Norway	Western Gneiss Region	CircumAtlantic	0.444
+Garcia-Casco et al., 2006	775	1.65	Cuba	Sierra del Convento Melange	CircumAtlantic	0.446
+Ota et al., 2002	625	1.65	Russia	Altai	Cont_Asia	0.449
+Aoki et al., 2009	510	1.7	Japan	Shimanto	CircumPacific	0.452
+Fitzherbert et al. 2003	610	1.7	New Caledonia	Pam Peninsula	CircumPacific	0.455
+John et al. 2010	575	1.7	Ecuador	Raspas Complex	CircumPacific	0.458
+Vitale Brovarone and Agard 2013	495	1.7	New Caledonia	Diahot Terrane	CircumPacific	0.46
+Krebs et al., 2011	360	1.7	Dominican Republic	Rio San Juan	CircumAtlantic	0.463
+Krebs et al., 2011	380	1.7	Dominican Republic	Rio San Juan	CircumAtlantic	0.466
+Krebs et al., 2011	375	1.7	Dominican Republic	Rio San Juan	CircumAtlantic	0.469
+Peterman et al., 2009	700	1.7	Norway	Western Gneiss Region	CircumAtlantic	0.472
+Bousquet et al., 2002	375	1.7	Switzerland/France	Petit St Bernard, France	Alps	0.475
+Dachs and Proyer, 2001	570	1.7	Austria	Tauern Window, Grossglockner	Alps	0.477
+Dale and Holland, 2003	640	1.7	Switzerland	Adula nappe	Alps	0.48
+Klemd et al. 2011	380	1.7	China	Tianshan	Cont_Asia	0.483
+Escuder-Viruete and Perez-Estaun, 2013	640	1.75	Dominican Republic	Rio San Juan	CircumAtlantic	0.486
+Krebs et al., 2011	520	1.75	Dominican Republic	Rio San Juan	CircumAtlantic	0.489
+Hoinkes et al., 1999	625	1.75	Switzerland/Austria/Italy	Schober Group	Alps	0.492
+Zhimulev et al., 2010	775	1.75	Kazakhstan	Kokchetav Massif	Cont_Asia	0.494
+Agard et al. 2006	500	1.75	Iran	Zagros	T-I-G	0.497
+Omrani et al., 2013	600	1.75	Iran	Shanderman	T-I-G	0.5
+Ko et al. 2005	535	1.8	Japan	Sanbagawa, Shikoku	CircumPacific	0.503
+Abbott and Draper, 2007	730	1.8	Dominican Republic	Rio San Juan	CircumAtlantic	0.506
+Braathen and Erambert, 2014	600	1.8	Norway	Western Gneiss Region	CircumAtlantic	0.508
+Brueckner et al. 1998	750	1.8	Greenland	NE Eclogite province	CircumAtlantic	0.511
+Elvevold and Gilotti, 2000	680	1.8	Greenland	NE Eclogite province	CircumAtlantic	0.514
+Sisson et al. 1997	485	1.8	Venezuela	Cordillera de la Costa	CircumAtlantic	0.517
+Stanek et al. 2006	605	1.8	Cuba	Sancti Spiritus dome	CircumAtlantic	0.52
+Cartwright and Barnicoat, 2002	584	1.8	Switzerland/Italy	Zermatt Saas	Alps	0.523
+Faryad and Hoinkes, 2003	690	1.8	Austria	Saualpe complex, eastern Alps	Alps	0.525
+Hoinkes et al., 1999	600	1.8	Switzerland/Austria/Italy	Koralpe, Eastern Alps	Alps	0.528
+Hoinkes et al., 1999	700	1.8	Switzerland/Austria/Italy	Koralpe, Eastern Alps	Alps	0.531
+Klemd et al. 2011	540	1.8	China	Tianshan	Cont_Asia	0.534
+Davis and Whitney, 2006	600	1.8	Turkey	Sivrihisar Massif	T-I-G	0.537
+Escuder-Viruete and Perez-Estaun, 2013	580	1.85	Dominican Republic	Rio San Juan	CircumAtlantic	0.54
+Federico et al., 2004	550	1.85	Italy	Voltri	Alps	0.542
+Carson et al. 1999	600	1.9	New Caledonia	Pam Peninsula	CircumPacific	0.545
+Vitale Brovarone and Agard 2013	525	1.9	New Caledonia	Diahot Terrane	CircumPacific	0.548
+Boundy et al., 2002	665	1.9	Norway	Western Gneiss Region	CircumAtlantic	0.551
+Sisson et al. 1997	640	1.9	Venezuela	Cordillera de la Costa	CircumAtlantic	0.554
+Agard et al., 2001	500	1.9	France/Italy	W. of Dora Maira	Alps	0.556
+Gasco et al., 2011a, b	520	1.9	Italy	Dora Maira	Alps	0.559
+Le Bayon et al., 2006b	490	1.9	Italy	Gran Paradiso, Gneiss Minuti Complex	Alps	0.562
+Schwartz et al. 2000	580	1.9	Italy	Monviso, Lago Superiore	Alps	0.565
+Zulbati, 2011	580	1.9	Switzerland	Adula nappe (northern)	Alps	0.568
+John et al. 2008	545	1.9	China	Tianshan	Cont_Asia	0.571
+Zhang et al., 1997	600	1.9	Kazakhstan	Kokchetav Massif	Cont_Asia	0.573
+Zhimulev et al., 2010	825	1.9	Kazakhstan	Kokchetav Massif	Cont_Asia	0.576
+Feenstra et al. 2007	530	1.9	Greece	Samos	T-I-G	0.579
+Will et al. 1998	520	1.9	Greece	Samos	T-I-G	0.582
+Liu et al. 2011	490	1.92	China	Qiangtang, Tibet	Cont_Asia	0.585
+Matsumoto et al. 2003	600	1.95	Japan	Kotsu	CircumPacific	0.588
+Ota et al. 2004	670	1.95	Japan	Iratsu eclogite, Sanbagawa	CircumPacific	0.59
+Tsujimori and Matsumoto, 2006	575	1.95	Japan	Hida Mountains	CircumPacific	0.593
+Elvevold et al., 2014	730	1.95	Norway	Svalbard	CircumAtlantic	0.596
+Jamtveit et al., 1990	700	1.95	Norway	Bergen arcs	CircumAtlantic	0.599
+Stanek et al. 2006	570	1.95	Cuba	Sancti Spiritus dome	CircumAtlantic	0.602
+Ashley et al. 2014	495	1.95	Greece	Sifnos	T-I-G	0.605
+Trotet et al. 2001	530	1.95	Greece	Syros	T-I-G	0.607
+Gabriele et al., 2003	575	2	Ecuador	Raspas Complex	CircumPacific	0.61
+Page et al. 2007	550	2	USA	Junction School eclogite, Healdsburg	CircumPacific	0.613
+Garcia-Casco et al. 2002	600	2	Cuba	Northern Serpentinite Melange	CircumAtlantic	0.616
+Kylander-Clark et al., 2007	730	2	Norway	Western Gneiss Region	CircumAtlantic	0.619
+Castelli et al. 2002	545	2	Italy	Monviso	Alps	0.621
+Cliff et al., 1998	400	2	Italy	Monviso	Alps	0.624
+Hoschek et al., 2010	585	2	Austria	Tauern Window eclogite zone	Alps	0.627
+Selverstone et al., 1992	625	2	Austria	Tauern Window eclogite zone	Alps	0.63
+Thoni and Miller, 1996	680	2	Austria	Saualpe complex, eastern Alps	Alps	0.633
+Groppo et al. 2009	475	2	Greece	Sifnos	T-I-G	0.636
+Schmadicke and Will 2003	540	2	Greece	Sifnos	T-I-G	0.638
+Sengun et al., 2012	625	2	Turkey	Biga Peninsula	T-I-G	0.641
+Trotet et al. 2001	580	2	Greece	Sifnos	T-I-G	0.644
+Cuthbert et al., 2000	575	2.05	Norway	Western Gneiss Region	CircumAtlantic	0.647
+Hoschek et al., 2010	540	2.05	Austria	Tauern Window eclogite zone	Alps	0.65
+Hoschek, 2001	610	2.08	Austria	Tauern Window eclogite zone	Alps	0.653
+Hoschek et al., 2010	510	2.08	Austria	Tauern Window eclogite zone	Alps	0.655
+Parkinson et al., 1998	520	2.1	Indonesia	Barru complex	CircumPacific	0.658
+Krebs et al., 2011	690	2.1	Dominican Republic	Rio San Juan	CircumAtlantic	0.661
+Krebs et al., 2011	690	2.1	Dominican Republic	Rio San Juan	CircumAtlantic	0.664
+Tsujimori et al. 2005	450	2.1	Guatemala	Motagua Fault Zone	CircumAtlantic	0.667
+Konzett et al., 2012	645	2.1	Austria	Tauern Window Polinek Complex	Alps	0.669
+Klemd et al. 2011	570	2.1	China	Tianshan	Cont_Asia	0.672
+van der Straaten et al. 2008	650	2.1	China	Tianshan	Cont_Asia	0.675
+Hoschek, 2004	635	2.15	Austria	Tauern Window eclogite zone	Alps	0.678
+Kurz et al., 1998	590	2.15	Austria	Tauern Window eclogite zone	Alps	0.681
+Messiga et al., 1995	575	2.15	Italy	Ligurian Alps	Alps	0.684
+Trommsdorf, 2000	650	2.15	Italy	Val Malenco	Alps	0.686
+Footoohi Rad et al., 2005	600	2.15	Iran	Sulabest	T-I-G	0.689
+Whitney and Davis, 2006	422	2.15	Turkey	Sivrihisar Massif	T-I-G	0.692
+Mposkos et al., 2012	585	2.17	Greece	Kechros	T-I-G	0.695
+Brueckner et al. 1998	750	2.2	Greenland	NE Eclogite province	CircumAtlantic	0.698
+Krebs et al., 2011	580	2.2	Dominican Republic	Rio San Juan	CircumAtlantic	0.701
+Kylander-Clark et al., 2007	815	2.2	Norway	Western Gneiss Region	CircumAtlantic	0.703
+Vitale Brovarone et al., 2011	530	2.2	France	Corsica	Alps	0.706
+Dale and Holland, 2003	750	2.2	Switzerland	Adula nappe	Alps	0.709
+Miller et al., 2007	640	2.2	Austria	Tauern Window eclogite zone	Alps	0.712
+Orozbaev et al., 2010	575	2.2	Kyrgyzstan	Tien-Shan	Cont_Asia	0.715
+Dragovic et al. 2012	560	2.2	Greece	Sifnos	T-I-G	0.718
+Thomas et al. 2010	560	2.2	Greece	Syros	T-I-G	0.72
+Wain, 1997	755	2.24	Norway	Western Gneiss Region	CircumAtlantic	0.723
+Li et al. 2012	552.5	2.245	China	Tianshan	Cont_Asia	0.726
+Cuthbert et al., 2000	620	2.25	Norway	Western Gneiss Region	CircumAtlantic	0.729
+Escuder-Viruete and Perez-Estaun, 2013	585	2.25	Dominican Republic	Rio San Juan	CircumAtlantic	0.732
+Harlow et al., 2011	400	2.25	Guatemala	Carrizal Grande	CircumAtlantic	0.734
+Krebs et al., 2011	695	2.25	Dominican Republic	Rio San Juan	CircumAtlantic	0.737
+Martens et al. 2012	705	2.25	Guatemala	Chuacus Complex	CircumAtlantic	0.74
+Ravna et al., 2010	377.5	2.25	France	Corsica	Alps	0.743
+Davoudian et al., 2008	585	2.25	Iran	Sanandaj-Sirjan	T-I-G	0.746
+Whitney and Davis, 2006	555	2.25	Turkey	Sivrihisar Massif	T-I-G	0.749
+Vitale Brovarone and Agard 2013	545	2.3	New Caledonia	Diahot Terrane	CircumPacific	0.751
+Engvik et al., 2007	635	2.3	Norway	Western Gneiss Region	CircumAtlantic	0.754
+Escuder-Viruete et al. 2011	615	2.3	Dominican Republic	Samana Peninsula	CircumAtlantic	0.757
+Krebs et al., 2008	750	2.3	Dominican Republic	Rio San Juan	CircumAtlantic	0.76
+Angiboust et al., 2009	540	2.3	Switzerland/Italy	Zermatt Saas	Alps	0.763
+Nussbaum et al., 1998	700	2.3	Switzerland	Suretta nappe	Alps	0.766
+Plunder et al., 2012	480	2.3	France/Italy	Schistes Lustres	Alps	0.768
+Toth et al., 2000	750	2.3	Switzerland	Adula nappe (southern)	Alps	0.771
+de Sigoyer et al. 2004	560	2.3	India	Tso Morari	Cont_Asia	0.774
+Rehman et al., 2013	765	2.3	Pakistan	Kaghan	Cont_Asia	0.777
+Shi et al 2014	508	2.34	China	Dabie Shan	Cont_Asia	0.78
+Krebs et al., 2011	660	2.35	Dominican Republic	Rio San Juan	CircumAtlantic	0.782
+Hoschek et al., 2010	585	2.35	Austria	Tauern Window eclogite zone	Alps	0.785
+Clarke et al., 1997	600	2.39	New Caledonia	Pam Peninsula	CircumPacific	0.788
+Dobrzhinetskaya et al., 2002	700	2.4	Switzerland	Alpe Arami	Alps	0.791
+Gabudianu Radulescu et al. , 2009	550	2.4	Italy	Gran Paradiso	Alps	0.794
+Le Bayon et al., 2006	505	2.4	Switzerland	Monte Rosa	Alps	0.797
+Meyre et al., 1999	650	2.4	Switzerland	Adula nappe (Trescolmen)	Alps	0.799
+Miller et al., 2005	650	2.4	Slovenia	Pohorje	Alps	0.802
+Song et al., 2009	500	2.4	China	Qilian Mountains	Cont_Asia	0.805
+Zhou et al., 2014	600	2.4	China	Dabie Shan	Cont_Asia	0.808
+Cetinkaplan et al., 2008	460	2.4	Turkey	Sivrihisar Massif	T-I-G	0.811
+Okay, 2002	430	2.4	Turkey	NW Turkey	T-I-G	0.814
+Ghent et al., 2009	450	2.5	Canada	Pinchi Lake	CircumPacific	0.816
+Tsujimori et al. 2006	620	2.5	USA	Tiburon, Franciscan	CircumPacific	0.819
+Cuthbert et al., 2000	650	2.5	Norway	Western Gneiss Region	CircumAtlantic	0.822
+Endo et al. 2012	520	2.5	Guatemala	Motagua Fault Zone	CircumAtlantic	0.825
+Krebs et al., 2011	780	2.5	Dominican Republic	Rio San Juan	CircumAtlantic	0.828
+Kylander-Clark et al., 2007	675	2.5	Norway	Western Gneiss Region	CircumAtlantic	0.831
+Dale and Holland, 2003	750	2.5	Switzerland	Adula nappe	Alps	0.833
+Stockhert et al., 1997	595	2.5	Austria	Tauern Window eclogite zone	Alps	0.836
+Lanari etal. 2013	750	2.5	Pakistan	Stak	Cont_Asia	0.839
+Krebs et al., 2011	805	2.55	Dominican Republic	Rio San Juan	CircumAtlantic	0.842
+Smit et al., 2008	620	2.55	Norway	Jaeren nappe, SW Norway	CircumAtlantic	0.845
+Gasco et al., 2011	560	2.55	Italy	Monte Rosa	Alps	0.847
+Groppo and Castelli, 2010	550	2.55	Italy	Monviso	Alps	0.85
+Ota et al., 2000	675	2.6	Kazakhstan	Kokchetav Massif	Cont_Asia	0.853
+Tian and Wei 2014	500	2.6	China	Tianshan	Cont_Asia	0.856
+Davis and Whitney, 2006	500	2.6	Turkey	Sivrihisar Massif	T-I-G	0.859
+Smye et al., 2011	555	2.62	Austria	Tauern Window eclogite zone	Alps	0.862
+Angiboust et al. 2011	550	2.65	Italy	Monviso, Lago Superiore	Alps	0.864
+St-Onge et al. 2013	637.5	2.65	India	Tso Morari	Cont_Asia	0.867
+Cuthbert et al., 2000	675	2.7	Norway	Western Gneiss Region	CircumAtlantic	0.87
+Ota et al., 2000	775	2.7	Kazakhstan	Kokchetav Massif	Cont_Asia	0.873
+Bucher et al., 2005	575	2.75	Switzerland	Zermatt-Saas Ophiolite Pfulwe	Alps	0.876
+Scambelluri et al., 2014	775	2.75	Italy	Cima di Gagnone	Alps	0.879
+Young et al., 2007	650	2.8	Norway	Western Gneiss Region	CircumAtlantic	0.881
+Reinecke, 1998	615	2.8	Italy	Cignana	Alps	0.884
+O'Brien et al., 2001	720	2.8	Pakistan	Kaghan	Cont_Asia	0.887
+Walsh and Hacker, 2004	830	2.85	Norway	Western Gneiss Region	CircumAtlantic	0.89
+Rehman et al., 2007	770	2.86	Pakistan	Kaghan	Cont_Asia	0.893
+Wain, 1997	815	2.88	Norway	Western Gneiss Region	CircumAtlantic	0.895
+Masago, 2000	725	2.9	Kazakhstan	Kokchetav Massif	Cont_Asia	0.898
+Ota et al., 2000	700	2.9	Kazakhstan	Kokchetav Massif	Cont_Asia	0.901
+Kaneko eet al., 2003	735	2.95	Pakistan	Kaghan	Cont_Asia	0.904
+Butler et al., 2013	760	3	Norway	Western Gneiss Region	CircumAtlantic	0.907
+Cuthbert et al., 2000	750	3	Norway	Western Gneiss Region	CircumAtlantic	0.91
+Hattori et al., 2010	700	3	Dominican Republic	Rio San Juan	CircumAtlantic	0.912
+Janak et al., 2013	800	3	Sweden	Seve nappe, Jämtland	CircumAtlantic	0.915
+Scambelluri et al., 2014	800	3	Italy	Cima di Gagnone	Alps	0.918
+Trommsdorff et al., 2000)	800	3	Switzerland/Italy	Alpe Arami	Alps	0.921
+Carswell et al. 1997	740	3	China	Dabie Shan	Cont_Asia	0.924
+Shi et al 2014	604	3.06	China	Dabie Shan	Cont_Asia	0.927
+Carswell et al. 1997	740	3.25	China	Dabie Shan	Cont_Asia	0.929
+Terry et al., 2000	820	3.3	Norway	Western Gneiss Region	CircumAtlantic	0.932
+Young et al., 2007	710	3.3	Norway	Western Gneiss Region	CircumAtlantic	0.935
+Wilke et al. 2010	715	3.3	Pakistan	Kaghan	Cont_Asia	0.938
+Yang et al. 2014	710	3.3	China	Sulu	Cont_Asia	0.941
+Janak et al., 2012	760	3.35	Norway	Tromsø nappe	CircumAtlantic	0.944
+Ravna et al., 2006	735	3.36	Norway	Tromsø nappe	CircumAtlantic	0.946
+Vriemojd et al., 2006	800	3.4	Norway	Western Gneiss Region	CircumAtlantic	0.949
+Janak et al., 2013	770	3.5	Norway	Tromsø nappe	CircumAtlantic	0.952
+Kylander-Clark et al., 2007	825	3.5	Norway	Western Gneiss Region	CircumAtlantic	0.955
+Carswell et al. 1997	850	3.5	China	Dabie Shan	Cont_Asia	0.958
+Gilotti and Ravna, 2002	970	3.6	Greenland	NE Eclogite province	CircumAtlantic	0.96
+Kylander-Clark et al., 2007	875	3.6	Norway	Western Gneiss Region	CircumAtlantic	0.963
+Lang and Gilotti, 2007	970	3.6	Greenland	NE Eclogite province	CircumAtlantic	0.966
+Nowlan et al. 2000	730	3.6	Italy	Dora Maira	Alps	0.969
+Rubatto and Hermann, 2001	760	3.6	Italy	Dora Maira	Alps	0.972
+Terry et al., 2000	820	3.65	Norway	Western Gneiss Region	CircumAtlantic	0.975
+Schertl et al., 1991	800	3.7	Italy	Dora Maira	Alps	0.977
+Masago, 2000	785	3.7	Kazakhstan	Kokchetav Massif	Cont_Asia	0.98
+Zhang et al., 1997	775	3.7	Kazakhstan	Kokchetav Massif	Cont_Asia	0.983
+Groppo et al., 2007	732	3.77	Italy	Dora Maira	Alps	0.986
+Carswell et al., 2006	867	3.85	Norway	Western Gneiss Region	CircumAtlantic	0.989
+Shi et al 2014	735	3.88	China	Dabie Shan	Cont_Asia	0.992
+Liang et al., 2004	1000	4	China	Altun Mountains	Cont_Asia	0.994
+Hermann, 2003	720	4.3	Italy	Dora Maira	Alps	0.997
+Carswell et al., 2006	867	4.5	Norway	Western Gneiss Region	CircumAtlantic	1
+Dobrzhinetskaya et al., 2002	1100	7	Switzerland	Alpe Arami	Alps	NA

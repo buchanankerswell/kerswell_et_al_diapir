@@ -2,7 +2,7 @@ source('functions.R')
 
 # Load marker and grid data
 cat('\nReading RData files from data/')
-paths <- list.files('data', pattern = '_marx.RData', full.names = T)[1:32]
+paths <- list.files('/Volumes/hd/nmods/kerswell_et_al_marx/data', pattern = '_marx.RData', full.names = T)[1:4]
 models <- stringr::str_extract(paths, 'cd.[0-9]+')
 cat('\nFound models:', models, sep = '\n')
 
@@ -14,11 +14,12 @@ cat('\nParallel computation with', cores, 'cores ...')
 fun <- function(model, path, n, k) {
   # Load markers
   load_marx(path)
-  # Take the markers dataframe and ...
-  marx.df <- get(paste0(model, '.marx'))
+  # Crop tsteps after interference timecut
+  m <- get(paste0(model, '.marx'))
+  tcut <- attr(m, 'tcut')
+  marx.df <- m %>% slice(1:tcut)
   # Compute features
-  fts.df <- marx.df %>%
-  marx_ft(features = c('sum.dP', 'max.P'))
+  fts.df <- marx.df %>% marx_ft(features = c('sum.dP', 'max.P'))
   # Classify markers
   marx.class.df <- marx_classify(marx.df, fts.df, k = k)
   # Monte Carlo sampling marx_classify
@@ -27,7 +28,7 @@ fun <- function(model, path, n, k) {
   assign(paste0(model, '.marx.classified'), list(
     'mc' = mc,
     'marx' = marx.class.df$marx,
-    'gm' = marx.class.df$mc
+    'gm' = marx.class.df$mcl
   ))
   # Save
   cat('\nSaving classified markers to data/', model, '_k', k,  '_marx_classified.RData', sep = '')
@@ -45,7 +46,7 @@ parallel::mcmapply(
   models,
   paths,
   k = 6,
-  n = 2,
+  n = 1,
   mc.cores = cores,
   SIMPLIFY = F
 ) %>% invisible()

@@ -15,8 +15,8 @@ models <- paths %>% stringr::str_extract('cd.[0-9]+')
 
 #cat('\nFound classified markers for:', models, sep = '\n')
 
-paths <- paths[61:64]
-models <- models[61:64]
+paths <- paths[41:44]
+models <- models[41:44]
 
 # path <- paths[5]
 # model <- models[5]
@@ -95,14 +95,15 @@ fun <- function(model, path) {
       xend = (median(d2$sumdP) - 3/4*IQR(d2$sumdP))/1e4,
       y = -Inf,
       yend = Inf),
-    alpha = 0.5) +
+    size = 0.5
+  ) +
   labs(
     x = bquote('sumdP'~'[GPa]'),
     y = 'Frequency',
     fill = 'Class',
     linetype = NULL
   ) +
-  scale_linetype_manual(values = c('reclassify threshold' = 'dotted', 'centroid threshold' = 'solid')) +
+  scale_linetype_manual(values = c('centroid threshold' = 'dotted')) +
   scale_color_manual(values = wesanderson::wes_palette(10, name = 'IsleofDogs1', type = 'continuous')) +
   scale_fill_manual(values = wesanderson::wes_palette(10, name = 'IsleofDogs1', type = 'continuous')) +
   theme_classic(base_size = 8)
@@ -113,18 +114,19 @@ fun <- function(model, path) {
   geom_segment(
     aes(
       linetype = 'reclassify threshold',
-      x = (median(d3$maxP))/1e4,
-      xend = (median(d3$maxP))/1e4,
+      x = (median(d3$maxP) + 3/4*IQR(d3$maxP))/1e4,
+      xend = (median(d3$maxP) + 3/4*IQR(d3$maxP))/1e4,
       y = -Inf,
       yend = Inf),
-    alpha = 0.5) +
+    size = 0.5
+  ) +
   labs(
     x = bquote('maxP [GPa]'),
     y = 'Frequency',
     fill = 'Recovered',
     linetype = NULL
   ) +
-  scale_linetype_manual(values = c('reclassify threshold' = 'dotted', 'centroid threshold' = 'solid')) +
+  scale_linetype_manual(values = c('reclassify threshold' = 'twodash')) +
   scale_fill_grey(start = 0.6, end = 0) +
   theme_classic(base_size = 8)
   # Max pressure class
@@ -139,8 +141,9 @@ fun <- function(model, path) {
       xend = (median(d4$maxP) - 3/4*IQR(d4$maxP))/1e4,
       y = -Inf,
       yend = Inf),
-    alpha = 0.5) +
-  scale_linetype_manual(values = c('reclassify threshold' = 'dotted', 'centroid threshold' = 'solid')) +
+    size = 0.5
+  ) +
+  scale_linetype_manual(values = c('centroid threshold' = 'dotted')) +
   scale_color_manual(values = wesanderson::wes_palette(10, name = 'IsleofDogs1', type = 'continuous')) +
   scale_fill_manual(values = wesanderson::wes_palette(10, name = 'IsleofDogs1', type = 'continuous')) +
   labs(
@@ -163,6 +166,7 @@ fun <- function(model, path) {
       axis.ticks.x = element_blank(),
       axis.title.x = element_blank(),
       axis.text.y = element_blank(),
+      axis.line.y = element_blank(),
       axis.ticks.y = element_blank(),
       axis.title.y = element_blank())
   ) /
@@ -172,6 +176,7 @@ fun <- function(model, path) {
     theme(
       axis.text.y = element_blank(),
       axis.ticks.y = element_blank(),
+      axis.line.y = element_blank(),
       axis.title.y = element_blank())
   ) +
   plot_layout(guides = 'collect') +
@@ -193,6 +198,7 @@ fun <- function(model, path) {
   geom_path(aes(linetype = 'Markers', group = run), show.legend = F) +
   geom_path(data = pd15, aes(x = pressure, y = cumulative, linetype = 'PD15')) +
   scale_linetype_manual(name = NULL, values = c('PD15' = 'dotted', 'Markers' = 'solid')) +
+  scale_y_continuous(breaks = seq(0, 1, 0.2)) +
   labs(
     x = 'Maximum P [GPa]',
     y = 'Probability'
@@ -208,6 +214,7 @@ fun <- function(model, path) {
     x = 'Maximum T [C]',
     y = 'Probability'
   ) +
+  scale_y_continuous(breaks = seq(0, 1, 0.2)) +
   scale_linetype_manual(name = NULL, values = c('PD15' = 'dotted', 'Markers' = 'solid')) +
   theme_classic(base_size = 8)
 # Viscosity
@@ -221,6 +228,7 @@ fun <- function(model, path) {
     bk.alpha = 0.7,
     mk.alpha = 1,
     mk.size = 0.25,
+    iso.size = 2,
     leg.dir = 'horizontal',
     leg.dir.rec = 'horizontal',
     sub.col = 'deeppink',
@@ -233,6 +241,7 @@ fun <- function(model, path) {
   p <- p3 / (p1 + (p2 +
     theme(
       axis.text.y = element_blank(),
+      axis.line.y = element_blank(),
       axis.title.y = element_blank(),
       axis.ticks.y = element_blank()
   ))) +
@@ -265,8 +274,9 @@ fun <- function(model, path) {
     leg.dir = 'horizontal',
     leg.dir.rec = 'horizontal',
     p.type = 'stream',
-    iso.alpha = 0.6,
+    iso.alpha = 0.7,
     iso.col = 'black',
+    iso.size = 2,
     stm.alpha = 0.2,
     v.pal = 'viridis',
     base.size = 8,
@@ -281,12 +291,15 @@ fun <- function(model, path) {
     leg.pos = 'bottom',
     leg.dir = 'horizontal',
     p.type = 'viscosity',
-    iso.alpha = 0.6,
+    iso.alpha = 0.7,
+    iso.size = 2,
     v.pal = 'viridis',
     base.size = 8,
     transparent = F)
   (p1 + theme(axis.title.x = element_blank())) /
-  p3 + plot_layout(guides = 'collect') &
+  p3 +
+  plot_annotation(tag_levels = 'a') +
+  plot_layout(guides = 'collect') &
   theme(legend.position = 'bottom') -> p
   ggsave(
     paste0('figs/', model, '_comp_profile.png'),
@@ -294,7 +307,7 @@ fun <- function(model, path) {
     device = 'png',
     type = 'cairo',
     width = 7,
-    height = 4,
+    height = 4.2,
     dpi = 300
   )
   # Marker motion movie

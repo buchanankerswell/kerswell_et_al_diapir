@@ -668,49 +668,42 @@ marx_ft <- function(df, features = 'all') {
 }
 
 # Gaussian mixture modelling (Scrucca et al., 2016) to classify recovered rocks
-marx_classify <- function(marx.df, fts.df, k = 2) {
-  # Crop markers > interference timecut
-  tcut <- attr(marx.df, 'tcut')
-  m <- marx.df %>% slice(1:tcut)
+marx_classify <- function(marx.df, fts.df, k = 6) {
   # Save IDs
   ids <- fts.df$id
   # Fit Eigenvalue decomposition models and select best using BIC
   cat('\nSelecting best Gaussian mixture model by BIC\n')
   fts.df %>% ungroup() %>% select(-id) -> X
   # Try clustering
-  mc.bic <- try(mclustBIC(X, G = seq_len(k)))
+  mcl.bic <- try(mclustBIC(X, G = seq_len(k)))
   # If clustering doesn't converge or throws error
-  if(class(mc.bic) == 'try-error') {
+  if(class(mcl.bic) == 'try-error') {
     # Keep trying i times
     i <- 1 # Counter
     imax <- 20
-    while(class(mc.bic) == 'try-error' && i <= imax) {
+    while(class(mcl.bic) == 'try-error' && i <= imax) {
       if(i < imax) {
-        mc.bic <- try(mclustBIC(X, G = seq_len(k)))
+        mcl.bic <- try(mclustBIC(X, G = seq_len(k)))
         i <- i + 1
       } else {
         stop('Clustering could not converge')
       }
     }
   }
-  #print(summary(mc.bic))
+  #print(summary(mcl.bic))
   # GMM clustering using model picked by BIC
-  mc <- Mclust(X, x = mc.bic, verbose = T)
-  #print(summary(mc))
+  mcl <- Mclust(X, x = mcl.bic, verbose = T)
+  #print(summary(mcl))
   # Make class id df
-  class.df <- tibble(id = ids, class = mc$classification)
+  class.df <- tibble(id = ids, class = mcl$classification)
   # Join classification to markers data
   marx.class.df <- m %>% left_join(class.df, by = 'id') %>% replace(is.na(.), 0)
-  # Max pressure for all markers
-  mft <- marx.class.df %>%
-  filter(class != 0) %>%
-  summarise(maxP = max(P), sumdP = sum(diff(P)))
   # Get parameter centroids
-  centroids <- t(mc$parameters$mean) %>% as_tibble() %>% mutate(class = 1:n(), .before = 'sum.dP')
+  centroids <- t(mcl$parameters$mean) %>% as_tibble() %>% mutate(class = 1:n(), .before = 'sum.dP')
   # Calculate lower bounds for features
   lowerB <- X %>% summarise(across(everything(), ~{median(.x) - 3/4*IQR(.x)}))
   # Classify group as recovered if maxP or sumdP centroid is below lower bound
-  d <- centroids[centroids$sum.dP <= lowerB$sum.dP | centroids$max.P <= lowerB$max.P,]
+  d <- centroids[centroids$sum.dP <= lowerB$sum.dP & centroids$max.P <= lowerB$max.P,]
   # Add recovered class
   recovered.df <- class.df %>%
   mutate(recovered = ifelse(class %in% d$class, TRUE, FALSE))
@@ -719,11 +712,10 @@ marx_classify <- function(marx.df, fts.df, k = 2) {
   left_join(recovered.df, by = c('id', 'class')) %>%
   replace(is.na(.), FALSE)
   # Summarise maximum pressures
-  #mP.class <- df %>% group_by(id, class) %>% summarise(maxP = max(P), sumdP = sum(diff(P)), .groups = 'keep')
-  #mP <- df %>% group_by(id, recovered) %>% summarise(maxP = max(P), .groups = 'keep')
-  # Change recovered to FALSE if recovered was TRUE and marker maxP was >= meadian + IQR
-  #misclassed.marx <- which(mP$maxP >= median(mP$maxP) & mP$recovered == TRUE)
-  #df$recovered[df$id %in% misclassed.marx] <- FALSE
+  mP <- df %>% group_by(id, recovered) %>% summarise(maxP = max(P), .groups = 'keep')
+  # Change recovered to FALSE if recovered was TRUE and marker maxP was >= meadian + 3/4*IQR
+  misclassed.marx <- which(mP$maxP >= (median(mP$maxP) + 3/4*IQR(mP$maxP)) & mP$recovered == TRUE)
+  df$recovered[df$id %in% misclassed.marx] <- FALSE
   # Print results
   cat('\nRecovered classes:')
   df %>% slice(1) %>% group_by(class) %>% select(class, recovered) %>% table() %>% print()
@@ -731,7 +723,7 @@ marx_classify <- function(marx.df, fts.df, k = 2) {
   return(
     list(
       'marx' = df,
-      'mc' = mc
+      'mcl' = mcl
     )
   )
 }
@@ -1096,6 +1088,7 @@ draw_grid <- function(
   iso.alpha = 1,
   iso.col = 'white',
   iso.skip = 0,
+  iso.size = 2,
   stm.alpha = 1,
   rec.col = 'white',
   sub.col = 'black',
@@ -1115,8 +1108,8 @@ draw_grid <- function(
       alpha = iso.alpha) +
     geom_text_contour(
       aes(x = x/1000, y = z/1000, z = tk - 273),
-      stroke = 0.2,
-      size = 3,
+      stroke = 0.15,
+      size = iso.size,
       skip = iso.skip,
       breaks = c(0, seq(100, 1900, 200))) +
     labs(
@@ -1147,8 +1140,8 @@ draw_grid <- function(
       alpha = iso.alpha) +
     geom_text_contour(
       aes(x = x/1000, y = z/1000, z = tk - 273),
-      stroke = 0.2,
-      size = 3,
+      stroke = 0.15,
+      size = iso.size,
       skip = iso.skip,
       breaks = c(0, seq(100, 1900, 200))) +
     labs(
@@ -1180,8 +1173,8 @@ draw_grid <- function(
       alpha = iso.alpha) +
     geom_text_contour(
       aes(x = x/1000, y = z/1000, z = tk - 273),
-      stroke = 0.2,
-      size = 3,
+      stroke = 0.15,
+      size = iso.size,
       skip = iso.skip,
       breaks = c(0, seq(100, 1900, 200))) +
     labs(
@@ -1225,8 +1218,8 @@ draw_grid <- function(
       alpha = iso.alpha) +
     geom_text_contour(
       aes(x = x / 1000, y = z / 1000, z = tk - 273),
-      stroke = 0.2,
-      size = 3,
+      stroke = 0.15,
+      size = iso.size,
       skip = iso.skip,
       breaks = c(0, seq(100, 1900, 200))) +
     labs(

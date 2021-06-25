@@ -11,7 +11,7 @@ mutate(cdf = (row_number()-1)/n()) -> pd15T
 
 # Load marker and grid data
 cat('\nReading RData files from data/')
-paths <- list.files('data/k6', pattern = '.RData', full.names = T)
+paths <- list.files('data/k10', pattern = '.RData', full.names = T)
 models <- paths %>% stringr::str_extract('cd.[0-9]+')
 
 # Load markers and grids

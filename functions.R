@@ -668,7 +668,7 @@ marx_ft <- function(df, features = 'all') {
 }
 
 # Gaussian mixture modelling (Scrucca et al., 2016) to classify recovered rocks
-marx_classify <- function(marx.df, fts.df, k = 6) {
+marx_classify <- function(marx.df, fts.df, thresh = 1, k = 6) {
   # Save IDs
   ids <- fts.df$id
   # Fit Eigenvalue decomposition models and select best using BIC
@@ -697,13 +697,26 @@ marx_classify <- function(marx.df, fts.df, k = 6) {
   # Make class id df
   class.df <- tibble(id = ids, class = mcl$classification)
   # Join classification to markers data
-  marx.class.df <- m %>% left_join(class.df, by = 'id') %>% replace(is.na(.), 0)
+  marx.class.df <- marx.df %>% left_join(class.df, by = 'id') %>% replace(is.na(.), 0)
   # Get parameter centroids
   centroids <- t(mcl$parameters$mean) %>% as_tibble() %>% mutate(class = 1:n(), .before = 'sum.dP')
   # Calculate lower bounds for features
-  lowerB <- X %>% summarise(across(everything(), ~{median(.x) - 3/4*IQR(.x)}))
+  lowerB <- X %>% summarise(across(everything(), ~{median(.x) - thresh*IQR(.x)}))
   # Classify group as recovered if maxP or sumdP centroid is below lower bound
-  d <- centroids[centroids$sum.dP <= lowerB$sum.dP & centroids$max.P <= lowerB$max.P,]
+  d <- centroids[centroids$sum.dP <= lowerB$sum.dP | centroids$max.P <= lowerB$max.P,]
+  # If no groups are classified as recovered, relax the lower bound
+  if(nrow(d) == 0) {
+    lowerB <- X %>% summarise(across(everything(), ~{median(.x) - 1/2*thresh*IQR(.x)}))
+    d <- centroids[centroids$sum.dP <= lowerB$sum.dP | centroids$max.P <= lowerB$max.P,]
+  }
+  if(nrow(d) == 0) {
+    lowerB <- X %>% summarise(across(everything(), ~{median(.x) - 1/4*thresh*IQR(.x)}))
+    d <- centroids[centroids$sum.dP <= lowerB$sum.dP | centroids$max.P <= lowerB$max.P,]
+  }
+  if(nrow(d) == 0) {
+    lowerB <- X %>% summarise(across(everything(), ~{median(.x)}))
+    d <- centroids[centroids$sum.dP <= lowerB$sum.dP | centroids$max.P <= lowerB$max.P,]
+  }
   # Add recovered class
   recovered.df <- class.df %>%
   mutate(recovered = ifelse(class %in% d$class, TRUE, FALSE))
@@ -712,10 +725,10 @@ marx_classify <- function(marx.df, fts.df, k = 6) {
   left_join(recovered.df, by = c('id', 'class')) %>%
   replace(is.na(.), FALSE)
   # Summarise maximum pressures
-  mP <- df %>% group_by(id, recovered) %>% summarise(maxP = max(P), .groups = 'keep')
+#   mP <- df %>% group_by(id, recovered) %>% summarise(maxP = max(P), .groups = 'keep')
   # Change recovered to FALSE if recovered was TRUE and marker maxP was >= meadian + 3/4*IQR
-  misclassed.marx <- which(mP$maxP >= (median(mP$maxP) + 3/4*IQR(mP$maxP)) & mP$recovered == TRUE)
-  df$recovered[df$id %in% misclassed.marx] <- FALSE
+#   misclassed.marx <- which(mP$maxP >= (median(mP$maxP) + IQR(mP$maxP)) & mP$recovered == TRUE)
+#   df$recovered[df$id %in% misclassed.marx] <- FALSE
   # Print results
   cat('\nRecovered classes:')
   df %>% slice(1) %>% group_by(class) %>% select(class, recovered) %>% table() %>% print()
@@ -739,8 +752,7 @@ marx_stats <- function(df) {
   summarise(
     recovered = sum(recovered),
     subducted = n()-recovered,
-    ratio = recovered/subducted,
-    perc = recovered/subducted * 100,
+    ratio = recovered/n(),
     max.P.rec = max(df$P[which(df$recovered == TRUE)]),
     med.P.rec = median(df$P[which(df$recovered == TRUE)]),
     iqr.P.rec = IQR(df$P[which(df$recovered == TRUE)]),
@@ -781,7 +793,7 @@ marx_stats <- function(df) {
 }
 
 # Monte carlo sampling of marx_classify()
-monte_carlo <- function(marx.df, fts.df, n = 100, k = 2) {
+monte_carlo <- function(marx.df, fts.df, thresh = 1, n = 100, k = 2) {
   # Progress bar
   pb <- progress_bar$new(
     format = 'Monte Carlo Sampling [:bar] :current/:total (:percent)',
@@ -829,7 +841,7 @@ marx_motion_mov <- function(df, name, class = FALSE, recovered = FALSE) {
          'type' = as.factor(type),
          'class' = as.factor(class)) %>%
   ggplot() +
-  geom_point(aes(x = x/1000, y = z/1000, color = recovered, group = id), size = 0.3) +
+  geom_point(aes(x = x/1000, y = z/1000, color = recovered, group = id), shape = 15, size = 0.25) +
   guides(color = guide_legend(nrow = 1, byrow = T)) +
   labs(
     title = paste0('[', name, '] Time: {round(frame_time, 2)} Ma'),
@@ -838,7 +850,7 @@ marx_motion_mov <- function(df, name, class = FALSE, recovered = FALSE) {
     color = 'Recovered') +
   scale_y_reverse() +
   coord_fixed() +
-  scale_color_manual(values = c('TRUE' = 'black', 'FALSE' = 'grey50')) +
+  scale_color_manual(values = c('TRUE' = 'black', 'FALSE' = 'deeppink')) +
   theme_minimal() +
   theme(
     legend.position = 'bottom'
@@ -1128,6 +1140,39 @@ draw_grid <- function(
       panel.grid = element_blank(),
       legend.position = leg.pos
     ) -> p
+  } else if(p.type =='pressure') {
+    node %>%
+    ggplot() +
+    geom_contour_fill(aes(x = x/1000, y = z/1000, z = pr/1e4), alpha = bk.alpha) +
+    geom_contour(
+      aes(x = x/1000, y = z/1000, z = pr/1e4),
+      color = iso.col,
+      breaks = c(0, seq(100, 1900, 200)),
+      size = 0.3,
+      alpha = iso.alpha) +
+    geom_text_contour(
+      aes(x = x/1000, y = z/1000, z = pr/1e4),
+      stroke = 0.15,
+      size = iso.size,
+      skip = iso.skip,
+      breaks = c(0, seq(100, 1900, 200))) +
+    labs(
+      title = paste0('Pressure [', model, '] ', tcut, ' Ma'),
+      x = 'Distance [km]',
+      y = 'Depth [km]',
+      fill = '[GPa]') +
+    guides(fill = guide_colorbar(direction = leg.dir, title.vjust = 1)) +
+    scale_fill_viridis(option = v.pal, direction = v.direction) +
+    scale_y_reverse() +
+    coord_equal(
+      expand = F,
+      ylim = c(box[2], box[1]),
+      xlim = c(box[3], box[4])) +
+    theme_minimal(base_size = base.size) +
+    theme(
+      panel.grid = element_blank(),
+      legend.position = leg.pos
+    ) -> p
   } else if(p.type =='temperature') {
     node %>%
     ggplot() +
@@ -1148,7 +1193,7 @@ draw_grid <- function(
       title = paste0('Temperature [', model, '] ', tcut, ' Ma'),
       x = 'Distance [km]',
       y = 'Depth [km]',
-      fill = bquote(degree*C)) +
+      fill = bquote('['*degree*C*']')) +
     guides(fill = guide_colorbar(direction = leg.dir, title.vjust = 1)) +
     scale_fill_viridis(option = v.pal, direction = v.direction) +
     scale_y_reverse() +
@@ -1278,8 +1323,7 @@ draw_grid <- function(
           size = mk.size) +
         labs(color = 'Recovered') +
         scale_color_manual(values = c('TRUE' = rec.col, 'FALSE' = sub.col)) +
-        guides(color = guide_legend(direction = leg.dir.rec, override.aes = list(alpha = 1, size = 2))) +
-        theme(legend.key = element_rect(fill = rgb(0.5, 0.5, 0.5, 0.5), color = NA))
+        guides(color = guide_legend(direction = leg.dir.rec, override.aes = list(alpha = 1, size = 2)))
       } else if(class == 'none') {
         p <- p +
         geom_point(
@@ -1321,8 +1365,7 @@ draw_grid <- function(
           size = mk.size) +
         labs(fill = 'Recovered') +
         scale_fill_manual(values = c('TRUE' = rec.col, 'FALSE' = sub.col)) +
-        guides(fill = guide_legend(direction = leg.dir.rec, override.aes = list(alpha = 1, size = 2, color = NA))) +
-        theme(legend.key = element_rect(fill = rgb(0.5, 0.5, 0.5, 0.5), color = NA))
+        guides(fill = guide_legend(direction = leg.dir.rec, override.aes = list(alpha = 1, size = 2, color = NA)))
       } else if(class == 'none') {
         p <- p +
         geom_point(

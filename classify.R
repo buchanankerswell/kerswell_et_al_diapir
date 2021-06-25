@@ -11,19 +11,18 @@ cores <- parallel::detectCores()
 cat('\nParallel computation with', cores, 'cores ...')
 
 # Summarise marker features
-fun <- function(model, path, n, k) {
+fun <- function(model, path, n, thresh, k) {
   # Load markers
   load_marx(path)
   # Crop tsteps after interference timecut
-  m <- get(paste0(model, '.marx'))
-  tcut <- attr(m, 'tcut')
-  marx.df <- m %>% slice(1:tcut)
+  marx.df <- get(paste0(model, '.marx'))
+  tcut <- attr(marx.df, 'tcut')
   # Compute features
   fts.df <- marx.df %>% marx_ft(features = c('sum.dP', 'max.P'))
   # Classify markers
-  marx.class.df <- marx_classify(marx.df, fts.df, k = k)
+  marx.class.df <- marx_classify(marx.df, fts.df, thresh = thresh, k = k)
   # Monte Carlo sampling marx_classify
-  mc <- monte_carlo(marx.df, fts.df, n = n, k = k)
+  mc <- monte_carlo(marx.df, fts.df, n = n, thresh = thresh, k = k)
   # Save
   assign(paste0(model, '.marx.classified'), list(
     'mc' = mc,
@@ -45,10 +44,11 @@ parallel::mcmapply(
   fun,
   models,
   paths,
-  k = 6,
-  n = 1,
+  k = 10,
+  n = 100,
+  thresh = 1,
   mc.cores = cores,
   SIMPLIFY = F
-) %>% invisible()
+)
 
 cat('\nDone!')

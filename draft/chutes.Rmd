@@ -19,10 +19,10 @@ corresponding_author:
 - name: Buchanan C. Kerswell
   email: buchanankerswell@u.boisestate.edu
 keypoints:
-  - 
-  - 
-  - 
-abstract: 
+  -
+  -
+  -
+abstract:
 plain_language_summary:
 output:
   pdf_document:
@@ -184,9 +184,9 @@ purrr::map_df(~.x$cdfT, .id = 'run') -> maxT.cdf78
 
 Maximum metamorphic conditions, in terms of pressure and temperature (PT), have now been estimated for hundreds of high-pressure rocks exhumed from subduction zones [@agard2018; @penniston2015]. This dataset (the *rock record*) is the only tangible record of PT conditions experienced by rocks during deformation and chemical processing in subduction systems [e.g., @agard2009]. Together with geophysical imaging [@naif2015; @hyndman2003; @syracuse2006; @ferris2003; @rondenay2008], surface heat flow [@kerswell2021; @currie2006; @gao2014; @wada2009; @hyndman2005], and forward numerical modelling [@gerya2002; @sizova2010; @gerya2006; @gerya2008; @syracuse2010; @yamato2007; @yamato2008; @hacker2003; @peacock1990; @peacock1996; @mckenzie1969], the rock record underpins contemporary views of subduction geodynamics [@agard2009; @agard2018; @bebout2007]. However, two interesting observations emerge from the rock record that remain contradictory or unexplained by geophysical observations and numerical models.
 
-First, temperature estimates for rocks are, on average, significantly warmer than widely cited numerical models of subduction [for a given depth, @penniston2015]. This significant temperature discrepancy implicates both geodynamic modelling and thermobarometry alike. Potential sources and magnitudes of uncertainty are discussed by @penniston2015, @abers2017, @kohn2018, and @vankeken2019 with conflicting arguments. Because subduction zone research relies on forward numerical modelling to generate and test hypotheses about temperature-dependent processes (metamorphism, mechanics, seismicity, volcanism, and chemical fluxes), further investigation into this discrepancy is warranted. In either case, currently only one set of numerical experiments from @syracuse2010 has been systematically compared to the rock record. Comparing the rock record with other widely used geodynamic codes [e.g. `I2VIS`, @gerya2003] may resolve or uncover recurrent and/or new incongruities.
+First, temperature estimates for rocks are, on average, significantly warmer than widely cited numerical models of subduction [for a given depth, @penniston2015]. This significant temperature discrepancy implicates both geodynamic modelling and thermobarometry alike. Potential sources and magnitudes of uncertainty are discussed by @penniston2015 and recapitulated by @abers2017, @kohn2018, and @vankeken2019 with conflicting arguments. Because subduction zone research relies on forward numerical modelling to generate and test hypotheses about temperature-dependent processes (metamorphism, mechanics, seismicity, volcanism, and chemical fluxes), further investigation into this discrepancy is warranted. In any case, currently only one set of numerical experiments from @syracuse2010 has been systematically compared to the rock record. Comparing the rock record with other widely used geodynamic codes [e.g. `I2VIS`, @gerya2003] may resolve or uncover recurrent and/or new incongruities.
 
-Second, the probability of recovering high-pressure rocks from depths beyond `r round(tail(pd15$pressure[pd15$cumulative <= 0.8], 1), 1)` $GPa$ rapidly diminishes ([@fig:cdf]). [@fig:cdf] implies a global recovery depth limit for high-pressure rocks that is not yet understood. Perhaps coincidentally, hypotheses of commonly thin backarcs [@currie2006] and common depths of mechanical coupling along the subduction interface [@furukawa1993; @wada2009] may help explain the recovery depth limit implied by [@fig:cdf] [@kerswell2020]. If subduction zone thermal structure is related to maximum recovery depth limits for high-pressure rocks, explaining the curve in [@fig:cdf] is key to understanding the temperature discrepancy sketched above. However, such commonalities among subduction zone thermal structure and mechanical coupling was recently scrutinized by interpolations of surface heat flow [@kerswell2021].
+Second, the probability of recovering high-pressure rocks from depths beyond `r round(tail(pd15$pressure[pd15$cumulative <= 0.8], 1), 1)` $GPa$ rapidly diminishes ([@fig:cdf]). [@fig:cdf] implies a global recovery depth limit for high-pressure rocks that is not yet understood. Perhaps coincidentally, hypotheses of commonly thin backarcs [@currie2006] and common depths of mechanical coupling along the subduction interface [@furukawa1993; @wada2009] may help explain the recovery depth limit implied by [@fig:cdf] [@kerswell2020]. However, such commonalities among subduction zone thermal structure and mechanical coupling was recently scrutinized by interpolations of surface heat flow [@kerswell2021]. Nonetheless, if subduction zone thermal structure is related to maximum recovery depth of high-pressure rocks, explaining the curve in [@fig:cdf] is key to understanding the temperature discrepancy summarized above.
 
 ![Cumulative probability of peak metamorphic pressures (a) and temperatures (b) for a global compilation of exhumed blueschists and eclogites. The rock record implies eighty percent (grey shaded regions) of rocks are recovered from $\leq$ `r round(tail(pd15$pressure[pd15$cumulative <= 0.8], 1), 1)` $GPa$ and $\leq$ `r round(tail(pd15T$T[pd15T$cdf <= 0.8], 1))` $^{\circ} C$. Note the abrupt change in slope at `r round(tail(pd15$pressure[pd15$cumulative <= 0.8], 1), 1)` $GPa$. Data from @penniston2015.](../figs/pd15_cdf.png){#fig:cdf}
 
@@ -257,7 +257,7 @@ $$ \Sigma_j = \lambda_j D_j A_j D_j^T $$ {#eq:eigen}
 
 where $D_j$ is the orthogonal eigenvector matrix, $A_j$ and $\lambda_j$ are diagonal matrices of values proportional to the eigenvalues. This implementation allows fixing one, two, or three geometric elements of the covariance matrices. That is, the volume $\lambda_j$, shape $A_j$, and orientation $D_j$ of Gaussian clusters can change or be fixed among all $k$ clusters [e.g., @celeux1995; @fraley2002]. Fourteen parameterizations of @eq:eigen are tried, representing different geometric combinations of the covariance matrices $\Sigma$ [see @scrucca2016] and the Bayesian Information Criterion [BIC, @schwarz1978] is computed. The best parameterization for @eq:eigen is chosen by BIC.
 
-![Marker classification example for model cdf78. GMM groups `r format(round(marx.summary$n[marx.summary$model == 'cdf78']), big.mark = ',')` markers into ten clusters according to each marker's maximum pressure and sum of all pressure changes along its PTt path. If a cluster's centroid is below the median $sumdP$ or $maxP$ of all markers (within the grey shaded region), it is classified as recovered (b). The size of centroid squares are proportional to the number of markers in a cluster.](../figs/cdf78_class.png){#fig:class}
+![Marker classification for model cdf78. GMM groups `r format(round(marx.summary$n[marx.summary$model == 'cdf78']), big.mark = ',')` markers into ten clusters according to each marker's maximum pressure and sum of all pressure changes along its PTt path (a). If a cluster's centroid is below the median $sumdP$ or $maxP$ of all markers (within the grey shaded region), it is classified as recovered (b). The size of centroid squares are proportional to the number of markers in a cluster.](../figs/cdf78_class.png){#fig:class}
 
 \clearpage
 
@@ -271,7 +271,7 @@ $$ p(z_{ij} | x_i) = \frac{p(x_i | z_{ij})p(z_{ij})}{p(x_i)} = \frac{\pi_j \math
 
 and new Gaussian estimates are computed with $\omega_{ij}$ ([@eq:mle]) during the *maximization* (M-)step.
 
-### Feature selection
+### Feature selection and final decision
 
 EM is sensitive to local optima and initialization [@figueiredo2002], so a number of features were computed from marker PTt paths and tested in combination. Redundant or useless features [e.g., @dy2004] were filtered out. We settled on two features:
 
@@ -280,23 +280,20 @@ $$\begin{aligned}
   sumdP \leftarrow \sum_{1}^{t_{dur}} dP
 \end{aligned}$$ {#eq:bivar}
 
-where $maxP$ and $sumdP$ represent the maximum pressure attained each marker's PTt path and the sum total of all pressure changes along each marker's PTt path, respectively. Up to ten Gaussian components are fit to the bivariate mixture model described by @eq:mix and @eq:bivar using EM ([@eq:posterior; @eq:mle]). This clustering step gives markers $x_i$ class labels $z_i \in \{1, \dots, k\}$ representing assignment to one of $k$ clusters ([@fig:class]a). Next, we describe our decisions in determining which clusters (if any) represent recovered markers.
+where $maxP$ and $sumdP$ represent the maximum pressure attained each marker's PTt path and the sum total of all pressure changes along each marker's PTt path, respectively. Up to ten Gaussian components are fit to the bivariate mixture model described by @eq:mix and @eq:bivar using EM ([@eq:posterior; @eq:mle]). This clustering step gives markers $x_i$ class labels $z_i \in \{1, \dots, k\}$ representing assignment to one of $k$ clusters ([@fig:class]a).
 
-![Example of metamorphic conditons for markers recovered from model cdf78. Maximum pressures for recovered markers (solid curves) range from `r round(head(maxP.cdf78$maxP[maxP.cdf78$cdf <= 0.8], 1)/1e4, 1)` to `r round(tail(maxP.cdf78$maxP[maxP.cdf78$cdf <= 0.8], 1)/1e4, 1)` (a) and only marginally overlap with the rock record (dotted curves). However, maximum temperatures for recovered markers range from `r round(head(maxT.cdf78$maxT[maxT.cdf78$cdf <= 0.8], 1)-273)` to `r round(tail(maxT.cdf78$maxT[maxT.cdf78$cdf <= 0.8], 1)-273)` (b) and show better agreement with the rock record than (a). PD15 dataset from @penniston2015.](../figs/cdf78_meta.png){#fig:meta}
+A final decision is made to classify a cluster, and all of its markers, as either *subducted* or *recovered* by comparing cluster centroids ($\mu_j$, [@eq:mle]) to the overall distribution of $maxP$ and $sumdP$. Clusters with centroids $\mu_j$ below the median in either $maxP$ or $sumdP$ dimensions, classify as *recovered* ([@fig:class]b). The marker classification example for model cdf78 in [@fig:class] is visualized in [@fig:snaps].
 
-\clearpage
 
-### Subducted or recovered?
-
-A final decision is made to classify a cluster, and all of its markers, as either *subducted* or *recovered* by comparing cluster centroids ($\mu_j$, [@eq:mle]) to the overall distribution of $maxP$ and $sumdP$. Clusters with centroids $\mu_j$ below the median in either $maxP$ or $sumdP$ dimensions, classify as *recovered* ([@fig:class]b).
-
-![Example of geodynamic evolution for model cdf78.](../figs/cdf78_snaps.png){#fig:snaps}
+![Geodynamic evolution for model cdf78.](../figs/cdf78_snaps.png){#fig:snaps}
 
 \clearpage
 
 # Results
 
-\blandscape
+![Maximum metamorphic conditons for markers recovered from model cdf78. Maximum pressures for recovered markers (solid curves) range from `r round(head(maxP.cdf78$maxP[maxP.cdf78$cdf <= 0.8], 1)/1e4, 1)` to `r round(tail(maxP.cdf78$maxP[maxP.cdf78$cdf <= 0.8], 1)/1e4, 1)` (a) and only marginally overlap with the rock record (dotted curves). However, maximum temperatures for recovered markers range from `r round(head(maxT.cdf78$maxT[maxT.cdf78$cdf <= 0.8], 1)-273)` to `r round(tail(maxT.cdf78$maxT[maxT.cdf78$cdf <= 0.8], 1)-273)` (b) and show better agreement with the rock record than (a). PD15 dataset from @penniston2015.](../figs/cdf78_meta.png){#fig:meta}
+
+\clearpage
 
 ```{r marx.summary, results='asis'}
 pander::set.alignment('right', row.names = 'left')
@@ -350,17 +347,13 @@ pander::pandoc.table(
 )
 ```
 
-\elandscape
-
 \clearpage
 
 # Discussion
 
 ## Cold nose geometry
 
-
 ## Diapirs
-
 
 ## Metamorphic conditions of rocks and markers
 
@@ -374,7 +367,7 @@ pander::pandoc.table(
 
 \acknowledgments
 
-This work was supported by the National Science Foundation grant OIA1545903 to M. Kohn, S. Penniston-Dorland, and M. Feineman.
+We gratefully acknowledge high-performance computing support of the Borah compute cluster (DOI: [10.18122/oit/3/boisestate](10.18122/oit/3/boisestate)) provided by Boise State University’s Research Computing Department. This work was supported by the National Science Foundation grant OIA1545903 to M. Kohn, S. Penniston-Dorland, and M. Feineman.
 
 \appendix
 

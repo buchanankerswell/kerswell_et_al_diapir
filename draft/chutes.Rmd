@@ -204,7 +204,7 @@ In this section we first define Lagrangian markers (now referred to as markers) 
 
 Markers are mathematical objects representing discrete parcels of fluid flowing in a continuum [@harlow1962; @harlow1964]. Imagine tracking millions of parcels of air as they collectively move around an air foil. Each marker would experience a different flow path and pressure history relative to its neighbors. For example, some parcels of air may spin off and cause turbulence, while others move orderly with their neighbors around the foil. In this analogy, knowing which parcels experience turbulence, perhaps based on some characteristic of a parcel's flow path, is useful information for aerodynamic testing.
 
-The analogy above highlights the representative advantage of markers. That is, markers record physical changes to the continuum *from the perspective of the fluid* [@harlow1962]. "Tracing" markers (saving marker states through time) in a numerical geodynamic model is useful for understanding subduction dynamics like tracing air parcels is useful for understanding aerodynamics. It is necessary, however, to first accept implicit simplifications and uncertainties (known and unknown) about the geodynamic continuum. For example, fluids like Earth's atmosphere and oceans are often modeled as incompressible fluids [@batchelor1953; @boussinesq1897]. Uncertainties are especially rich in the petrologic model governing phase changes [@ito1971; @schmidt1998] and its effects on the highly non-linear rheologic model relating stress and strain by empirical flow laws [@hilairet2007; @ranalli1995; @karato1993; @turcotte2002]. See @kerswell2020 for details. Nonetheless, insofar as subducting crustal rocks on earth behave like an incompressible visco-plastic fluid [as parameterized by @gerya2019; @kerswell2020; @gerya2003], principled comparisons between marker PTt paths and the rock record [e.g. Figure 1, @agard2018; @penniston2015] may be made.
+The analogy above highlights the representative advantage of markers. That is, markers record physical changes to the continuum *from the perspective of the fluid* [@harlow1962]. "Tracing" markers (saving marker states through time) in a numerical geodynamic model is useful for understanding subduction dynamics like tracing air parcels is useful for understanding aerodynamics. It is necessary, however, to first accept implicit simplifications and uncertainties (known and unknown) about the geodynamic continuum. For example, fluids like Earth's atmosphere and oceans are often modeled as incompressible fluids [@batchelor1953; @boussinesq1897]. Uncertainties are especially rich in the petrologic model governing phase changes [@ito1971; @schmidt1998] and its effects on the highly non-linear rheologic model relating stress and strain by empirical flow laws [@hilairet2007; @ranalli1995; @karato1993; @turcotte2002]. See @kerswell2020 for details. Nonetheless, insofar as subducting crustal rocks on Earth behave like an incompressible visco-plastic fluid [as parameterized by @gerya2019; @kerswell2020; @gerya2003], principled comparisons between marker PTt paths and the rock record [e.g. Figure 1, @agard2018; @penniston2015] may be made.
 
 Markers also have a distinct numerical advantage in geodynamic cases. Unlike air parcels flowing in a relatively homogeneous atmosphere (air foil aside), markers are deforming in a partly layered, partly chaotic, visco-plastic continuum representing the interface between the top of subducting oceanic crust and the mantle it sinks into (often called the subduction interface). Current models of the subduction interface epitomize a geologic continuum with complex geometry, sharp thermal, chemical, and strain gradients, strong advection (high Peclét number), and abundant fluid flow [@agard2016; @agard2018; @bebout2002; @bebout2007; @gerya2003; @syracuse2010; @penniston2015]. Markers greatly improve solution accuracy and stability in such cases by interpolating and updating thermal, chemical, and velocity fields during each timestep [@gerya2003; @gerya2019; @moresi2003].
 
@@ -214,7 +214,7 @@ On average, `r format(round(mean(marx.summary$n)), big.mark = ',')` markers are 
 
 At the heart of our marker classification algorithm is a finite Gaussian mixture model (GMM) fit by Expectation-Maximization [EM, @dempster1977]. Please note that GMM fit by EM is a general purpose clustering algorithm broadly used in pattern recognition, anomaly detection, and estimating complex probability distribution functions [e.g., @banfield1993; @celeux1995; @figueiredo2002; @fraley2002; @vermeesch2018]. We derive GMM in @sec:gmm and EM in @sec:em.
 
-Before deriving the details of marker classification, we hypothesize that subducted and recovered markers may be distinguished by their PTt paths. If true, clustering algorithms like GMM may reliably classify markers by (dis)similarity along any number of dimensions computed from marker PTt paths [e.g., @dy2004].
+Before deriving the details of marker classification, we hypothesize that subducted and recovered markers may be distinguished by their PTt paths. If true, clustering algorithms like GMM may reliably classify markers by (dis)similarity along any number of dimensions computed from marker PTt paths.
 
 ![Initial conditions for marker tracing. Markers are selected from a 760 $km$ wide and 8 $km$ deep section representing 7 $km$ of mafic oceanic crust (rock type 7 & 8) and 1 $km$ of seafloor sediments (rock type 3 & 4). Two convergence regions far from the trench initiate and maintain subduction. On average, `r format(round(mean(marx.summary$n)), big.mark = ',')` markers are traced for each model. Numerical modelling details are in @kerswell2020.](../figs/cdf78_init.png){#fig:init}
 
@@ -282,18 +282,13 @@ $$\begin{aligned}
 
 where $maxP$ and $sumdP$ represent the maximum pressure attained each marker's PTt path and the sum total of all pressure changes along each marker's PTt path, respectively. Up to ten Gaussian components are fit to the bivariate mixture model described by @eq:mix and @eq:bivar using EM ([@eq:posterior; @eq:mle]). This clustering step gives markers $x_i$ class labels $z_i \in \{1, \dots, k\}$ representing assignment to one of $k$ clusters ([@fig:class]a).
 
-A final decision is made to classify a cluster, and all of its markers, as either *subducted* or *recovered* by comparing cluster centroids ($\mu_j$, [@eq:mle]) to the overall distribution of $maxP$ and $sumdP$. Clusters with centroids $\mu_j$ below the median in either $maxP$ or $sumdP$ dimensions, classify as *recovered* ([@fig:class]b). The marker classification example for model cdf78 in [@fig:class] is visualized in [@fig:snaps].
-
-
-![Geodynamic evolution for model cdf78.](../figs/cdf78_snaps.png){#fig:snaps}
-
-\clearpage
+A final decision is made to classify a cluster, and all of its markers, as either *subducted* or *recovered* by comparing cluster centroids ($\mu_j$, [@eq:mle]) to the overall distribution of $maxP$ and $sumdP$. Clusters with centroids $\mu_j$ below the median in either $maxP$ or $sumdP$ dimensions, classify as *recovered* ([@fig:class]b).
 
 # Results
 
-![Maximum metamorphic conditons for markers recovered from model cdf78. Maximum pressures for recovered markers (solid curves) range from `r round(head(maxP.cdf78$maxP[maxP.cdf78$cdf <= 0.8], 1)/1e4, 1)` to `r round(tail(maxP.cdf78$maxP[maxP.cdf78$cdf <= 0.8], 1)/1e4, 1)` (a) and only marginally overlap with the rock record (dotted curves). However, maximum temperatures for recovered markers range from `r round(head(maxT.cdf78$maxT[maxT.cdf78$cdf <= 0.8], 1)-273)` to `r round(tail(maxT.cdf78$maxT[maxT.cdf78$cdf <= 0.8], 1)-273)` (b) and show better agreement with the rock record than (a). PD15 dataset from @penniston2015.](../figs/cdf78_meta.png){#fig:meta}
+## Classification variance and error
 
-\clearpage
+Typical measures of classification accuracy, like confusion matrices [@stehman1997], bootstrap [@efron1994], and cross-validation [@kohavi1995], leverage *a priori* information (class labels $y_i$) about the data $x_i$ to validate clustering results. Generally speaking, these methods compare classes predicted by clustering $z_i$ with actual classes $y_i$ to quantify type I (false positive---classified as recovered but was subducted) and type II (false negative---classified as subducted but was recovered) errors. However, our markers are unlabelled (no $y_i$) so *true* validation is not possible by these methods or similar. Instead, we use a straight-forward resampling approach to assess variance in our clustering results. First, all markers $x_i$ from all numerical models are classified one-hundred times. Summary statistics for each numerical model (mean and standard deviation) are then computed from the one-hundred classifications ([@tbl:marx.summary]).
 
 ```{r marx.summary, results='asis'}
 pander::set.alignment('right', row.names = 'left')
@@ -310,17 +305,7 @@ select(
   sd.sub,
   mean.ratio,
   sd.ratio
-#   mean.max.P.rec,
-#   sd.max.P.rec,
-#   mean.max.T.rec,
-#   sd.max.T.rec
 ) %>%
-# mutate(
-#   'mean.max.P.rec' = mean.max.P.rec/1e4,
-#   'sd.max.P.rec' = sd.max.P.rec/1e4,
-#   'mean.max.T.rec' = mean.max.T.rec - 273,
-#   'sd.max.T.rec' = sd.max.T.rec
-# ) %>%
 rename(
   '$z_{cpl}$\n$[km]$' = zc,
   '$z_{1100}$\n$[km]$' = z1100,
@@ -330,22 +315,38 @@ rename(
   '$n_{sub}$' = mean.sub,
   '$\\sigma_{rec}$' = sd.rec,
   '$\\sigma_{sub}$' = sd.sub,
-  ratio = mean.ratio,
+  '$\\frac{n_{rec}}{n_{marx}}$' = mean.ratio,
   'age\n$[Ma]$' = age,
-  '$\\sigma_{ratio}$' = sd.ratio,
-#   '$P_{max}$\n$[GPa]$' = mean.max.P.rec,
-#   '$\\sigma_{P_{max}}$' = sd.max.P.rec,
-#   '$T_{max}$\n$[C]$' = mean.max.T.rec,
-#   '$\\sigma_{T_{max}}$' = sd.max.T.rec
+  '$\\sigma_{\\frac{n_{rec}}{n_{marx}}}$' = sd.ratio,
 ) %>%
 pander::pandoc.table(
   split.tables = Inf,
   keep.line.breaks = T,
   round = c(rep(0, 9), 2, 3),
-  caption = 'Summary of subduction parameters and marker tracing results by numerical experiment {#tbl:marx.summary}',
+  caption = 'Summary of subduction parameters and marker tracing results {#tbl:marx.summary}',
   missing = '**'
 )
 ```
+
+Type I and type II errors, qualitatively assessed by visualizing the geodynamic evolution and marker metamorphic conditons of each model (see [@sec:vis]), show consistently low prevalence of type I error and variable amounts of type II error. Note that type II error is analogous to a biased rock record only the proportion of recovered rocks that are exhumed to Earth's surface may be sampled. Therefore, some principled comparisons may still be made between the rock record and models with abundant type II error. The same is not true for type I error. Rocks do not generally record anomalously high PT conditions if demonstrably absent of disequilibrium (kinetic) textures. The only example of excessive type I error is shown in [@fig:typeI; @fig:cdm46snaps; @fig:cdm46meta; @fig:cdm46class]. Type I error is especially apparent in [@fig:typeI]b with eighty percent of markers being recovered from pressures of $\leq 6~GPa$. Model cdm46 notwithstanding, the prevalence of type I error is low and overall and the shapes of cumulative probability curves for all other models are negligibly affected.
+
+![Example of excessive type I error.](../figs/typeI.png){#fig:typeI}
+
+\clearpage
+
+## Marker motions
+
+![Examples of mantle wedge diapirs.](../figs/diapirs.png){#fig:diapir}
+
+\clearpage
+
+## Marker proportions
+
+![Geodynamic evolution for model cdf78.](../figs/cdf78_snaps.png){#fig:snaps}
+
+![Maximum metamorphic conditons for markers recovered from model cdf78. Maximum pressures for recovered markers (solid curves) range from `r round(head(maxP.cdf78$maxP[maxP.cdf78$cdf <= 0.8], 1)/1e4, 1)` to `r round(tail(maxP.cdf78$maxP[maxP.cdf78$cdf <= 0.8], 1)/1e4, 1)` (a) and only marginally overlap with the rock record (dotted curves). However, maximum temperatures for recovered markers range from `r round(head(maxT.cdf78$maxT[maxT.cdf78$cdf <= 0.8], 1)-273)` to `r round(tail(maxT.cdf78$maxT[maxT.cdf78$cdf <= 0.8], 1)-273)` (b) and show better agreement with the rock record than (a). PD15 dataset from @penniston2015.](../figs/cdf78_meta.png){#fig:meta}
+
+## Maximum recovery depths
 
 \clearpage
 
@@ -383,13 +384,13 @@ Although our classification algorithm uses a constant tracing duration $t_{dur} 
 
 \clearpage
 
-## Visualizations
+## Visualizations {#sec:vis}
 
 ```{r vis, results = 'asis'}
 for(i in seq_along(models)){
-  cat('\n\n![Marker classification for model ', models[i], '.](../figs/', models[i], '_class.png)', sep = '')
-  cat('\n\n![Metamorphic conditions of markers recovered from model ', models[i], '.](../figs/', models[i], '_meta.png)', sep = '')
-  cat('\n\n![Geodynamic evolution of model ', models[i], '.](../figs/', models[i], '_snaps.png)', sep = '')
+  cat('\n\n![Marker classification for model ', models[i], '.](../figs/', models[i], '_class.png){#fig:', models[i], 'class}', sep = '')
+	cat('\n\n![Metamorphic conditions of markers recovered from model ', models[i], '.](../figs/', models[i], '_meta.png){#fig:', models[i], 'meta}', sep = '')
+  cat('\n\n![Geodynamic evolution of model ', models[i], '.](../figs/', models[i], '_snaps.png){#fig:', models[i], 'snaps}', sep = '')
   cat('\n\n\\clearpage')
 }
 ```

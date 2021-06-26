@@ -48,17 +48,6 @@ fun <- function(model, path) {
   # Max T summary for CDFs
   get(paste0(model, '.marx.classified'))$mc %>%
   purrr::map_df(~.x$cdfT, .id = 'run') -> maxT
-  # Visualize GMM results
-#   png(
-#     file = paste0('figs/', model, '_class.png'),
-#     type = 'cairo',
-#     res = 300,
-#     width = 5,
-#     height = 5,
-#     units = 'in'
-#   )
-#   plot(m, what = 'classification')
-#   dev.off()
   cat('\nDrawing ... [', model, ']', sep = '')
   # Sum of pressure changes recovered
   cent <- marx %>% slice(1) %>% ungroup() %>% count(class) %>%
@@ -216,7 +205,8 @@ fun <- function(model, path) {
       axis.ticks.y = element_blank()
   )) +
   plot_annotation(title = paste0('Metamorphic conditions [', model, ']'), tag_levels = 'a') +
-  plot_layout(guides = 'collect')
+  plot_layout(guides = 'collect') &
+  theme(legend.position = 'bottom')
   cat('\nSaving metamorphic conditions plot [', model, ']', sep = '')
   ggsave(
     paste0('figs/', model, '_meta.png'),

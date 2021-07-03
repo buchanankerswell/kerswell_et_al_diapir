@@ -2,7 +2,7 @@
 source('functions.R')
 
 # Read Penniston-Dorland et al., 2015 dataset
-cat('\nReading Penniston-Dorland 2015')
+cat('\nReading Penniston-Dorland 2015 ...')
 pd15 <- readr::read_delim('data/PD15.tsv', delim = '\t', col_types = 'cddcccd')
 pd15 <- pd15[1:nrow(pd15)-1,]
 
@@ -13,7 +13,7 @@ mutate(cdf = (row_number()-1)/n()) -> pd15T
 load('data/mods.RData')
 
 # Get file paths
-cat('\nReading RData files from data/')
+cat('\nReading classified marx ...')
 paths <- list.files('data/k10', full.names = T)
 models <- paths %>% stringr::str_extract('cd.[0-9]+')
 
@@ -24,7 +24,11 @@ for (i in paths) load(i)
 purrr::map(ls()[grep('classified', ls())], ~get(.x)) %>%
 purrr::set_names(models) -> m
 
+# Clean up environment
 rm(list = ls()[grep('classified', ls())])
+
+# Time cuts
+tcuts <- purrr::map_dbl(m, ~attr(.x$marx, 'tcut'))
 
 # Number of markers by model
 purrr::map_df(m, ~{
@@ -34,25 +38,23 @@ purrr::map_df(m, ~{
   summarise(n = n())
 }, .id = 'model') -> marx.summary
 
+# Combine marx and model data
 mods.summary <- mods %>%
 select(model, phi, zc, z1100, age, cv) %>%
-left_join(marx.summary, by = 'model')
+left_join(marx.summary, by = 'model') %>%
+mutate(tcut = tcuts, .before = 'phi')
 
 # Summarise marker stats by model
 purrr::map_df(m, ~{
-  .x$mc %>%
+  .x$jk %>%
   purrr::map_df(~purrr::pluck(.x, 'stats'), .id = 'run') %>%
   summarise(
-    mean.rec = mean(recovered),
-    sd.rec = sd(recovered),
-    mean.sub = mean(subducted),
-    sd.sub = sd(subducted),
+    mean.rec = mean(rec),
+    sd.rec = sd(rec),
+    mean.sub = mean(sub),
+    sd.sub = sd(sub),
     mean.ratio = mean(ratio),
-    sd.ratio = sd(ratio),
-    mean.max.P.rec = mean(max.P.rec),
-    sd.max.P.rec = sd(max.P.rec),
-    mean.max.T.rec = mean(max.T.rec),
-    sd.max.T.rec = sd(max.T.rec)
+    sd.ratio = sd(ratio)
   )
 }, .id = 'model') -> stats.summary
 
@@ -114,7 +116,11 @@ group_by(z1100) %>%
 nest() -> d1
 
 maxP <- d1$data %>%
-purrr::map_df(~.x %>% arrange(maxP) %>% mutate(cdf = (row_number()-1)/n())) %>%
+purrr::map_df(
+  ~.x %>%
+  arrange(maxP) %>%
+  mutate(cdf = (row_number()-1)/n())
+) %>%
 arrange(model) %>%
 left_join(select(mods, model, z1100), by = 'model')
 
@@ -130,11 +136,203 @@ group_by(z1100) %>%
 nest() -> d2
 
 maxT <- d2$data %>%
-purrr::map_df(~.x %>% arrange(maxT) %>% mutate(cdf = (row_number()-1)/n())) %>%
+purrr::map_df(
+  ~.x %>%
+  arrange(maxT) %>%
+  mutate(cdf = (row_number()-1)/n())
+) %>%
+arrange(model) %>%
+left_join(select(mods, model, z1100), by = 'model')
+
+# Biased plots
+maxP.bias90 <- d1$data %>%
+purrr::map_df(
+  ~.x %>%
+  arrange(maxP) %>%
+  slice_head(n = nrow(.x)*0.9) %>%
+  mutate(cdf = (row_number()-1)/n())
+) %>%
+arrange(model) %>%
+left_join(select(mods, model, z1100), by = 'model')
+
+maxT.bias90 <- d2$data %>%
+purrr::map_df(
+  ~.x %>%
+  arrange(maxT) %>%
+  slice_head(n = nrow(.x)*0.9) %>%
+  mutate(cdf = (row_number()-1)/n())
+) %>%
 arrange(model) %>%
 left_join(select(mods, model, z1100), by = 'model')
 
 # CDFS summary by lithospheric thickness
+p1 <- maxP.bias90 %>%
+group_by(z1100) %>%
+ggplot() +
+geom_ribbon(
+  data = pd15[pd15$cumulative <= 0.8,],
+  aes(ymin = 0, ymax = cumulative, x = pressure),
+  alpha = 0.2) +
+geom_ribbon(
+  data = maxP.bias90[maxP.bias90$cdf <= 0.8,],
+  aes(x = maxP/1e4, ymin = 0, ymax = cdf, fill = as.factor(z1100), group = z1100),
+  alpha = 0.2) +
+geom_line(aes(x = maxP/1e4, y = cdf, linetype = 'markers', color = as.factor(z1100), group = z1100), show.legend = F) +
+geom_path(data = pd15, aes(x = pressure, y = cumulative, linetype = 'PD15')) +
+guides(fill = guide_legend(override.aes = list(alpha = 1))) +
+scale_x_continuous(breaks = seq(1, 10, 2)) +
+scale_linetype_manual(name = NULL, values = c('PD15' = 'dotted', 'markers' = 'solid')) +
+scale_y_continuous(breaks = seq(0, 1, 0.2)) +
+scale_color_manual(values = wesanderson::wes_palette(4, name = 'IsleofDogs1')) +
+scale_fill_manual(values = wesanderson::wes_palette(4, name = 'IsleofDogs1')) +
+labs(
+  x = 'Maximum P [GPa]',
+  y = 'Probability',
+  color = bquote(z[1100]~'[km]'),
+  fill = bquote(z[1100]~'[km]')
+) +
+theme_classic(base_size = 11)
+p2 <- maxT.bias90 %>%
+group_by(z1100) %>%
+ggplot() +
+geom_ribbon(
+  data = pd15T[pd15T$cdf <= 0.8,],
+  aes(ymin = 0, ymax = cdf, x = T),
+  alpha = 0.2) +
+geom_ribbon(
+  data = maxT.bias90[maxT.bias90$cdf <= 0.8,],
+  aes(x = maxT - 273, ymin = 0, ymax = cdf, fill = as.factor(z1100), group = z1100),
+  alpha = 0.2) +
+geom_line(aes(x = maxT - 273, y = cdf, linetype = 'markers', color = as.factor(z1100), group = z1100), show.legend = F) +
+geom_path(data = pd15T, aes(x = T, y = cdf, linetype = 'PD15')) +
+guides(fill = guide_legend(override.aes = list(alpha = 1))) +
+scale_linetype_manual(name = NULL, values = c('PD15' = 'dotted', 'markers' = 'solid')) +
+scale_y_continuous(breaks = seq(0, 1, 0.2)) +
+scale_color_manual(values = wesanderson::wes_palette(4, name = 'IsleofDogs1')) +
+scale_fill_manual(values = wesanderson::wes_palette(4, name = 'IsleofDogs1')) +
+labs(
+  x = 'Maximum T [C]',
+  y = 'Probability',
+  color = bquote(z[1100]~'[km]'),
+  fill = bquote(z[1100]~'[km]')
+) +
+theme_classic(base_size = 11)
+pp1 <- p1 + (p2 +
+  theme(
+    axis.text.y = element_blank(),
+    axis.line.y = element_blank(),
+    axis.title.y = element_blank(),
+    axis.ticks.y = element_blank()
+)) +
+plot_annotation(title = 'Metamorphic conditions [all models 90% bias]', tag_levels = 'a') +
+plot_layout(guides = 'collect') &
+theme(legend.position = 'bottom')
+cat('\nSaving ECDF bias 90 plot')
+ggsave(
+  'figs/meta_bias90.png',
+  plot = pp1,
+  device = 'png',
+  type = 'cairo',
+  width = 7,
+  height = 4,
+  dpi = 300
+)
+
+# Biased plots
+maxP.bias70 <- d1$data %>%
+purrr::map_df(
+  ~.x %>%
+  arrange(maxP) %>%
+  slice_head(n = nrow(.x)*0.7) %>%
+  mutate(cdf = (row_number()-1)/n())
+) %>%
+arrange(model) %>%
+left_join(select(mods, model, z1100), by = 'model')
+
+maxT.bias70 <- d2$data %>%
+purrr::map_df(
+  ~.x %>%
+  arrange(maxT) %>%
+  slice_head(n = nrow(.x)*0.7) %>%
+  mutate(cdf = (row_number()-1)/n())
+) %>%
+arrange(model) %>%
+left_join(select(mods, model, z1100), by = 'model')
+
+# CDFS summary by lithospheric thickness
+p3 <- maxP.bias70 %>%
+group_by(z1100) %>%
+ggplot() +
+geom_ribbon(
+  data = pd15[pd15$cumulative <= 0.8,],
+  aes(ymin = 0, ymax = cumulative, x = pressure),
+  alpha = 0.2) +
+geom_ribbon(
+  data = maxP.bias70[maxP.bias70$cdf <= 0.8,],
+  aes(x = maxP/1e4, ymin = 0, ymax = cdf, fill = as.factor(z1100), group = z1100),
+  alpha = 0.2) +
+geom_line(aes(x = maxP/1e4, y = cdf, linetype = 'markers', color = as.factor(z1100), group = z1100), show.legend = F) +
+geom_path(data = pd15, aes(x = pressure, y = cumulative, linetype = 'PD15')) +
+guides(fill = guide_legend(override.aes = list(alpha = 1))) +
+scale_x_continuous(breaks = seq(1, 10, 2)) +
+scale_linetype_manual(name = NULL, values = c('PD15' = 'dotted', 'markers' = 'solid')) +
+scale_y_continuous(breaks = seq(0, 1, 0.2)) +
+scale_color_manual(values = wesanderson::wes_palette(4, name = 'IsleofDogs1')) +
+scale_fill_manual(values = wesanderson::wes_palette(4, name = 'IsleofDogs1')) +
+labs(
+  x = 'Maximum P [GPa]',
+  y = 'Probability',
+  color = bquote(z[1100]~'[km]'),
+  fill = bquote(z[1100]~'[km]')
+) +
+theme_classic(base_size = 11)
+p4 <- maxT.bias70 %>%
+group_by(z1100) %>%
+ggplot() +
+geom_ribbon(
+  data = pd15T[pd15T$cdf <= 0.8,],
+  aes(ymin = 0, ymax = cdf, x = T),
+  alpha = 0.2) +
+geom_ribbon(
+  data = maxT.bias70[maxT.bias70$cdf <= 0.8,],
+  aes(x = maxT - 273, ymin = 0, ymax = cdf, fill = as.factor(z1100), group = z1100),
+  alpha = 0.2) +
+geom_line(aes(x = maxT - 273, y = cdf, linetype = 'markers', color = as.factor(z1100), group = z1100), show.legend = F) +
+geom_path(data = pd15T, aes(x = T, y = cdf, linetype = 'PD15')) +
+guides(fill = guide_legend(override.aes = list(alpha = 1))) +
+scale_linetype_manual(name = NULL, values = c('PD15' = 'dotted', 'markers' = 'solid')) +
+scale_y_continuous(breaks = seq(0, 1, 0.2)) +
+scale_color_manual(values = wesanderson::wes_palette(4, name = 'IsleofDogs1')) +
+scale_fill_manual(values = wesanderson::wes_palette(4, name = 'IsleofDogs1')) +
+labs(
+  x = 'Maximum T [C]',
+  y = 'Probability',
+  color = bquote(z[1100]~'[km]'),
+  fill = bquote(z[1100]~'[km]')
+) +
+theme_classic(base_size = 11)
+pp2 <- p3 + (p4 +
+  theme(
+    axis.text.y = element_blank(),
+    axis.line.y = element_blank(),
+    axis.title.y = element_blank(),
+    axis.ticks.y = element_blank()
+)) +
+plot_annotation(title = 'Metamorphic conditions [all models 70% bias]', tag_levels = 'a') +
+plot_layout(guides = 'collect') &
+theme(legend.position = 'bottom')
+cat('\nSaving ECDF bias 70 plot')
+ggsave(
+  'figs/meta_bias70.png',
+  plot = pp2,
+  device = 'png',
+  type = 'cairo',
+  width = 7,
+  height = 4,
+  dpi = 300
+)
+
+# CDFS no bias
 p1 <- maxP %>%
 group_by(z1100) %>%
 ggplot() +
@@ -146,14 +344,14 @@ geom_ribbon(
   data = maxP[maxP$cdf <= 0.8,],
   aes(x = maxP/1e4, ymin = 0, ymax = cdf, fill = as.factor(z1100), group = z1100),
   alpha = 0.2) +
-geom_line(aes(x = maxP/1e4, y = cdf, linetype = 'recovered markers', color = as.factor(z1100), group = z1100), show.legend = F) +
+geom_line(aes(x = maxP/1e4, y = cdf, linetype = 'markers', color = as.factor(z1100), group = z1100), show.legend = F) +
 geom_path(data = pd15, aes(x = pressure, y = cumulative, linetype = 'PD15')) +
 guides(fill = guide_legend(override.aes = list(alpha = 1))) +
 scale_x_continuous(breaks = seq(1, 10, 2)) +
-scale_linetype_manual(name = NULL, values = c('PD15' = 'dotted', 'recovered markers' = 'solid')) +
+scale_linetype_manual(name = NULL, values = c('PD15' = 'dotted', 'markers' = 'solid')) +
 scale_y_continuous(breaks = seq(0, 1, 0.2)) +
-  scale_color_manual(values = wesanderson::wes_palette(10, name = 'IsleofDogs1', type = 'continuous')) +
-  scale_fill_manual(values = wesanderson::wes_palette(10, name = 'IsleofDogs1', type = 'continuous')) +
+scale_color_manual(values = wesanderson::wes_palette(4, name = 'IsleofDogs1')) +
+scale_fill_manual(values = wesanderson::wes_palette(4, name = 'IsleofDogs1')) +
 labs(
   x = 'Maximum P [GPa]',
   y = 'Probability',
@@ -172,13 +370,13 @@ geom_ribbon(
   data = maxT[maxT$cdf <= 0.8,],
   aes(x = maxT - 273, ymin = 0, ymax = cdf, fill = as.factor(z1100), group = z1100),
   alpha = 0.2) +
-geom_line(aes(x = maxT - 273, y = cdf, linetype = 'recovered markers', color = as.factor(z1100), group = z1100), show.legend = F) +
+geom_line(aes(x = maxT - 273, y = cdf, linetype = 'markers', color = as.factor(z1100), group = z1100), show.legend = F) +
 geom_path(data = pd15T, aes(x = T, y = cdf, linetype = 'PD15')) +
 guides(fill = guide_legend(override.aes = list(alpha = 1))) +
-scale_linetype_manual(name = NULL, values = c('PD15' = 'dotted', 'recovered markers' = 'solid')) +
+scale_linetype_manual(name = NULL, values = c('PD15' = 'dotted', 'markers' = 'solid')) +
 scale_y_continuous(breaks = seq(0, 1, 0.2)) +
-  scale_color_manual(values = wesanderson::wes_palette(10, name = 'IsleofDogs1', type = 'continuous')) +
-  scale_fill_manual(values = wesanderson::wes_palette(10, name = 'IsleofDogs1', type = 'continuous')) +
+scale_color_manual(values = wesanderson::wes_palette(4, name = 'IsleofDogs1')) +
+scale_fill_manual(values = wesanderson::wes_palette(4, name = 'IsleofDogs1')) +
 labs(
   x = 'Maximum T [C]',
   y = 'Probability',
@@ -193,10 +391,10 @@ p <- p1 + (p2 +
     axis.title.y = element_blank(),
     axis.ticks.y = element_blank()
 )) +
-plot_annotation(title = 'Metamorphic conditions [all]', tag_levels = 'a') +
+plot_annotation(title = 'Metamorphic conditions [all models 0% bias]', tag_levels = 'a') +
 plot_layout(guides = 'collect') &
 theme(legend.position = 'bottom')
-cat('\nSaving cdf plot')
+cat('\nSaving ECDF plot')
 ggsave(
   'figs/meta_all.png',
   plot = p,
@@ -207,24 +405,24 @@ ggsave(
   dpi = 300
 )
 
-# Load markers and grids for model cdf78
-path <- paths[23]
-model <- models[23]
+# Load markers and grids for model cde78
+path <- paths[19]
+model <- models[19]
 load_marx(paste0('/Volumes/hd/nmods/kerswell_et_al_marx/data/', model, '_marx.RData'))
 load(path)
 # Marker data
 marx <- get(paste0(model, '.marx.classified'))$marx
 # Classification info
-m <- get(paste0(model, '.marx.classified'))$gm
+mcl <- get(paste0(model, '.marx.classified'))$mcl
 # Timecut
 tcut <- attr(get(paste0(model, '.marx')), 'tcut')
 # Nodes data
 grid <- get(paste0(model, '.grid'))[[1]] %>% mutate(z = z - 18000)
 # Max P summary for CDFs
-get(paste0(model, '.marx.classified'))$mc %>%
+get(paste0(model, '.marx.classified'))$jk %>%
 purrr::map_df(~.x$cdfP, .id = 'run') -> maxP
 # Max T summary for CDFs
-get(paste0(model, '.marx.classified'))$mc %>%
+get(paste0(model, '.marx.classified'))$jk %>%
 purrr::map_df(~.x$cdfT, .id = 'run') -> maxT
 # Initial conditions
 p <- grid %>%
@@ -233,7 +431,7 @@ draw_grid(
   marx = marx,
   class = 'type',
   time = 1,
-  box = c(up = -18, down = 200, left = 0, right = 2000),
+  box = c(up = -18, down = 300, left = 0, right = 2000),
   bk.alpha = 0.3,
   iso.alpha = 0.3,
   iso.col = 'black',
@@ -273,9 +471,12 @@ ggsave(
   device = 'png',
   type = 'cairo',
   width = 7,
-  height = 1.9,
+  height = 2.3,
   dpi = 300
 )
+
+# Clean up environment
+rm(list = ls()[grep('classified', ls())])
 
 # Diapir examples
 path <- paths[c(3, 4, 8, 20, 24)]
@@ -289,7 +490,7 @@ pp <- purrr::map2(path, model, ~{
   # Marker data
   marx <- get(paste0(.y, '.marx.classified'))$marx
   # Classification info
-  m <- get(paste0(.y, '.marx.classified'))$gm
+  mcl <- get(paste0(.y, '.marx.classified'))$mcl
   # Timecut
   tcut <- attr(get(paste0(.y, '.marx')), 'tcut')
   # Nodes data
@@ -300,10 +501,10 @@ pp <- purrr::map2(path, model, ~{
     model = .y,
     marx = marx,
     class = 'recovered',
-    box = c(up = -18, down = 200, left = 500, right = 1800),
+    box = c(up = -18, down = 300, left = 500, right = 1800),
     time = tcut,
     bk.alpha = 0.5,
-    mk.alpha = 1,
+    mk.alpha = 0.3,
     mk.size = 0.25,
     iso.size = 2,
     leg.dir = 'horizontal',
@@ -337,11 +538,11 @@ ggsave(
   device = 'png',
   type = 'cairo',
   width = 7,
-  height = 9,
+  height = 11.8,
   dpi = 300
 )
 
-# Diapir examples
+# Type I error examples
 path <- paths[49]
 model <- models[49]
 
@@ -352,7 +553,7 @@ load(path)
 # Marker data
 marx <- get(paste0(model, '.marx.classified'))$marx
 # Classification info
-m <- get(paste0(model, '.marx.classified'))$gm
+mcl <- get(paste0(model, '.marx.classified'))$mcl
 # Timecut
 tcut <- attr(get(paste0(model, '.marx')), 'tcut')
 # Nodes data
@@ -363,10 +564,10 @@ draw_grid(
   model = model,
   marx = marx,
   class = 'recovered',
-  box = c(up = -18, down = 200, left = 500, right = 1800),
+  box = c(up = -18, down = 300, left = 500, right = 1800),
   time = tcut,
   bk.alpha = 0.5,
-  mk.alpha = 1,
+  mk.alpha = 0.3,
   mk.size = 0.25,
   iso.size = 2,
   leg.dir = 'horizontal',
@@ -379,24 +580,27 @@ draw_grid(
   base.size = 11,
   transparent = F)
 # Max P summary for CDFs
-get(paste0(model, '.marx.classified'))$mc %>%
+get(paste0(model, '.marx.classified'))$jk %>%
 purrr::map_df(~.x$cdfP, .id = 'run') -> maxP
 # Max T summary for CDFs
-get(paste0(model, '.marx.classified'))$mc %>%
+get(paste0(model, '.marx.classified'))$jk %>%
 purrr::map_df(~.x$cdfT, .id = 'run') -> maxT
 # Marker maxP CDF
 p2 <- maxP %>%
 group_by(run) %>%
 ggplot() +
 geom_ribbon(
+  data = maxP[maxP$cdf <= 0.8,],
+  aes(x = maxP/1e4, ymin = 0, ymax = cdf, group = run),
+  fill = 'grey50',
+  alpha = 0.01) +
+geom_path(
+  aes(x = maxP/1e4, y = cdf, linetype = 'markers', group = run),
+  size = 0.1) +
+geom_ribbon(
   data = pd15[pd15$cumulative <= 0.8,],
   aes(ymin = 0, ymax = cumulative, x = pressure),
   alpha = 0.2) +
-geom_ribbon(
-  data = maxP[maxP$cdf <= 0.8,],
-  aes(x = maxP/1e4, ymin = 0, ymax = cdf, group = run),
-  alpha = 0.01) +
-geom_path(aes(x = maxP/1e4, y = cdf, linetype = 'markers', group = run)) +
 geom_path(data = pd15, aes(x = pressure, y = cumulative, linetype = 'PD15')) +
 labs(
   x = 'Maximum P [GPa]',
@@ -410,14 +614,17 @@ p3 <- maxT %>%
 group_by(run) %>%
 ggplot() +
 geom_ribbon(
+  data = maxT[maxT$cdf <= 0.8,],
+  aes(x = maxT - 273, ymin = 0, ymax = cdf, group = run),
+  fill = 'grey50',
+  alpha = 0.01) +
+geom_path(
+  aes(x = maxT - 273, y = cdf, linetype = 'markers', group = run),
+  size = 0.1) +
+geom_ribbon(
   data = pd15T[pd15T$cdf <= 0.8,],
   aes(ymin = 0, ymax = cdf, x = T),
   alpha = 0.2) +
-geom_ribbon(
-  data = maxT[maxT$cdf <= 0.8,],
-  aes(x = maxT - 273, ymin = 0, ymax = cdf, group = run),
-  alpha = 0.01) +
-geom_path(aes(x = maxT - 273, y = cdf, linetype = 'markers', group = run)) +
 geom_path(data = pd15T, aes(x = T, y = cdf, linetype = 'PD15')) +
 labs(
   x = 'Maximum T [C]',
@@ -433,8 +640,8 @@ p <- p1 /
     axis.title.y = element_blank(),
     axis.ticks.y = element_blank()
 ))) +
-plot_annotation(title = 'Excessive type I error', tag_levels = 'a') +
-plot_layout(guides = 'collect', heights = c(1, 2)) &
+plot_annotation(tag_levels = 'a') +
+plot_layout(guides = 'collect', heights = c(1, 1.5)) &
 theme(legend.position = 'bottom')
 # Save
 cat('\nSaving typeI plot')
@@ -444,8 +651,11 @@ ggsave(
   device = 'png',
   type = 'cairo',
   width = 7,
-  height = 6,
+  height = 6.8,
   dpi = 300
 )
-# clean up environment
-rm(list = c(paste0(model, '.marx.classified'), paste0(model, '.marx'), paste0(model, '.grid')), envir = .GlobalEnv)
+
+# Clean up environment
+rm(list = ls()[grep('classified', ls())])
+
+cat('\nDone!')

@@ -668,12 +668,14 @@ marx_ft <- function(df, features = 'all') {
 }
 
 # Gaussian mixture modelling (Scrucca et al., 2016) to classify recovered rocks
-marx_classify <- function(marx.df, fts.df, thresh = 1, k = 6) {
+marx_classify <- function(marx, fts, thresh = 1, k = 10) {
+  # Save tcut
+  tcut <- attr(marx, 'tcut')
   # Save IDs
-  ids <- fts.df$id
+  ids <- fts$id
   # Fit Eigenvalue decomposition models and select best using BIC
   cat('\nSelecting best Gaussian mixture model by BIC\n')
-  fts.df %>% ungroup() %>% select(-id) -> X
+  fts %>% ungroup() %>% select(-id) -> X
   # Try clustering
   mcl.bic <- try(mclustBIC(X, G = seq_len(k)))
   # If clustering doesn't converge or throws error
@@ -695,9 +697,9 @@ marx_classify <- function(marx.df, fts.df, thresh = 1, k = 6) {
   mcl <- Mclust(X, x = mcl.bic, verbose = T)
   #print(summary(mcl))
   # Make class id df
-  class.df <- tibble(id = ids, class = mcl$classification)
+  class <- tibble(id = ids, class = mcl$classification)
   # Join classification to markers data
-  marx.class.df <- marx.df %>% left_join(class.df, by = 'id') %>% replace(is.na(.), 0)
+  marx.class <- marx %>% left_join(class, by = 'id') %>% replace(is.na(.), 0)
   # Get parameter centroids
   centroids <- t(mcl$parameters$mean) %>% as_tibble() %>% mutate(class = 1:n(), .before = 'sum.dP')
   # Calculate lower bounds for features
@@ -718,65 +720,54 @@ marx_classify <- function(marx.df, fts.df, thresh = 1, k = 6) {
     d <- centroids[centroids$sum.dP <= lowerB$sum.dP | centroids$max.P <= lowerB$max.P,]
   }
   # Add recovered class
-  recovered.df <- class.df %>%
+  recovered <- class %>%
   mutate(recovered = ifelse(class %in% d$class, TRUE, FALSE))
   # Join with marker data
-  df <- marx.class.df %>%
-  left_join(recovered.df, by = c('id', 'class')) %>%
+  df <- marx.class %>%
+  left_join(recovered, by = c('id', 'class')) %>%
   replace(is.na(.), FALSE)
-  # Summarise maximum pressures
-#   mP <- df %>% group_by(id, recovered) %>% summarise(maxP = max(P), .groups = 'keep')
-  # Change recovered to FALSE if recovered was TRUE and marker maxP was >= meadian + 3/4*IQR
-#   misclassed.marx <- which(mP$maxP >= (median(mP$maxP) + IQR(mP$maxP)) & mP$recovered == TRUE)
-#   df$recovered[df$id %in% misclassed.marx] <- FALSE
+  # Final decisions
+  # Summarizing maxP and sumdP
+  sdf <- df %>%
+  group_by(id, recovered, class) %>%
+  summarise(sumdP = sum(diff(P)), maxP = max(P), .groups = 'keep')
+  # Find missclassified markers
+  misclass <- c(
+    # Find marx with rec is TRUE and maxP or sumdP is >= lower bound
+    which(sdf$maxP > lowerB$max.P & sdf$sumdP >= lowerB$sum.dP & sdf$recovered == TRUE),
+    # Find marx with approx equal maxP and sumdP
+    which((sdf$maxP - sdf$sumdP) <= 2e3)
+  )
+  # Reclassify
+  df$recovered[df$id %in% misclass] <- FALSE
   # Print results
   cat('\nRecovered classes:')
   df %>% slice(1) %>% group_by(class) %>% select(class, recovered) %>% table() %>% print()
+  # Save tcut as attribute
+  attr(df, 'tcut') <- tcut
   # Join classification (subducted or recovered) to markers data
   return(
     list(
       'marx' = df,
-      'mcl' = mcl
+      'mcl' = mcl,
+      'misclassed' = misclass
     )
   )
 }
 
 # Calculate ratios, statistics, and P-T-x-z of markers
-marx_stats <- function(df) {
+marx_stats <- function(marx) {
   # Stats
   cat('\nCalculating statistics')
+  df <- marx
   df %>%
   group_by(id) %>%
   slice(1) %>%
   ungroup() %>%
   summarise(
-    recovered = sum(recovered),
-    subducted = n()-recovered,
-    ratio = recovered/n(),
-    max.P.rec = max(df$P[which(df$recovered == TRUE)]),
-    med.P.rec = median(df$P[which(df$recovered == TRUE)]),
-    iqr.P.rec = IQR(df$P[which(df$recovered == TRUE)]),
-    mean.P.rec = mean(df$P[which(df$recovered == TRUE)]),
-    sd.P.rec = sd(df$P[which(df$recovered == TRUE)]),
-    min.P.rec = min(df$P[which(df$recovered == TRUE)]),
-    max.T.rec = max(df$T[which(df$recovered == TRUE)]),
-    med.T.rec = median(df$T[which(df$recovered == TRUE)]),
-    iqr.T.rec = IQR(df$T[which(df$recovered == TRUE)]),
-    mean.T.rec = mean(df$T[which(df$recovered == TRUE)]),
-    sd.T.rec = sd(df$T[which(df$recovered == TRUE)]),
-    min.T.rec = min(df$T[which(df$recovered == TRUE)]),
-    max.P.sub = max(df$P[which(df$recovered == FALSE)]),
-    med.P.sub = median(df$P[which(df$recovered == FALSE)]),
-    iqr.P.sub = IQR(df$P[which(df$recovered == FALSE)]),
-    mean.P.sub = mean(df$P[which(df$recovered == FALSE)]),
-    sd.P.sub = sd(df$P[which(df$recovered == FALSE)]),
-    min.P.sub = min(df$P[which(df$recovered == FALSE)]),
-    max.T.sub = max(df$T[which(df$recovered == FALSE)]),
-    med.T.sub = median(df$T[which(df$recovered == FALSE)]),
-    iqr.T.sub = IQR(df$T[which(df$recovered == FALSE)]),
-    mean.T.sub = mean(df$T[which(df$recovered == FALSE)]),
-    sd.T.sub = sd(df$T[which(df$recovered == FALSE)]),
-    min.T.sub = min(df$T[which(df$recovered == FALSE)])
+    rec = sum(recovered),
+    sub = n()-rec,
+    ratio = rec/n()
   ) -> s
   cat('\nCalculating empirical probability distribution')
   cdf.P <- df %>%
@@ -793,14 +784,18 @@ marx_stats <- function(df) {
 }
 
 # Monte carlo sampling of marx_classify()
-monte_carlo <- function(marx.df, fts.df, thresh = 1, n = 100, k = 2) {
+jknife <- function(marx, thresh = 1, n = 100, p = 0.9, k = 2) {
   # Progress bar
   pb <- progress_bar$new(
     format = 'Monte Carlo Sampling [:bar] :current/:total (:percent)',
     total = n, clear = FALSE, width = 80)
   purrr::map(seq_len(n), ~{
     pb$tick()
-    marx_classify(marx.df, fts.df, k = k)$marx %>%
+    # Subsample
+    df <- marx %>% slice_sample(prop = p)
+    # Compute features
+    fts <- df %>% marx_ft(features = c('sum.dP', 'max.P'))
+    marx_classify(df, fts, k = k)$marx %>%
     marx_stats()
   })
 }
@@ -1086,24 +1081,24 @@ draw_grid <- function(
   marx = NULL,
   class = c('type', 'class', 'recovered', 'none'),
   time,
-  box = c(up = -18, down = 200, left = 0, right = 2000),
+  box = c(up = -18, down = 300, left = 0, right = 2000),
   arrows = FALSE,
   leg.pos = 'right',
   leg.dir = 'vertical',
   leg.dir.rec = 'vertical',
   base.size = 11,
-  p.type = c('blank', 'temperature', 'viscosity', 'stream'),
+  p.type = c('blank', 'temperature', 'viscosity', 'stream', 'pressure'),
   bk.alpha = 0.6,
   bk.col = rgb(1, 1, 1, 1),
   mk.alpha = 1,
-  mk.size = 0.3,
+  mk.size = 0.25,
   iso.alpha = 1,
   iso.col = 'white',
   iso.skip = 0,
   iso.size = 2,
   stm.alpha = 1,
-  rec.col = 'white',
-  sub.col = 'black',
+  rec.col = 'black',
+  sub.col = 'deeppink',
   v.pal = 'magma',
   v.direction = 1,
   transparent = TRUE) {
@@ -1145,13 +1140,13 @@ draw_grid <- function(
     ggplot() +
     geom_contour_fill(aes(x = x/1000, y = z/1000, z = pr/1e4), alpha = bk.alpha) +
     geom_contour(
-      aes(x = x/1000, y = z/1000, z = pr/1e4),
+      aes(x = x/1000, y = z/1000, z = tk - 273),
       color = iso.col,
       breaks = c(0, seq(100, 1900, 200)),
       size = 0.3,
       alpha = iso.alpha) +
     geom_text_contour(
-      aes(x = x/1000, y = z/1000, z = pr/1e4),
+      aes(x = x/1000, y = z/1000, z = tk - 273),
       stroke = 0.15,
       size = iso.size,
       skip = iso.skip,
@@ -1317,12 +1312,13 @@ draw_grid <- function(
         p <- p +
         geom_point(
           data = marx %>% filter(tstep == tcut),
-          aes(x = x/1000, y = z/1000, color = as.factor(recovered)),
+          aes(x = x/1000, y = z/1000, color = as.factor(recovered), alpha = as.factor(recovered)),
           shape = 15,
-          alpha = mk.alpha,
+          #alpha = mk.alpha,
           size = mk.size) +
         labs(color = 'Recovered') +
         scale_color_manual(values = c('TRUE' = rec.col, 'FALSE' = sub.col)) +
+        scale_alpha_manual(values = c('TRUE' = 1, 'FALSE' = mk.alpha), guide = 'none') +
         guides(color = guide_legend(direction = leg.dir.rec, override.aes = list(alpha = 1, size = 2)))
       } else if(class == 'none') {
         p <- p +

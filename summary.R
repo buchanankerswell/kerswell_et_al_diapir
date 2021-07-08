@@ -145,7 +145,7 @@ arrange(model) %>%
 left_join(select(mods, model, z1100), by = 'model')
 
 # Biased plots
-maxP.bias90 <- d1$data %>%
+maxP.bias10 <- d1$data %>%
 purrr::map_df(
   ~.x %>%
   arrange(maxP) %>%
@@ -155,7 +155,7 @@ purrr::map_df(
 arrange(model) %>%
 left_join(select(mods, model, z1100), by = 'model')
 
-maxT.bias90 <- d2$data %>%
+maxT.bias10 <- d2$data %>%
 purrr::map_df(
   ~.x %>%
   arrange(maxT) %>%
@@ -166,7 +166,7 @@ arrange(model) %>%
 left_join(select(mods, model, z1100), by = 'model')
 
 # CDFS summary by lithospheric thickness
-p1 <- maxP.bias90 %>%
+p1 <- maxP.bias10 %>%
 group_by(z1100) %>%
 ggplot() +
 geom_ribbon(
@@ -174,7 +174,7 @@ geom_ribbon(
   aes(ymin = 0, ymax = cumulative, x = pressure),
   alpha = 0.2) +
 geom_ribbon(
-  data = maxP.bias90[maxP.bias90$cdf <= 0.8,],
+  data = maxP.bias10[maxP.bias10$cdf <= 0.8,],
   aes(x = maxP/1e4, ymin = 0, ymax = cdf, fill = as.factor(z1100), group = z1100),
   alpha = 0.2) +
 geom_line(aes(x = maxP/1e4, y = cdf, linetype = 'markers', color = as.factor(z1100), group = z1100), show.legend = F) +
@@ -192,7 +192,7 @@ labs(
   fill = bquote(z[1100]~'[km]')
 ) +
 theme_classic(base_size = 11)
-p2 <- maxT.bias90 %>%
+p2 <- maxT.bias10 %>%
 group_by(z1100) %>%
 ggplot() +
 geom_ribbon(
@@ -200,7 +200,7 @@ geom_ribbon(
   aes(ymin = 0, ymax = cdf, x = T),
   alpha = 0.2) +
 geom_ribbon(
-  data = maxT.bias90[maxT.bias90$cdf <= 0.8,],
+  data = maxT.bias10[maxT.bias10$cdf <= 0.8,],
   aes(x = maxT - 273, ymin = 0, ymax = cdf, fill = as.factor(z1100), group = z1100),
   alpha = 0.2) +
 geom_line(aes(x = maxT - 273, y = cdf, linetype = 'markers', color = as.factor(z1100), group = z1100), show.legend = F) +
@@ -224,12 +224,12 @@ pp1 <- p1 + (p2 +
     axis.title.y = element_blank(),
     axis.ticks.y = element_blank()
 )) +
-plot_annotation(title = 'Metamorphic conditions [all models 90% bias]', tag_levels = 'a') +
+plot_annotation(title = 'PT conditions [all models 10% bias]', tag_levels = 'a') +
 plot_layout(guides = 'collect') &
 theme(legend.position = 'bottom')
-cat('\nSaving ECDF bias 90 plot')
+cat('\nSaving ECDF bias 10 plot')
 ggsave(
-  'figs/meta_bias90.png',
+  'figs/meta_bias10.png',
   plot = pp1,
   device = 'png',
   type = 'cairo',
@@ -239,7 +239,7 @@ ggsave(
 )
 
 # Biased plots
-maxP.bias70 <- d1$data %>%
+maxP.bias20 <- d1$data %>%
 purrr::map_df(
   ~.x %>%
   arrange(maxP) %>%
@@ -249,7 +249,7 @@ purrr::map_df(
 arrange(model) %>%
 left_join(select(mods, model, z1100), by = 'model')
 
-maxT.bias70 <- d2$data %>%
+maxT.bias20 <- d2$data %>%
 purrr::map_df(
   ~.x %>%
   arrange(maxT) %>%
@@ -260,7 +260,7 @@ arrange(model) %>%
 left_join(select(mods, model, z1100), by = 'model')
 
 # CDFS summary by lithospheric thickness
-p3 <- maxP.bias70 %>%
+p3 <- maxP.bias20 %>%
 group_by(z1100) %>%
 ggplot() +
 geom_ribbon(
@@ -268,7 +268,7 @@ geom_ribbon(
   aes(ymin = 0, ymax = cumulative, x = pressure),
   alpha = 0.2) +
 geom_ribbon(
-  data = maxP.bias70[maxP.bias70$cdf <= 0.8,],
+  data = maxP.bias20[maxP.bias20$cdf <= 0.8,],
   aes(x = maxP/1e4, ymin = 0, ymax = cdf, fill = as.factor(z1100), group = z1100),
   alpha = 0.2) +
 geom_line(aes(x = maxP/1e4, y = cdf, linetype = 'markers', color = as.factor(z1100), group = z1100), show.legend = F) +
@@ -286,7 +286,7 @@ labs(
   fill = bquote(z[1100]~'[km]')
 ) +
 theme_classic(base_size = 11)
-p4 <- maxT.bias70 %>%
+p4 <- maxT.bias20 %>%
 group_by(z1100) %>%
 ggplot() +
 geom_ribbon(
@@ -294,7 +294,7 @@ geom_ribbon(
   aes(ymin = 0, ymax = cdf, x = T),
   alpha = 0.2) +
 geom_ribbon(
-  data = maxT.bias70[maxT.bias70$cdf <= 0.8,],
+  data = maxT.bias20[maxT.bias20$cdf <= 0.8,],
   aes(x = maxT - 273, ymin = 0, ymax = cdf, fill = as.factor(z1100), group = z1100),
   alpha = 0.2) +
 geom_line(aes(x = maxT - 273, y = cdf, linetype = 'markers', color = as.factor(z1100), group = z1100), show.legend = F) +
@@ -318,12 +318,106 @@ pp2 <- p3 + (p4 +
     axis.title.y = element_blank(),
     axis.ticks.y = element_blank()
 )) +
-plot_annotation(title = 'Metamorphic conditions [all models 70% bias]', tag_levels = 'a') +
+plot_annotation(title = 'PT conditions [all models 20% bias]', tag_levels = 'a') +
 plot_layout(guides = 'collect') &
 theme(legend.position = 'bottom')
-cat('\nSaving ECDF bias 70 plot')
+cat('\nSaving ECDF bias 20 plot')
 ggsave(
-  'figs/meta_bias70.png',
+  'figs/meta_bias20.png',
+  plot = pp2,
+  device = 'png',
+  type = 'cairo',
+  width = 7,
+  height = 4,
+  dpi = 300
+)
+
+# Biased plots
+maxP.bias30 <- d1$data %>%
+purrr::map_df(
+  ~.x %>%
+  arrange(maxP) %>%
+  slice_head(n = nrow(.x)*0.7) %>%
+  mutate(cdf = (row_number()-1)/n())
+) %>%
+arrange(model) %>%
+left_join(select(mods, model, z1100), by = 'model')
+
+maxT.bias30 <- d2$data %>%
+purrr::map_df(
+  ~.x %>%
+  arrange(maxT) %>%
+  slice_head(n = nrow(.x)*0.7) %>%
+  mutate(cdf = (row_number()-1)/n())
+) %>%
+arrange(model) %>%
+left_join(select(mods, model, z1100), by = 'model')
+
+# CDFS summary by lithospheric thickness
+p3 <- maxP.bias30 %>%
+group_by(z1100) %>%
+ggplot() +
+geom_ribbon(
+  data = pd15[pd15$cumulative <= 0.8,],
+  aes(ymin = 0, ymax = cumulative, x = pressure),
+  alpha = 0.2) +
+geom_ribbon(
+  data = maxP.bias30[maxP.bias30$cdf <= 0.8,],
+  aes(x = maxP/1e4, ymin = 0, ymax = cdf, fill = as.factor(z1100), group = z1100),
+  alpha = 0.2) +
+geom_line(aes(x = maxP/1e4, y = cdf, linetype = 'markers', color = as.factor(z1100), group = z1100), show.legend = F) +
+geom_path(data = pd15, aes(x = pressure, y = cumulative, linetype = 'PD15')) +
+guides(fill = guide_legend(override.aes = list(alpha = 1))) +
+scale_x_continuous(breaks = seq(1, 10, 2)) +
+scale_linetype_manual(name = NULL, values = c('PD15' = 'dotted', 'markers' = 'solid')) +
+scale_y_continuous(breaks = seq(0, 1, 0.2)) +
+scale_color_manual(values = wesanderson::wes_palette(4, name = 'IsleofDogs1')) +
+scale_fill_manual(values = wesanderson::wes_palette(4, name = 'IsleofDogs1')) +
+labs(
+  x = 'Maximum P [GPa]',
+  y = 'Probability',
+  color = bquote(z[1100]~'[km]'),
+  fill = bquote(z[1100]~'[km]')
+) +
+theme_classic(base_size = 11)
+p4 <- maxT.bias30 %>%
+group_by(z1100) %>%
+ggplot() +
+geom_ribbon(
+  data = pd15T[pd15T$cdf <= 0.8,],
+  aes(ymin = 0, ymax = cdf, x = T),
+  alpha = 0.2) +
+geom_ribbon(
+  data = maxT.bias30[maxT.bias30$cdf <= 0.8,],
+  aes(x = maxT - 273, ymin = 0, ymax = cdf, fill = as.factor(z1100), group = z1100),
+  alpha = 0.2) +
+geom_line(aes(x = maxT - 273, y = cdf, linetype = 'markers', color = as.factor(z1100), group = z1100), show.legend = F) +
+geom_path(data = pd15T, aes(x = T, y = cdf, linetype = 'PD15')) +
+guides(fill = guide_legend(override.aes = list(alpha = 1))) +
+scale_linetype_manual(name = NULL, values = c('PD15' = 'dotted', 'markers' = 'solid')) +
+scale_y_continuous(breaks = seq(0, 1, 0.2)) +
+scale_color_manual(values = wesanderson::wes_palette(4, name = 'IsleofDogs1')) +
+scale_fill_manual(values = wesanderson::wes_palette(4, name = 'IsleofDogs1')) +
+labs(
+  x = 'Maximum T [C]',
+  y = 'Probability',
+  color = bquote(z[1100]~'[km]'),
+  fill = bquote(z[1100]~'[km]')
+) +
+theme_classic(base_size = 11)
+pp2 <- p3 + (p4 +
+  theme(
+    axis.text.y = element_blank(),
+    axis.line.y = element_blank(),
+    axis.title.y = element_blank(),
+    axis.ticks.y = element_blank()
+)) +
+plot_annotation(title = 'PT conditions [all models 30% bias]', tag_levels = 'a') +
+plot_layout(guides = 'collect') &
+theme(legend.position = 'bottom')
+cat('\nSaving ECDF bias 30 plot')
+ggsave(
+  'figs/meta_bias30.png',
   plot = pp2,
   device = 'png',
   type = 'cairo',
@@ -391,7 +485,7 @@ p <- p1 + (p2 +
     axis.title.y = element_blank(),
     axis.ticks.y = element_blank()
 )) +
-plot_annotation(title = 'Metamorphic conditions [all models 0% bias]', tag_levels = 'a') +
+plot_annotation(title = 'PT conditions [all models 0% bias]', tag_levels = 'a') +
 plot_layout(guides = 'collect') &
 theme(legend.position = 'bottom')
 cat('\nSaving ECDF plot')

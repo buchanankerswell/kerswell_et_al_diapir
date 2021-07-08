@@ -783,7 +783,7 @@ marx_stats <- function(marx) {
   return(list('stats' = s, 'cdfT' = cdf.T, 'cdfP' = cdf.P))
 }
 
-# Monte carlo sampling of marx_classify()
+# Jacknife sampling of marx_classify()
 jknife <- function(marx, thresh = 1, n = 100, p = 0.9, k = 2) {
   # Progress bar
   pb <- progress_bar$new(

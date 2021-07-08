@@ -27,10 +27,12 @@ fun <- function(model, path) {
   thresh <- 1
   # Marker data
   marx <- get(paste0(model, '.marx.classified'))$marx
+  # Jacknife samples
+  jk <- get(paste0(model, '.marx.classified'))$jk
   # Classification info
   mcl <- get(paste0(model, '.marx.classified'))$mcl
   # Timecut
-  tcut <- attr(get(paste0(model, '.marx')), 'tcut')
+  tcut <- attr(marx, 'tcut')
   t2 <- ceiling(tcut/2)
   t3 <- ceiling(tcut/4)
   # Nodes data
@@ -38,11 +40,9 @@ fun <- function(model, path) {
   g2 <- get(paste0(model, '.grid'))[[t2]] %>% mutate(z = z - 18000)
   g3 <- get(paste0(model, '.grid'))[[t3]] %>% mutate(z = z - 18000)
   # Max P summary for CDFs
-  get(paste0(model, '.marx.classified'))$jk %>%
-  purrr::map_df(~.x$cdfP, .id = 'run') -> maxP
+  maxP <- jk %>% purrr::map_df(~.x$cdfP, .id = 'run')
   # Max T summary for CDFs
-  get(paste0(model, '.marx.classified'))$jk %>%
-  purrr::map_df(~.x$cdfT, .id = 'run') -> maxT
+  maxT <- jk %>% purrr::map_df(~.x$cdfT, .id = 'run')
   # Cluster centroids
   cent <- marx %>% slice(1) %>% ungroup() %>% count(class) %>%
   mutate(sumdP = mcl$parameters$mean[1,], maxP = mcl$parameters$mean[2,])
@@ -206,10 +206,10 @@ fun <- function(model, path) {
       axis.title.y = element_blank(),
       axis.ticks.y = element_blank()
   )) +
-  plot_annotation(title = paste0('Metamorphic conditions [', model, ']'), tag_levels = 'a') +
+  plot_annotation(title = paste0('PT conditions [', model, ']'), tag_levels = 'a') +
   plot_layout(guides = 'collect') &
   theme(legend.position = 'bottom')
-  cat('\nSaving metamorphic conditions plot [', model, ']', sep = '')
+  cat('\nSaving PT conditions plot [', model, ']', sep = '')
   ggsave(
     paste0('figs/k10/', model, '_meta.png'),
     plot = p,

@@ -46,7 +46,7 @@ parallel::mcmapply(
   paths,
   k = 10,
   n = 100,
-  p = 0.9,
+  p = 0.98,
   thresh = 1,
   mc.cores = cores,
   SIMPLIFY = F

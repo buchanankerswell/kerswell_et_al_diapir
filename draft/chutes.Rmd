@@ -337,7 +337,9 @@ pander::pandoc.table(
 )
 ```
 
-Although not strictly quantifiable, type I and type II errors are qualitatively assessed by visualizing the geodynamic evolution and marker PT conditons of each model. An example is model cdm46, which has excessive type I error ([@fig:typeI; @fig:cdm46snaps; @fig:cdm46meta; @fig:cdm46class]). We observe a number of black squares subducted beyond any chance of recovery (> 200 $km$) in [@fig:typeI]a. False positives like these represent the last fifty-percent of markers that were recovered from pressures greater than approx. seven gigapascals ([@fig:typeI]b). Removing the type I error in this case would significantly change the shape of the ECDF in [@fig:typeI]b---translating and morphing it closer to the rock record ECDF. Despite model cdm46, we observe low prevalence of type I error and variable amounts of type II error (see [@sec:vis]).
+Although not strictly quantifiable, type I and type II errors are qualitatively assessed by visualizing the geodynamic evolution and marker PT conditons of each model. Model cdm46 stands out because it demonstrates excessive type I error ([@fig:typeI; @fig:cdm46snaps; @fig:cdm46meta; @fig:cdm46class]). For example, a number of black squares are observed subducting beyond any chance of recovery (> 200 $km$) in [@fig:typeI]a. The ECDF shrinks and streches in proportion to the amount of type I error ([@fig:typeI]b). Please note the last fifty-percent of recovered markers in [@fig:typeI]b, which all having maximum pressures above 7 $GPa$. Removing the type I error in this case changes ECDF towards a less-biased result with respect to the rock record. It is clear, however, that removing all type I error from model cdm46 does not bring the marker ECDF remotely close to the rock record (we discuss this point in [@sec:rvm]).
+
+Despite model cdm46, we observe low prevalence of type I error and variable amounts of type II error (see [@sec:vis]). We find the errors qualitatively acceptable, with the exception of model cdm46.
 
 ![Example of excessive type I error.](../figs/typeI.png){#fig:typeI width=95%}
 
@@ -365,13 +367,13 @@ On average `r round(mean(d$mean.ratio)*100)` percent of markers get recovered fr
 
 # Discussion
 
+## Metamorphic conditions of rocks and markers {#sec:rvm}
+
+![Metamorphic conditions of markers grouped by models with different upper plate lithospheric thicknesses $z_{1100}$. Eighty percent (shaded regions under curves) of recovered markers (solid curves) reach maximum pressures between `r round(head(maxP$maxP[maxP$cdf <= 0.8], 1)/1e4, 1)` and `r round(tail(maxP$maxP[maxP$cdf <= 0.8], 1)/1e4, 1)` with ostensibly no markers reaching maximum pressures of less than one gigapascal (a). In general, markers are recovered from lower maximum pressures for models with thin upper plates ($z_{1100} \leq 62~km$) compared to models with thicker upper plates ($z_{1100} > 62~km$) due to differences in coupling depths between the oceanic plate and upper plate [see @kerswell2020]. Eighty percent of recovered markers reach maximum temperatures between `r round(head(maxT$maxT[maxT$cdf <= 0.8], 1)-273)` and `r round(tail(maxT$maxT[maxT$cdf <= 0.8], 1)-273)` (b). With respect to temperature, models with thin upper plates ($z_{1100} \leq 62~km$) show better agreement with the rock record (dotted line) compared to models with thicker upper plates ($z_{1100} > 62~km$). The rock record does not significantly overlap with maximum metamorphic conditions of markers regardless of model parameterization. PD15 dataset from @penniston2015](../figs/meta_all.png){#fig:metacomp width=95%}
+
 ## Cold nose geometry
 
 ## Diapirs
-
-## Metamorphic conditions of rocks and markers
-
-![Metamorphic conditions of markers grouped by models with different upper plate lithospheric thicknesses $z_{1100}$. Eighty percent (shaded regions under curves) of recovered markers (solid curves) reach maximum pressures between `r round(head(maxP$maxP[maxP$cdf <= 0.8], 1)/1e4, 1)` and `r round(tail(maxP$maxP[maxP$cdf <= 0.8], 1)/1e4, 1)` with ostensibly no markers reaching maximum pressures of less than one gigapascal (a). In general, markers are recovered from lower maximum pressures for models with thin upper plates ($z_{1100} \leq 62~km$) compared to models with thicker upper plates ($z_{1100} > 62~km$) due to differences in coupling depths between the oceanic plate and upper plate [see @kerswell2020]. Eighty percent of recovered markers reach maximum temperatures between `r round(head(maxT$maxT[maxT$cdf <= 0.8], 1)-273)` and `r round(tail(maxT$maxT[maxT$cdf <= 0.8], 1)-273)` (b). With respect to temperature, models with thin upper plates ($z_{1100} \leq 62~km$) show better agreement with the rock record (dotted line) compared to models with thicker upper plates ($z_{1100} > 62~km$). The rock record does not significantly overlap with maximum metamorphic conditions of markers regardless of model parameterization. PD15 dataset from @penniston2015](../figs/meta_all.png){#fig:metacomp width=95%}
 
 \clearpage
 

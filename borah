@@ -1,4 +1,3 @@
-
-rsync -avzPn --exclude='borah' --exclude='summary' --exclude='marx' --exclude='data' --exclude='figs' --exclude='.git' --exclude='draft' * bkerswell@borah-login.boisestate.edu:/bsuhome/bkerswell/scratch/kerswell_et_al_marx/
+rsync -avzPn --exclude='classify.R' --exclude='borah' --exclude='summary.R' --exclude='marx_vis.R' --exclude='data' --exclude='figs' --exclude='.git' --exclude='draft' * bkerswell@borah-login.boisestate.edu:/bsuhome/bkerswell/scratch/kerswell_et_al_marx/
 
 rsync -avzPn --exclude='.git' bkerswell@borah-login.boisestate.edu:/bsuhome/bkerswell/scratch/kerswell_et_al_marx/data/k10 data/

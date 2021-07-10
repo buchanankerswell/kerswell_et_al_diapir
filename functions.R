@@ -668,14 +668,12 @@ marx_ft <- function(df, features = 'all') {
 }
 
 # Gaussian mixture modelling (Scrucca et al., 2016) to classify recovered rocks
-marx_classify <- function(marx, fts, thresh = 1, k = 10) {
-  # Save tcut
-  tcut <- attr(marx, 'tcut')
+marx_classify <- function(marx, fts, tcut, thresh = 1, k = 10) {
   # Save IDs
   ids <- fts$id
   # Fit Eigenvalue decomposition models and select best using BIC
   cat('\nSelecting best Gaussian mixture model by BIC\n')
-  fts %>% ungroup() %>% select(-id) -> X
+  X <- fts %>% ungroup() %>% select(-id)
   # Try clustering
   mcl.bic <- try(mclustBIC(X, G = seq_len(k)))
   # If clustering doesn't converge or throws error
@@ -700,8 +698,11 @@ marx_classify <- function(marx, fts, thresh = 1, k = 10) {
   class <- tibble(id = ids, class = mcl$classification)
   # Join classification to markers data
   marx.class <- marx %>% left_join(class, by = 'id') %>% replace(is.na(.), 0)
+  # Cluster decision
   # Get parameter centroids
-  centroids <- t(mcl$parameters$mean) %>% as_tibble() %>% mutate(class = 1:n(), .before = 'sum.dP')
+  centroids <- t(mcl$parameters$mean) %>%
+  as_tibble() %>%
+  mutate(class = 1:n(), .before = 'sum.dP')
   # Calculate lower bounds for features
   lowerB <- X %>% summarise(across(everything(), ~{median(.x) - thresh*IQR(.x)}))
   # Classify group as recovered if maxP or sumdP centroid is below lower bound
@@ -726,20 +727,75 @@ marx_classify <- function(marx, fts, thresh = 1, k = 10) {
   df <- marx.class %>%
   left_join(recovered, by = c('id', 'class')) %>%
   replace(is.na(.), FALSE)
-  # Final decisions
+# plot (!!!remove after testing)
+# df %>%
+# group_by(id, recovered) %>%
+# summarise(maxP = max(P), sumdP = sum(diff(P)), .groups = 'drop_last') %>%
+# ggplot(aes(sumdP, maxP)) +
+# geom_point(aes(color = recovered)) +
+# geom_point(
+#   data = centroids,
+#   aes(sum.dP, max.P, fill = as.factor(class)),
+#   shape = 25,
+#   size = 3
+# ) +
+# geom_hline(yintercept = lowerB$max.P) +
+# geom_vline(xintercept = lowerB$sum.dP) -> p1
+  # Find markers near 1-1 maxP vs. sumdP line and classify as subducted
   # Summarizing maxP and sumdP
+  sdf <- df %>%
+  summarise(sumdP = sum(diff(P)), maxP = max(P), .groups = 'keep') %>%
+  mutate(reclass = abs(maxP - sumdP) <= 2e3)
+  # Reclassify
+  df$recovered[df$id %in% sdf$id[sdf$reclass]] <- FALSE
+# plot (!!!remove after testing)
+# df %>%
+# group_by(id, recovered) %>%
+# summarise(maxP = max(P), sumdP = sum(diff(P)), .groups = 'drop_last') %>%
+# ggplot(aes(sumdP, maxP)) +
+# geom_point(aes(color = recovered)) +
+# geom_point(
+#   data = centroids,
+#   aes(sum.dP, max.P, fill = as.factor(class)),
+#   shape = 25,
+#   size = 3
+# ) +
+# geom_hline(yintercept = lowerB$max.P) +
+# geom_vline(xintercept = lowerB$sum.dP) -> p2
+  # Resummarizing maxP and sumdP
   sdf <- df %>%
   group_by(id, recovered, class) %>%
   summarise(sumdP = sum(diff(P)), maxP = max(P), .groups = 'keep')
-  # Find missclassified markers
-  misclass <- c(
-    # Find marx with rec is TRUE and maxP or sumdP is >= lower bound
-    which(sdf$maxP > lowerB$max.P & sdf$sumdP >= lowerB$sum.dP & sdf$recovered == TRUE),
-    # Find marx with approx equal maxP and sumdP
-    which((sdf$maxP - sdf$sumdP) <= 2e3)
+  # Lower bound calculated from recovered markers
+  lowerB <- sdf %>%
+  group_by(id) %>%
+  filter(recovered == TRUE) %>%
+  ungroup() %>%
+  select(sumdP, maxP) %>%
+  summarise(across(everything(), ~{median(.x) + 2*IQR(.x)}))
+  # Find marx with rec is TRUE and maxP or sumdP is >= lower bound
+  sdf <- sdf %>%
+  mutate(
+    reclass = abs(maxP - sumdP) <= 2e3,
+    misclass = maxP > lowerB$maxP & recovered == TRUE
   )
   # Reclassify
-  df$recovered[df$id %in% misclass] <- FALSE
+  df$recovered[df$id %in% sdf$id[sdf$misclass]] <- FALSE
+# plot (!!!remove after testing)
+# df %>%
+# group_by(id, recovered) %>%
+# summarise(maxP = max(P), sumdP = sum(diff(P)), .groups = 'drop_last') %>%
+# ggplot(aes(sumdP, maxP)) +
+# geom_point(aes(color = recovered)) +
+# geom_point(
+#   data = centroids,
+#   aes(sum.dP, max.P, fill = as.factor(class)),
+#   shape = 25,
+#   size = 3
+# ) +
+# geom_hline(yintercept = lowerB$maxP) +
+# geom_vline(xintercept = lowerB$sumdP) -> p3
+# (p1 + p2) / (p3 + p3)
   # Print results
   cat('\nRecovered classes:')
   df %>% slice(1) %>% group_by(class) %>% select(class, recovered) %>% table() %>% print()
@@ -750,7 +806,9 @@ marx_classify <- function(marx, fts, thresh = 1, k = 10) {
     list(
       'marx' = df,
       'mcl' = mcl,
-      'misclassed' = misclass
+      'reclass' = sdf$id[sdf$reclass],
+      'misclass' = sdf$id[sdf$misclass],
+      'lowerB' = lowerB
     )
   )
 }
@@ -784,19 +842,25 @@ marx_stats <- function(marx) {
 }
 
 # Jacknife sampling of marx_classify()
-jknife <- function(marx, thresh = 1, n = 100, p = 0.9, k = 2) {
+jknife <- function(marx, thresh = 1, n = 100, p = 0.98, k = 10) {
   # Progress bar
   pb <- progress_bar$new(
     format = 'Monte Carlo Sampling [:bar] :current/:total (:percent)',
     total = n, clear = FALSE, width = 80)
+  # Jacknife sampling
   purrr::map(seq_len(n), ~{
     pb$tick()
+    # Save tcut
+    tcut <- attr(marx, 'tcut')
     # Subsample
-    df <- marx %>% slice_sample(prop = p)
+    ids <- unique(marx$id)
+    smp <- sample(ids, size = length(ids)*p) %>% sort()
+    marx <- marx[marx$id %in% smp,]
     # Compute features
-    fts <- df %>% marx_ft(features = c('sum.dP', 'max.P'))
-    marx_classify(df, fts, k = k)$marx %>%
-    marx_stats()
+    fts <- marx %>% marx_ft(features = c('sum.dP', 'max.P'))
+    # Classify markers
+    marx.class <- marx_classify(marx, fts, tcut, thresh, k)
+    marx_stats(marx.class$marx)
   })
 }
 
@@ -1138,7 +1202,7 @@ draw_grid <- function(
   } else if(p.type =='pressure') {
     node %>%
     ggplot() +
-    geom_contour_fill(aes(x = x/1000, y = z/1000, z = pr/1e4), alpha = bk.alpha) +
+    geom_contour_fill(aes(x = x/1000, y = z/1000, z = pr/1e9), alpha = bk.alpha) +
     geom_contour(
       aes(x = x/1000, y = z/1000, z = tk - 273),
       color = iso.col,

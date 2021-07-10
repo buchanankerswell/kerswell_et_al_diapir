@@ -2,7 +2,7 @@ source('functions.R')
 
 # Load marker and grid data
 cat('\nReading RData files from data/')
-paths <- list.files('data', pattern = '_marx.RData', full.names = T)[1:32]
+paths <- list.files('/Volumes/hd/nmods/kerswell_et_al_marx/data', pattern = '_marx.RData', full.names = T)
 models <- stringr::str_extract(paths, 'cd.[0-9]+')
 cat('\nFound models:', models, sep = '\n')
 
@@ -20,14 +20,17 @@ fun <- function(model, path, n, p, thresh, k) {
   # Compute features
   fts <- marx %>% marx_ft(features = c('sum.dP', 'max.P'))
   # Classify markers
-  marx.class <- marx_classify(marx, fts, thresh = thresh, k = k)
+  marx.class <- marx_classify(marx, fts, tcut, thresh, k)
   # Monte Carlo sampling marx_classify
-  jk <- jknife(marx, n = n, p = p, thresh = thresh, k = k)
+  jk <- jknife(marx, thresh, n, p, k)
   # Save
   assign(paste0(model, '.marx.classified'), list(
     'jk' = jk,
     'marx' = marx.class$marx,
-    'mcl' = marx.class$mcl
+    'mcl' = marx.class$mcl,
+    'misclass' = marx.class$misclass,
+    'reclass' = marx.class$reclass,
+    'lowerB' = marx.class$lowerB
   ))
   # Save
   cat('\nSaving classified markers to data/', model, '_k', k,  '_marx_classified.RData', sep = '')
@@ -45,7 +48,7 @@ parallel::mcmapply(
   models,
   paths,
   k = 10,
-  n = 100,
+  n = 10,
   p = 0.98,
   thresh = 1,
   mc.cores = cores,
